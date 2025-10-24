@@ -1,0 +1,4 @@
+package cvs
+
+class Example {
+}
