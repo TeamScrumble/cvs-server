@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class CvsServerApplication
 
 fun main(args: Array<String>) {
-	runApplication<CvsServerApplication>(*args)
+    runApplication<CvsServerApplication>(*args)
 }
