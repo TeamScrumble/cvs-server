@@ -1,5 +1,6 @@
 package crawler.client.target
 
+import cvs.crawler.CrawlerData
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -25,21 +26,22 @@ abstract class CVS {
         Thread.sleep(SLEEP_SHORT_MS)
     }
 
-    fun run(headless: Boolean = false) {
-        val options = ChromeOptions()
-        if (headless) options.addArguments("--headless=new")
-
+    fun run(headless: Boolean = false): List<CrawlerData> {
+        val options = ChromeOptions().apply {
+            if (headless) addArguments("--headless=new")
+        }
         val driver = ChromeDriver(options)
-        try {
+        return try {
             crawl(driver)
         } catch (e: Exception) {
             println("크롤링 중 오류 발생: ${e.message}")
+            emptyList()
         } finally {
             driver.quit()
         }
     }
 
-    protected abstract fun crawl(driver: WebDriver)
+    protected abstract fun crawl(driver: WebDriver): List<CrawlerData>
 
-    abstract fun findProductList(driver: WebDriver): Boolean
+    protected abstract fun findProductList(driver: WebDriver): List<CrawlerData>
 }
