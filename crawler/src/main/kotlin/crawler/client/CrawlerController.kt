@@ -38,7 +38,7 @@ class CrawlerController(
             results.awaitAll()
         }
 
-        calculateTimeMillis(logger, "Crawling - 전체", duration.inWholeMilliseconds)
+        calculateTimeMillis(logger, "Crawling 종료(총 ${inMemoryDB.map { it.value.size }.sum()}개 상품)", duration.inWholeMilliseconds)
 
         inMemoryDB
     }
