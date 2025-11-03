@@ -20,5 +20,5 @@ class CrawlerService(
         CvsTarget.EMART_24 to emart24,
         CvsTarget.SEVEN_ELEVEN to sevenEleven
     )
-    fun crawl(target: CvsTarget) = crawlers[target]?.run(false) ?: emptyList()
+    fun crawl(target: CvsTarget) = crawlers[target]?.run(target, false) ?: emptyList()
 }
