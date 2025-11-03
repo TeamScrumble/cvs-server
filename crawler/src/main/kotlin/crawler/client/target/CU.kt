@@ -22,7 +22,6 @@ class CU : CVS() {
         waitForElement(driver, SELECTOR_PRODUCT_ITEM)
         val items = driver.findElements(By.cssSelector(SELECTOR_PRODUCT_ITEM))
         if (items.isEmpty()) {
-            println("상품 항목이 없습니다.")
             return emptyList()
         }
 
@@ -36,13 +35,6 @@ class CU : CVS() {
 
             val flagText = flagElems.firstOrNull()?.text?.trim().orEmpty()
             val isNew = newElems.isNotEmpty()
-
-            println("[${idx + 1}] $title")
-            println("가격: $price")
-            println("이미지 URL: $imgUrl")
-            println("플래그: ${flagText.ifBlank { "-" }}")
-            println("NEW: $isNew")
-            println("-".repeat(40))
 
             CrawlerData(title, price, imgUrl, flagText, isNew)
         }
@@ -59,22 +51,18 @@ class CU : CVS() {
                     .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(SELECTOR_MORE_BUTTON)))
 
                 if (!moreButton.isDisplayed) {
-                    println("더보기 버튼이 숨겨졌습니다. 종료.")
                     break
                 }
 
                 pageCount += 1
-                println("[더보기 클릭 ${pageCount}회차]")
 
                 // onclick="nextPage(1)" 과 동일 동작
                 (driver as JavascriptExecutor).executeScript("nextPage(1);")
                 scrollToBottom(driver)
             } catch (_: Exception) {
-                println("더 이상 '더보기' 버튼이 없습니다. 종료.")
                 break
             }
         }
-        println("총 ${pageCount}회 '더보기' 실행 완료.")
     }
 
     // ===== 전체 흐름 =====

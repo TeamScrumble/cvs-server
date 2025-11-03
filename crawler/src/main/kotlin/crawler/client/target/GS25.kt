@@ -27,7 +27,6 @@ class GS25 : CVS() {
         (driver as JavascriptExecutor).executeScript("goodsPageController.movePage($pageNum);")
         waitForElement(driver, SELECTOR_ITEM)
         Thread.sleep(WAIT_SHORT_MS)
-        println("▶ ${pageNum}페이지 이동 완료.")
     }
 
     // ===== 마지막 페이지 번호 추출 =====
@@ -42,7 +41,6 @@ class GS25 : CVS() {
             val matcher = Pattern.compile("movePage\\((\\d+)\\)").matcher(onclickAttr)
             if (matcher.find()) matcher.group(1)?.toIntOrNull() ?: 1 else 1
         } catch (e: Exception) {
-            println("마지막 페이지 번호 추출 실패: ${e.message}")
             1
         }
     }
@@ -59,7 +57,6 @@ class GS25 : CVS() {
 
             CrawlerData(title, price, imgUrl, flagText, false)
         } catch (e: Exception) {
-            println("상품 파싱 실패: ${e.message}")
             null
         }
     }
@@ -71,12 +68,10 @@ class GS25 : CVS() {
 
         val items = driver.findElements(By.cssSelector(SELECTOR_ITEM))
         if (items.isEmpty()) {
-            println("상품이 없습니다.")
             return emptyList()
         }
 
         val products = items.mapNotNull { parseProduct(it) }
-        println("상품 ${products.size}개 수집 완료.")
         return products
     }
 
@@ -93,12 +88,10 @@ class GS25 : CVS() {
 
         // 페이지 수 확인
         val lastPage = getLastPageNumber(driver)
-        println("총 ${lastPage}페이지 탐색 시작\n")
 
         val allProducts = mutableListOf<CrawlerData>()
 
         for (pageNum in 1..lastPage) {
-            println("=== [Page $pageNum/$lastPage] ===")
             moveToPage(driver, pageNum)
 
             val productList = findProductList(driver)
@@ -107,7 +100,6 @@ class GS25 : CVS() {
             allProducts += productList
         }
 
-        println("총 ${allProducts.size}개 상품 수집 완료.")
         return allProducts
     }
 }

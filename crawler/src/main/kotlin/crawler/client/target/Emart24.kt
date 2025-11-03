@@ -60,7 +60,6 @@ class Emart24 : CVS() {
         }
 
         val lastPage = driver.findElement(By.cssSelector(SELECTOR_PAGE_FOCUS)).text.trim().toInt()
-        println("▶ 마지막 페이지 번호: $lastPage")
         return lastPage
     }
 
@@ -71,7 +70,6 @@ class Emart24 : CVS() {
             val opacity = nextBtn.getCssValue("opacity").toDoubleOrNull() ?: 1.0
 
             if (opacity <= 0.3) {
-                println("▶ 마지막 페이지 도달")
                 false
             } else {
                 (driver as JavascriptExecutor).executeScript("arguments[0].click();", nextBtn)
@@ -80,7 +78,6 @@ class Emart24 : CVS() {
                 true
             }
         } catch (e: Exception) {
-            println("다음 페이지 이동 실패: ${e.message}")
             false
         }
     }
@@ -92,7 +89,6 @@ class Emart24 : CVS() {
         scrollToBottom(driver)
 
         val lastPage = findLastPageNumber(driver)
-        println("총 ${lastPage}페이지 탐색 시작\n")
 
         // 첫 페이지로 복귀
         driver.get(BASE_URL)
@@ -103,22 +99,18 @@ class Emart24 : CVS() {
         var pageNum = 1
 
         while (true) {
-            println("=== [Page $pageNum/$lastPage] ===")
             val productList = findProductList(driver)
 
             if (productList.isEmpty()) {
-                println("상품이 없습니다. 종료.")
                 break
             }
 
-            println("상품 ${productList.size}개 수집 완료.")
             allProducts += productList
 
             if (!goToNextPage(driver)) break
             pageNum++
         }
 
-        println("총 ${allProducts.size}개 상품 수집 완료.")
         return allProducts
     }
 }

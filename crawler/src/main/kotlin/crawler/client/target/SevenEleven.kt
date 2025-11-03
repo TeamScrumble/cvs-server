@@ -32,22 +32,18 @@ class SevenEleven : CVS() {
                 )
 
                 if (!moreButton.isDisplayed) {
-                    println("▶ 더보기 버튼이 숨겨졌습니다. 종료.")
                     break
                 }
 
                 pageCount++
-                println("[$pageCount] 더보기 클릭 중...")
 
                 (driver as JavascriptExecutor).executeScript("fncMore('');")
                 scrollToBottom(driver)
             } catch (_: Exception) {
-                println("▶ 더 이상 더보기 버튼이 없습니다. 종료.")
                 break
             }
         }
 
-        println("총 ${pageCount}회 '더보기' 실행 완료.")
     }
 
     // ===== 단일 상품 파싱 =====
@@ -67,7 +63,6 @@ class SevenEleven : CVS() {
 
             CrawlerData(title, price, imgUrl, "", isNew)
         } catch (e: Exception) {
-            println("상품 파싱 실패: ${e.message}")
             null
         }
     }
@@ -77,12 +72,10 @@ class SevenEleven : CVS() {
         waitForElement(driver, SELECTOR_PRODUCT_ITEM)
         val items = driver.findElements(By.cssSelector(SELECTOR_PRODUCT_ITEM))
         if (items.isEmpty()) {
-            println("상품 항목이 없습니다.")
             return emptyList()
         }
 
         val products = items.mapNotNull { parseProduct(it) }
-        println("상품 ${products.size}개 수집 완료.")
         return products
     }
 
@@ -95,7 +88,6 @@ class SevenEleven : CVS() {
         clickAllPages(driver)
 
         val productList = findProductList(driver)
-        println("총 ${productList.size}개 상품 수집 완료.")
         return productList
     }
 }
