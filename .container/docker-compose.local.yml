@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cvs
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-net
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - app-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app-net
+
+  core-api:
+    build:
+      context: ../            # cvs-server 루트 기준
+      dockerfile: core/core-api/Dockerfile
+    container_name: core-api
+    depends_on:
+      - kafka
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cvs
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8080:8080"
+    networks:
+      - app-net
+
+  crawler:
+    build:
+      context: ../            # cvs-server 루트 기준
+      dockerfile: crawler/Dockerfile
+    container_name: crawler
+    depends_on:
+      - kafka
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cvs
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8082:8081"
+    networks:
+      - app-net
+
+volumes:
+  db_data:
+
+networks:
+  app-net:
