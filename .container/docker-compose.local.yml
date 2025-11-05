@@ -41,7 +41,7 @@ services:
 
   core-api:
     build:
-      context: ../            # cvs-server 루트 기준
+      context: ../
       dockerfile: core/core-api/Dockerfile
     container_name: core-api
     depends_on:
@@ -60,7 +60,7 @@ services:
 
   crawler:
     build:
-      context: ../            # cvs-server 루트 기준
+      context: ../
       dockerfile: crawler/Dockerfile
     container_name: crawler
     depends_on:
