@@ -6,9 +6,9 @@ data class CrawlerResultEvent(
 )
 
 data class CrawlerData(
-//    val id: String,
+    val id: String,
     val productName: String,
-    val price: String,
+    val price: Int,
     val imgUrl: String,
     val flag: String,
     val isNew: Boolean
