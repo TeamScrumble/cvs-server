@@ -43,7 +43,7 @@ class Emart24 : CVS() {
 
             val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
 
-            val id = generateId("$productImgId|$title|$price|$eventText")
+            val id = generateId("$productImgId|$title")
 
             CrawlerData(id, title, price.toPrice(), imgUrl, eventText, false)
         }

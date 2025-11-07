@@ -58,7 +58,7 @@ class GS25 : CVS() {
             val flagText = item.findElements(By.cssSelector(".flag_box span")).firstOrNull()?.text?.trim().orEmpty()
 
             val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
-            val id = generateId("$productImgId|$title|$price|$flagText")
+            val id = generateId("$productImgId|$title")
 
             CrawlerData(id, title, price.toPrice(), imgUrl, flagText, false)
         } catch (e: Exception) {
