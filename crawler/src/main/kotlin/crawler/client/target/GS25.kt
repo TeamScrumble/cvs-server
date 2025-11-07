@@ -20,6 +20,8 @@ class GS25 : CVS() {
         private const val SELECTOR_NEXT2 = ".paging .next2"
         private const val SELECTOR_TAB_TOTAL = "#TOTAL"
         private const val WAIT_SHORT_MS = 500L
+
+        private val PRODUCT_IMG_URL_REGEX = Regex(""".*/([A-Za-z0-9_]+)\.[A-Za-z0-9]+$""")
     }
 
     // ===== 페이지 이동 =====
@@ -36,7 +38,7 @@ class GS25 : CVS() {
             wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(SELECTOR_NEXT2)))
 
             val next2Elem = driver.findElement(By.cssSelector(SELECTOR_NEXT2))
-            val onclickAttr = next2Elem.getAttribute("onclick") ?: return 1
+            val onclickAttr = next2Elem.getDomAttribute("onclick") ?: return 1
 
             val matcher = Pattern.compile("movePage\\((\\d+)\\)").matcher(onclickAttr)
             if (matcher.find()) matcher.group(1)?.toIntOrNull() ?: 1 else 1
@@ -52,10 +54,13 @@ class GS25 : CVS() {
             if (title.isBlank()) return null
 
             val price = item.findElements(By.cssSelector(".price")).firstOrNull()?.text?.trim().orEmpty()
-            val imgUrl = item.findElements(By.cssSelector("img")).firstOrNull()?.getDomProperty("src").orEmpty()
+            val imgUrl = item.findElements(By.cssSelector("img")).firstOrNull()?.getDomAttribute("src").orEmpty()
             val flagText = item.findElements(By.cssSelector(".flag_box span")).firstOrNull()?.text?.trim().orEmpty()
 
-            CrawlerData(title, price, imgUrl, flagText, false)
+            val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
+            val id = generateId("$productImgId|$title|$price|$flagText")
+
+            CrawlerData(id, title, price.toPrice(), imgUrl, flagText, false)
         } catch (e: Exception) {
             null
         }

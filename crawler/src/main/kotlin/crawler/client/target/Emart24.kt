@@ -11,11 +11,12 @@ class Emart24 : CVS() {
 
     companion object {
         private const val BASE_URL = "https://emart24.co.kr/goods/event"
-
         private const val SELECTOR_ITEM = ".itemList .itemWrap"
         private const val SELECTOR_DOUBLE_NEXT = ".pageNationWrap .doubleNext"
         private const val SELECTOR_NEXT_BTN = ".nextButtons .next"
         private const val SELECTOR_PAGE_FOCUS = ".pageNationWrap .pIndex.focus span"
+
+        private val PRODUCT_IMG_URL_REGEX = Regex(""".*/([0-9]+)\.[A-Za-z0-9]+$""")
 
         private val EVENT_MAPPING = mapOf(
             "onepl" to "1+1",
@@ -32,15 +33,19 @@ class Emart24 : CVS() {
         return items.map { item ->
             val title = item.findElement(By.cssSelector(".itemTxtWrap .itemtitle p a")).text.trim()
             val price = item.findElement(By.cssSelector(".itemTxtWrap .price")).text.trim()
-            val imgUrl = item.findElement(By.cssSelector(".itemSpImg img")).getDomProperty("src") ?: ""
+            val imgUrl = item.findElement(By.cssSelector(".itemSpImg img")).getDomAttribute("src") ?: ""
 
             // 이벤트 유형 파싱
             val eventElems = item.findElements(By.cssSelector(".itemTit .floatR"))
-            val eventText = eventElems.firstOrNull()?.getDomProperty("class")?.let { className ->
+            val eventText = eventElems.firstOrNull()?.getDomAttribute("class")?.let { className ->
                 EVENT_MAPPING.entries.firstOrNull { className.contains(it.key) }?.value
             }.orEmpty()
 
-            CrawlerData(title, price, imgUrl, eventText, false)
+            val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
+
+            val id = generateId("$productImgId|$title|$price|$eventText")
+
+            CrawlerData(id, title, price.toPrice(), imgUrl, eventText, false)
         }
     }
 
