@@ -17,7 +17,7 @@ on:
 
 jobs:
   gradle-build:
-    runs-on: sanai
+    runs-on: build-runner
     if: 
       ${{ inputs.deploy_target == 'total-deploy' || 
       (github.event_name == 'pull_request_review' && github.event.review.state == 'approved') }}
