@@ -12,19 +12,32 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.zip.CRC32
 import kotlin.time.measureTimedValue
 
 abstract class CVS {
     companion object {
+        private val PRICE_REGEX = Regex("""\D""")
         const val WAIT_TIMEOUT_SEC = 5L
         const val SLEEP_SHORT_MS = 800L
+        const val NOT_EXIST_ID = "NOT_EXIST_ID"
     }
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    protected fun String.toPrice() = replace(PRICE_REGEX, "").toInt()
+
+    protected fun generateId(input: String): String {
+        val crc = CRC32()
+        crc.update(input.toByteArray())
+        return crc.value.toString()
+    }
+
     fun waitForElement(driver: WebDriver, selector: String, timeoutSec: Long = WAIT_TIMEOUT_SEC) {
-        WebDriverWait(driver, Duration.ofSeconds(timeoutSec))
-            .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector)))
+        WebDriverWait(
+            driver,
+            Duration.ofSeconds(timeoutSec)
+        ).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector)))
     }
 
     fun scrollToBottom(driver: WebDriver) {
@@ -43,7 +56,7 @@ abstract class CVS {
         return try {
             logger.info("[$prefix] 크롤링 시작")
             val (value, duration) = measureTimedValue {
-                crawl(driver)
+                crawl(driver).distinctBy { it.id }
             }
 
             logger.info("[$prefix] 크롤링 종료 / 수집된 데이터 : ${value.size}개")

@@ -14,7 +14,10 @@ import java.time.Duration
 class SevenEleven : CVS() {
 
     companion object {
-        private const val BASE_URL = "https://www.7-eleven.co.kr/product/bestdosirakList.asp"
+        private const val BASE = "https://www.7-eleven.co.kr"
+        private const val BASE_URL = "$BASE/product/bestdosirakList.asp"
+        private val ID_REGEX = Regex("""fncGoView\('(\d+)'\)""")
+
         private const val SELECTOR_PRODUCT_ITEM = "div.dosirak_list ul li"
         private const val SELECTOR_MORE_BUTTON = ".btn_more a"
     }
@@ -57,11 +60,15 @@ class SevenEleven : CVS() {
                 .firstOrNull()?.text?.trim().orEmpty()
 
             val imgUrl = item.findElements(By.cssSelector(".pic_product img"))
-                .firstOrNull()?.getDomProperty("src").orEmpty()
+                .firstOrNull()?.getDomAttribute("src").orEmpty()
 
             val isNew = item.findElements(By.cssSelector("ul.tag_list_01 .ico_tag_03")).isNotEmpty()
 
-            CrawlerData(title, price, imgUrl, "", isNew)
+            val href = item.findElement(By.cssSelector("a.btn_product_01"))
+                .getDomAttribute("href") ?: ""
+            val id = ID_REGEX.find(href)?.groupValues?.get(1) ?: NOT_EXIST_ID
+
+            CrawlerData(id, title, price.toPrice(), "${BASE}$imgUrl", "", isNew)
         } catch (e: Exception) {
             null
         }
