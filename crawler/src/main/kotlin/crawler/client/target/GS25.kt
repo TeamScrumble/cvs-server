@@ -1,5 +1,6 @@
 package crawler.client.target
 
+import cvs.crawler.CrawlerData
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -12,102 +13,98 @@ import java.util.regex.Pattern
 
 @Component
 class GS25 : CVS() {
+
     companion object {
         private const val BASE_URL = "http://gs25.gsretail.com/gscvs/ko/products/event-goods#;"
         private const val SELECTOR_ITEM = "ul.prod_list li"
         private const val SELECTOR_NEXT2 = ".paging .next2"
         private const val SELECTOR_TAB_TOTAL = "#TOTAL"
-        private const val SLEEP_INTERVAL_MS = 500L
+        private const val WAIT_SHORT_MS = 500L
+
+        private val PRODUCT_IMG_URL_REGEX = Regex(""".*/([A-Za-z0-9_]+)\.[A-Za-z0-9]+$""")
     }
 
+    // ===== 페이지 이동 =====
     private fun moveToPage(driver: WebDriver, pageNum: Int) {
-        val script = "goodsPageController.movePage($pageNum);"
-        (driver as JavascriptExecutor).executeScript(script)
+        (driver as JavascriptExecutor).executeScript("goodsPageController.movePage($pageNum);")
         waitForElement(driver, SELECTOR_ITEM)
-        Thread.sleep(SLEEP_INTERVAL_MS)
+        Thread.sleep(WAIT_SHORT_MS)
     }
 
+    // ===== 마지막 페이지 번호 추출 =====
     private fun getLastPageNumber(driver: WebDriver): Int {
-        WebDriverWait(driver, Duration.ofSeconds(WAIT_TIMEOUT_SEC))
-            .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(SELECTOR_NEXT2)))
+        return try {
+            val wait = WebDriverWait(driver, Duration.ofSeconds(WAIT_TIMEOUT_SEC))
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(SELECTOR_NEXT2)))
 
-        val next2Elem = driver.findElement(By.cssSelector(SELECTOR_NEXT2))
-        val onclickAttr = next2Elem.getAttribute("onclick")
-        val pattern = Pattern.compile("movePage\\((\\d+)\\)")
-        val matcher = pattern.matcher(onclickAttr)
+            val next2Elem = driver.findElement(By.cssSelector(SELECTOR_NEXT2))
+            val onclickAttr = next2Elem.getDomAttribute("onclick") ?: return 1
 
-        if (!matcher.find()) {
-            throw RuntimeException("onclick에서 페이지 번호를 찾을 수 없습니다.")
+            val matcher = Pattern.compile("movePage\\((\\d+)\\)").matcher(onclickAttr)
+            if (matcher.find()) matcher.group(1)?.toIntOrNull() ?: 1 else 1
+        } catch (e: Exception) {
+            1
         }
-
-        return matcher.group(1).toInt()
     }
 
-    private fun crawlAllPages(driver: WebDriver) {
-        val lastPage = getLastPageNumber(driver)
-        println("마지막 페이지 번호: $lastPage")
+    // ===== 상품 파싱 =====
+    private fun parseProduct(item: WebElement): CrawlerData? {
+        return try {
+            val title = item.findElements(By.cssSelector(".tit")).firstOrNull()?.text?.trim().orEmpty()
+            if (title.isBlank()) return null
 
-        moveToPage(driver, 1)
-        for (pageNum in 1..lastPage) {
-            println("\n=== $pageNum 페이지 탐색 중 ===")
-            if (!findProductList(driver)) {
-                println("상품이 없습니다. 종료.")
-                break
-            }
-            if (pageNum < lastPage) {
-                moveToPage(driver, pageNum + 1)
-            }
+            val price = item.findElements(By.cssSelector(".price")).firstOrNull()?.text?.trim().orEmpty()
+            val imgUrl = item.findElements(By.cssSelector("img")).firstOrNull()?.getDomAttribute("src").orEmpty()
+            val flagText = item.findElements(By.cssSelector(".flag_box span")).firstOrNull()?.text?.trim().orEmpty()
+
+            val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
+            val id = generateId("$productImgId|$title")
+
+            CrawlerData(id, title, price.toPrice(), imgUrl, flagText, false)
+        } catch (e: Exception) {
+            null
         }
-
-        println("\n모든 페이지 탐색 완료.")
     }
 
-    // --- 핵심 기능 ---
-    override fun findProductList(driver: WebDriver): Boolean {
+    // ===== 상품 리스트 수집 =====
+    override fun findProductList(driver: WebDriver): List<CrawlerData> {
         waitForElement(driver, SELECTOR_ITEM)
-        Thread.sleep(SLEEP_INTERVAL_MS)
+        Thread.sleep(WAIT_SHORT_MS)
 
         val items = driver.findElements(By.cssSelector(SELECTOR_ITEM))
-        if (items.isEmpty()) return false
-
-        for (item in items) {
-            try {
-                val titleElem: WebElement = item.findElement(By.cssSelector(".tit"))
-                val title = titleElem.text.trim()
-                if (title.isBlank()) continue
-
-                val price = item.findElement(By.cssSelector(".price")).text.trim()
-                val imgUrl = item.findElement(By.cssSelector("img")).getAttribute("src")
-
-                val flagElems = item.findElements(By.cssSelector(".flag_box span"))
-                val flagText = flagElems.firstOrNull()?.text?.trim().orEmpty()
-
-                println("상품 제목: $title")
-                println("가격: $price")
-                println("이미지 URL: $imgUrl")
-                println("플래그: $flagText")
-                println("---")
-            } catch (e: Exception) {
-                println("상품 파싱 실패: ${e.message}")
-            }
+        if (items.isEmpty()) {
+            return emptyList()
         }
 
-        return true
+        val products = items.mapNotNull { parseProduct(it) }
+        return products
     }
 
-    // --- 실행 부분 ---
-    override fun crawl(driver: WebDriver) {
+    // ===== 전체 크롤링 흐름 =====
+    override fun crawl(driver: WebDriver): List<CrawlerData> {
         driver.get(BASE_URL)
 
-        // 전체 탭 진입
+        // "전체" 탭 클릭
         WebDriverWait(driver, Duration.ofSeconds(WAIT_TIMEOUT_SEC))
             .until(ExpectedConditions.elementToBeClickable(By.cssSelector(SELECTOR_TAB_TOTAL)))
-
         driver.findElement(By.cssSelector(SELECTOR_TAB_TOTAL)).click()
 
-        Thread.sleep(SLEEP_INTERVAL_MS)
+        Thread.sleep(WAIT_SHORT_MS)
 
-        // 전체 페이지 크롤링
-        crawlAllPages(driver)
+        // 페이지 수 확인
+        val lastPage = getLastPageNumber(driver)
+
+        val allProducts = mutableListOf<CrawlerData>()
+
+        for (pageNum in 1..lastPage) {
+            moveToPage(driver, pageNum)
+
+            val productList = findProductList(driver)
+            if (productList.isEmpty()) break
+
+            allProducts += productList
+        }
+
+        return allProducts
     }
 }
