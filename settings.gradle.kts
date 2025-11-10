@@ -9,6 +9,7 @@ include("clients:client-crawler")
 
 include("storage")
 include("storage:db-core")
+
 include("storage:storage-kafka")
 include("storage:storage-kafka:kafka-event")
 
