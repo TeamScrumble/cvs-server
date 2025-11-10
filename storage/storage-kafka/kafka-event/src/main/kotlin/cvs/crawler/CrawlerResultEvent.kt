@@ -2,7 +2,7 @@ package cvs.crawler
 
 data class CrawlerResultEvent(
     val target: CvsTarget,
-    val data: String
+    val data: List<CrawlerData>
 )
 
 data class CrawlerData(

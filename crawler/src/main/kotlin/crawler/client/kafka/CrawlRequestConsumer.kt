@@ -30,12 +30,12 @@ class CrawlRequestConsumer(
         // 결과 객체 생성
         val result = CrawlerResultEvent(
             target = target,
-            data = objectMapper.writeValueAsString(crawledData)
+            data = crawledData
         )
 
         // Kafka 결과 발행
         val resultJson = objectMapper.writeValueAsString(result)
-        kafkaTemplate.send("crawl.result", resultJson)
+        kafkaTemplate.send("crawl.response", resultJson)
         logger.info("크롤링 결과 발행 완료: $target")
     }
 }
