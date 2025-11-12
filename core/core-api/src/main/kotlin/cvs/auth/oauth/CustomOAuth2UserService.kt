@@ -1,6 +1,5 @@
 package cvs.auth.oauth
 
-import com.fasterxml.jackson.databind.BeanProperty.Std
 import cvs.auth.user.SocialUser
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
@@ -24,6 +23,7 @@ class CustomOAuth2UserService()
         val mapped = when (registrationId) {
             "google" -> mapGoogle(attributes)
             "naver" -> mapNaver(attributes)
+            "kakao" -> mapKakao(attributes)
             else -> error("Unsupported provider: $registrationId")
         }
 
@@ -71,6 +71,19 @@ class CustomOAuth2UserService()
             email = response["email"]?.toString(),
             name = response["name"]?.toString(),
             profileImage = response["profile_image"]?.toString()
+        )
+    }
+
+    private fun mapKakao(attr: Map<String, Any?>): StdUser {
+        val kakaoAccount = attr["kakao_account"] as? Map<String, Any?> ?: emptyMap()
+        val profile = kakaoAccount["profile"] as? Map<String, Any?> ?: emptyMap()
+
+        return StdUser(
+            provider = "kakao",
+            providerId = attr["id"]?.toString() ?: "",
+            email = kakaoAccount["email"]?.toString(),
+            name = profile["nickname"]?.toString(),
+            profileImage = profile["profile_image_url"]?.toString()
         )
     }
 
