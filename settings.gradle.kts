@@ -14,3 +14,4 @@ include("service:crawler-service")
 
 include("infra")
 include("infra:infra-db")
+include("infra:infra-cache")
