@@ -1,4 +1,4 @@
-package cvs.auth.jwt
+package auth.jwt
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -40,7 +40,7 @@ class JwtService(
             .signWith(key)
             .compact()
 
-        refreshRepository.save(subject, token, refreshExpire)
+//        refreshRepository.save(subject, token, refreshExpire)
 
         return token
     }

@@ -1,6 +1,6 @@
-package cvs.auth.controller
+package auth.controller
 
-import cvs.auth.jwt.JwtService
+import auth.jwt.JwtService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController

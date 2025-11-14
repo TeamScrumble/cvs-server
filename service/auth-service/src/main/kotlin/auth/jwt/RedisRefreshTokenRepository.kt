@@ -1,4 +1,4 @@
-package cvs.auth.jwt
+package auth.jwt
 
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository

@@ -17,6 +17,7 @@ dependencies {
     // --- Spring
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // -- Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")

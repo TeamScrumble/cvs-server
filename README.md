@@ -6,3 +6,12 @@
 - `git switch -c "feat/#23" dev`
 3. PR 올릴 때 dev에 머지가 될 수 있도록 설정
 - PR 제목은 이슈 이름과 동일하게 한다.
+
+---
+
+## Service Ports
+- gateway :8080
+- auth-service :8081
+- member-service :8082
+- product-service :8083
+- crawler-service :8084

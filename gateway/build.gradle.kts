@@ -15,8 +15,12 @@ plugins {
 
 dependencies {
     // --- Spring
-    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    // --- Gateway
+    implementation("org.springframework.cloud:spring-cloud-starter-gateway")
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
     // -- Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -1,11 +1,12 @@
-package cvs.auth.oauth
+package auth.oauth
 
-import cvs.auth.jwt.JwtService
+import auth.jwt.JwtService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.stereotype.Component
 import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.core.user.OAuth2User
 
 @Component
 class OAuth2SuccessHandler(
@@ -17,7 +18,7 @@ class OAuth2SuccessHandler(
         res: HttpServletResponse,
         auth: Authentication
     ) {
-        val principal = auth.principal as org.springframework.security.oauth2.core.user.OAuth2User
+        val principal = auth.principal as OAuth2User
         val provider = principal.attributes["provider"].toString()
         val providerId = principal.attributes["providerId"].toString()
         val email = principal.attributes["email"]?.toString()

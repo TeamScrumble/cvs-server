@@ -1,8 +1,8 @@
-package cvs.auth.config
+package auth.config
 
-import cvs.auth.jwt.JwtAuthFilter
-import cvs.auth.oauth.CustomOAuth2UserService
-import cvs.auth.oauth.OAuth2SuccessHandler
+import auth.jwt.JwtAuthFilter
+import auth.oauth.CustomOAuth2UserService
+import auth.oauth.OAuth2SuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity

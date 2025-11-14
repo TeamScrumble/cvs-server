@@ -1,4 +1,4 @@
-package cvs.auth.jwt
+package auth.jwt
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest

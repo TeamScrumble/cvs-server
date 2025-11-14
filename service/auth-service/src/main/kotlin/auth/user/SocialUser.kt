@@ -1,4 +1,4 @@
-package cvs.auth.user
+package auth.user
 
 data class SocialUser(
     val id: Long? = null,

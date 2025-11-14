@@ -1,6 +1,6 @@
-package cvs.auth.oauth
+package auth.oauth
 
-import cvs.auth.user.SocialUser
+import auth.user.SocialUser
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
@@ -10,8 +10,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 
 @Service
-class CustomOAuth2UserService()
-    : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+class CustomOAuth2UserService() : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+
     private val delegate = DefaultOAuth2UserService()
 
     override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
@@ -94,5 +94,4 @@ class CustomOAuth2UserService()
         val name: String?,
         val profileImage: String?
     )
-
 }
