@@ -1,3 +1,0 @@
-crawler:
-  uri: http://localhost:8081/api/crawler
-  secret: secret-key

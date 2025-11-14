@@ -1,0 +1,36 @@
+tasks.getByName("bootJar") {
+    enabled = true
+}
+
+tasks.getByName("jar") {
+    enabled = false
+}
+
+plugins {
+    kotlin("jvm")
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
+}
+
+dependencies {
+    // --- Spring
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // --- Selenium
+    implementation("org.seleniumhq.selenium:selenium-java:4.26.0")
+    implementation("org.seleniumhq.selenium:selenium-chrome-driver:4.26.0")
+
+    // --- Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
+    // --- Test
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+
+    // --- Modules
+    implementation(project(":contract:contract-event"))
+}

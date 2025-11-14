@@ -1,16 +1,16 @@
 rootProject.name = "cvs-server"
 
-include("core")
-include("core:core-api")
+include("contract")
+include("contract:contract-api")
+include("contract:contract-event")
 
-include("clients")
-include("clients:client-common")
-include("clients:client-crawler")
+include("gateway")
 
-include("storage")
-include("storage:db-core")
+include("service")
+include("service:product-service")
+include("service:member-service")
+include("service:auth-service")
+include("service:crawler-service")
 
-include("storage:storage-kafka")
-include("storage:storage-kafka:kafka-event")
-
-include("crawler")
+include("infra")
+include("infra:infra-db")
