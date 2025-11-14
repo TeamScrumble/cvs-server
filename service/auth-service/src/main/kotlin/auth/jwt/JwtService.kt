@@ -45,7 +45,7 @@ class JwtService(
         return token
     }
 
-    fun reissue(refreshToken: String): Pair<String, String>? {
+    suspend fun reissue(refreshToken: String): Pair<String, String>? {
         val claims = parse(refreshToken)
         val subject = claims.subject
 

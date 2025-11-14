@@ -37,9 +37,11 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-expire: 3600000        # 1시간
   refresh-token-expire: 604800000     # 7일
+
 server:
-  port: 8081
+  port: 8080

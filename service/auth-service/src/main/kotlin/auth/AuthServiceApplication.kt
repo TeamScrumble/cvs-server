@@ -3,7 +3,9 @@ package auth
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
+@SpringBootApplication(
+    scanBasePackages = ["auth", "cache"]
+)
 class AuthServiceApplication
 
 fun main(args: Array<String>) {

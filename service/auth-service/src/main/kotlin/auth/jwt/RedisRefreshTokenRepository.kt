@@ -1,31 +1,22 @@
 package auth.jwt
 
-import org.springframework.data.redis.core.StringRedisTemplate
+import cache.CacheMemory
 import org.springframework.stereotype.Repository
-import java.util.concurrent.TimeUnit
 
 @Repository
 class RedisRefreshTokenRepository(
-    private val redis: StringRedisTemplate
+    private val cacheMemory: CacheMemory
 ) {
 
-    fun save(subject: String, refreshToken: String, expireMillis: Long) {
-        redis
-            .opsForValue()
-            .set(
-                "refresh:$subject",
-                refreshToken,
-                expireMillis,
-                TimeUnit.MILLISECONDS
-            )
+    suspend fun save(subject: String, refreshToken: String, expireMillis: Long) {
+        cacheMemory.set("refresh:$subject", refreshToken, expireMillis)
     }
 
-    fun find(subject: String): String? {
-        return redis.opsForValue().get("refresh:$subject")
+    suspend fun find(subject: String): String? {
+        return cacheMemory.get("refresh:$subject")
     }
 
-    fun delete(subject: String) {
-        redis.delete("refresh:$subject")
+    suspend fun delete(subject: String) {
+        cacheMemory.evict("refresh:$subject")
     }
-
 }

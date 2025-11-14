@@ -11,7 +11,7 @@ class ReissueController(
 ) {
 
     @PostMapping("/auth/reissue")
-    fun reissue(@RequestHeader("Refresh") refreshToken: String): Map<String, String>? {
+    suspend fun reissue(@RequestHeader("Refresh") refreshToken: String): Map<String, String>? {
         val tokens = jwtService.reissue(refreshToken) ?: return null
 
         return mapOf("access" to tokens.first, "refresh" to tokens.second)
