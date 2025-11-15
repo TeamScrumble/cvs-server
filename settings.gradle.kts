@@ -2,9 +2,12 @@ rootProject.name = "cvs-server"
 
 include("contract")
 include("contract:contract-api")
+include("contract:contract-api:client")
 include("contract:contract-event")
 
-include("gateway")
+include("edge")
+include("edge:gateway")
+include("edge:discovery")
 
 include("service")
 include("service:product-service")

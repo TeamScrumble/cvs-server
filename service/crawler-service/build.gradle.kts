@@ -17,6 +17,12 @@ dependencies {
     // --- Spring
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+    // -- discovery
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
     // --- Selenium
     implementation("org.seleniumhq.selenium:selenium-java:4.26.0")

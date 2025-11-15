@@ -10,8 +10,11 @@
 ---
 
 ## Service Ports
-- gateway :8080
-- auth-service :8081
-- member-service :8082
-- product-service :8083
-- crawler-service :8084
+- edge
+  - gateway :8760
+  - discovery :8761
+- service
+  - auth-service :8080
+  - member-service :8082
+  - product-service :8083
+  - crawler-service :8084

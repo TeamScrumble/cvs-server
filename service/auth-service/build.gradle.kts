@@ -18,6 +18,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+    // -- discovery
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
     // -- Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -37,4 +42,6 @@ dependencies {
 
     // --- modules
     implementation(project(":infra:infra-cache"))
+    implementation(project(":contract:contract-api"))
+    implementation(project(":contract:contract-api:client"))
 }
