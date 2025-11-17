@@ -1,6 +1,8 @@
 package auth.oauth
 
 import auth.user.SocialUser
+import member.MemberAddApi
+import member.MemberApi
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
@@ -11,7 +13,9 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
 @Service
-class CustomOAuth2UserService() : ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> {
+class CustomOAuth2UserService(
+    private val memberApi: MemberApi
+) : ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private val delegate = DefaultReactiveOAuth2UserService()
 

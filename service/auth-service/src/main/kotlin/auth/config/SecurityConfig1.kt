@@ -1,6 +1,5 @@
 package auth.config
 
-import auth.oauth.CustomOAuth2UserService
 import auth.oauth.OAuth2SuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,7 +9,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 
 @Configuration
 @EnableWebFluxSecurity
-class SecurityConfig(
+class SecurityConfig1(
     private val oAuth2SuccessHandler: OAuth2SuccessHandler,
 //    private val jwtAuthFilter: JwtAuthFilter, // WebFlux용 filter로 바꿔야 함 (WebFilter)
 ) {

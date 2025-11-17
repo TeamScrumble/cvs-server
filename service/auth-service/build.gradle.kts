@@ -42,6 +42,7 @@ dependencies {
 
     // --- modules
     implementation(project(":infra:infra-cache"))
+    implementation(project(":infra:infra-security"))
     implementation(project(":contract:contract-api"))
     implementation(project(":contract:contract-api:client"))
 }
