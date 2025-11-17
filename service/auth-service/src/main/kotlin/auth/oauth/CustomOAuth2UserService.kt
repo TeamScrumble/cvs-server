@@ -1,0 +1,103 @@
+package auth.oauth
+
+import auth.user.SocialUser
+import member.MemberAddApi
+import member.MemberApi
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
+import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User
+import org.springframework.security.oauth2.core.user.OAuth2User
+import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
+
+@Service
+class CustomOAuth2UserService(
+    private val memberApi: MemberApi
+) : ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> {
+
+    private val delegate = DefaultReactiveOAuth2UserService()
+
+    override fun loadUser(userRequest: OAuth2UserRequest): Mono<OAuth2User> {
+        return delegate.loadUser(userRequest)
+            .map { oAuth2User ->
+                val registrationId = userRequest.clientRegistration.registrationId
+                val attributes = oAuth2User.attributes
+
+                val mapped = when (registrationId) {
+                    "google" -> mapGoogle(attributes)
+                    "naver" -> mapNaver(attributes)
+                    "kakao" -> mapKakao(attributes)
+                    else -> error("Unsupported provider: $registrationId")
+                }
+
+                val saved = upsertUser(mapped)
+
+                val principalAttributes = mapOf(
+                    "provider" to saved.provider,
+                    "providerId" to saved.providerId,
+                    "email" to saved.email,
+                    "name" to saved.name,
+                    "profileImage" to saved.profileImage
+                )
+                val authorities = setOf(SimpleGrantedAuthority("ROLE_USER"))
+
+                DefaultOAuth2User(authorities, principalAttributes, "providerId")
+            }
+    }
+
+    private fun upsertUser(user: StdUser): SocialUser {
+        // todo: db 저장, 갱신 추후 구현
+        return SocialUser(
+            provider = user.provider,
+            providerId = user.providerId,
+            email = user.email,
+            name = user.name,
+            profileImage = user.profileImage
+        )
+    }
+
+    private fun mapGoogle(attr: Map<String, Any?>) = StdUser(
+        provider = "google",
+        providerId = attr["sub"]?.toString() ?: "",
+        email = attr["email"]?.toString(),
+        name = attr["name"]?.toString(),
+        profileImage = attr["picture"]?.toString()
+    )
+
+    @Suppress("UNCHECKED_CAST")
+    private fun mapNaver(attr: Map<String, Any?>): StdUser {
+        val response = attr["response"] as Map<String, Any?>
+
+        return StdUser(
+            provider = "naver",
+            providerId = response["id"]?.toString() ?: "",
+            email = response["email"]?.toString(),
+            name = response["name"]?.toString(),
+            profileImage = response["profile_image"]?.toString()
+        )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun mapKakao(attr: Map<String, Any?>): StdUser {
+        val kakaoAccount = attr["kakao_account"] as? Map<String, Any?> ?: emptyMap()
+        val profile = kakaoAccount["profile"] as? Map<String, Any?> ?: emptyMap()
+
+        return StdUser(
+            provider = "kakao",
+            providerId = attr["id"]?.toString() ?: "",
+            email = kakaoAccount["email"]?.toString(),
+            name = profile["nickname"]?.toString(),
+            profileImage = profile["profile_image_url"]?.toString()
+        )
+    }
+
+    data class StdUser(
+        val provider: String,
+        val providerId: String,
+        val email: String?,
+        val name: String?,
+        val profileImage: String?
+    )
+}

@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: gateway
+  profiles:
+    active:
+      - security
+      - cache
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: auth-oauth2
+          uri: lb://auth-service
+          predicates:
+            - Path=/oauth2/**
+        - id: auth-login-callback
+          uri: lb://auth-service
+          predicates:
+            - Path=/login/oauth2/**
+        - id: member-service
+          uri: lb://member-service
+          predicates:
+            - Path=/api/member/**
+        - id: crawler-service
+          uri: lb://crawler-service
+          predicates:
+            - Path=/api/crawler/**
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/product/**
+      discovery:
+        locator:
+          enabled: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka

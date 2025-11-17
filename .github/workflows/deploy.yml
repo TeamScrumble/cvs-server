@@ -1,0 +1,211 @@
+name: Spring Boot 애플리케이션 빌드 및 배포
+
+on:
+  workflow_dispatch:
+    inputs:
+      module_path:
+        description: '빌드할 모듈 경로 (예: service/product-service)'
+        required: false
+        type: string
+        default: '.'
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  gradle-build:
+    runs-on: build-runner
+    if: github.event_name == 'workflow_dispatch'
+    outputs:
+      module_path: ${{ steps.module.outputs.path }}
+      module_name: ${{ steps.module.outputs.name }}
+    steps:
+    - name: 소스 코드 체크아웃
+      uses: actions/checkout@v4
+
+    - name: JDK 21 설정
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: 모듈 경로 설정
+      id: module
+      run: |
+        if [ -n "${{ inputs.module_path }}" ] && [ "${{ inputs.module_path }}" != "." ]; then
+          MODULE_PATH="${{ inputs.module_path }}"
+          MODULE_NAME=$(basename $MODULE_PATH)
+        else
+          MODULE_PATH="."
+          MODULE_NAME="spring-app"
+        fi
+        echo "path=$MODULE_PATH" >> $GITHUB_OUTPUT
+        echo "name=$MODULE_NAME" >> $GITHUB_OUTPUT
+        echo "모듈 경로: $MODULE_PATH"
+        echo "모듈 이름: $MODULE_NAME"
+
+    - name: Gradle 실행 권한 부여
+      run: |
+        cd ${{ steps.module.outputs.path }}
+        chmod +x gradlew
+
+    - name: Gradle로 빌드
+      run: |
+        cd ${{ steps.module.outputs.path }}
+        ./gradlew bootJar --parallel --build-cache --no-daemon
+
+    - name: 빌드 결과물 업로드
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-jar
+        path: ${{ steps.module.outputs.path }}/build/libs/*.jar
+        retention-days: 1
+
+  docker-build:
+    runs-on: build-runner
+    needs: gradle-build
+    outputs:
+      exposed_port: ${{ steps.port.outputs.port }}
+    steps:
+    - name: 소스 코드 체크아웃
+      uses: actions/checkout@v4
+
+    - name: 빌드 결과물 다운로드
+      uses: actions/download-artifact@v4
+      with:
+        name: app-jar
+        path: ${{ needs.gradle-build.outputs.module_path }}/build/libs
+
+    - name: Dockerfile에서 EXPOSE 포트 추출
+      id: port
+      run: |
+        DOCKERFILE_PATH="${{ needs.gradle-build.outputs.module_path }}/Dockerfile"
+        if [ -f "$DOCKERFILE_PATH" ]; then
+          EXPOSED_PORT=$(grep -i "^EXPOSE" $DOCKERFILE_PATH | awk '{print $2}' | head -n 1)
+          if [ -z "$EXPOSED_PORT" ]; then
+            EXPOSED_PORT="8080"
+          fi
+        else
+          EXPOSED_PORT="8080"
+        fi
+        echo "port=$EXPOSED_PORT" >> $GITHUB_OUTPUT
+        echo "감지된 포트: $EXPOSED_PORT"
+
+    - name: Docker 레지스트리 로그인
+      uses: docker/login-action@v3
+      with:
+        registry: registry.scrumble.kro.kr
+        username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+        password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+
+    - name: Docker 이미지 빌드
+      run: |
+        MODULE_PATH="${{ needs.gradle-build.outputs.module_path }}"
+        MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
+        
+        cd $MODULE_PATH
+        
+        docker build \
+          --cache-from registry.scrumble.kro.kr/$MODULE_NAME:latest \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          -t registry.scrumble.kro.kr/$MODULE_NAME:latest \
+          -t registry.scrumble.kro.kr/$MODULE_NAME:${{ github.sha }} \
+          .
+
+    - name: Docker 이미지 푸시
+      run: |
+        MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
+        docker push registry.scrumble.kro.kr/$MODULE_NAME:latest
+        docker push registry.scrumble.kro.kr/$MODULE_NAME:${{ github.sha }}
+
+    - name: 로그아웃
+      if: always()
+      run: docker logout registry.scrumble.kro.kr
+
+  docker-deploy:
+    runs-on: deploy-runner
+    needs: [gradle-build, docker-build]
+    steps:
+    - name: env 파일 레포지토리 체크아웃
+      uses: actions/checkout@v4
+      with:
+        repository: TeamScrumble/env
+        token: ${{ secrets.ENV_REPO_TOKEN }}
+        path: cvs-server
+    
+    - name: env 파일 준비
+      run: |
+        mkdir -p ~/app-env
+        cp cvs-server/server.env ~/app-env/.env
+        ls -la ~/app-env/
+
+    - name: 도커 이미지 가져오기
+      run: |
+        MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
+        docker pull localhost:5000/$MODULE_NAME:latest
+
+    - name: 기존 컨테이너 중지 및 삭제 (있을 경우)
+      run: |
+        MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
+        docker stop $MODULE_NAME || true
+        docker rm $MODULE_NAME || true
+
+    - name: 새 컨테이너 실행
+      run: |
+        MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
+        EXPOSED_PORT="${{ needs.docker-build.outputs.exposed_port }}"
+        
+        echo "컨테이너 이름: $MODULE_NAME"
+        echo "포트 매핑: $EXPOSED_PORT:$EXPOSED_PORT"
+        
+        docker run -d \
+          --name $MODULE_NAME \
+          --network cvs \
+          -p $EXPOSED_PORT:$EXPOSED_PORT \
+          --env-file ~/app-env/.env \
+          -e SPRING_PROFILES_ACTIVE=production \
+          localhost:5000/$MODULE_NAME:latest
+
+  notify-discord-on-pr-and-approve:
+    if: |
+      github.event_name == 'pull_request_review' && 
+      (github.event.review.state == 'approved' || github.event.review.state == 'commented')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 디스코드로 PR 리뷰 알림 전송
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          REVIEW_USER: ${{ github.event.review.user.login }}
+          REVIEW_BODY: ${{ github.event.review.body }}
+        run: |
+          if [ "$REVIEW_STATE" = "approved" ]; then
+            MESSAGE="**✅ Pull Request가 승인되었습니다!**
+            제목: $PR_TITLE
+            
+            내용: $PR_BODY
+            
+            링크: $PR_URL
+            승인자: $REVIEW_USER"
+          else
+            MESSAGE="**💬 Pull Request에 리뷰가 달렸습니다!**
+            제목: $PR_TITLE
+            
+            내용: $PR_BODY
+            
+            링크: $PR_URL
+            리뷰어: $REVIEW_USER
+            리뷰 내용: $REVIEW_BODY"
+          fi
+          
+          PAYLOAD=$(jq -n \
+            --arg content "$MESSAGE" \
+            '{content: $content}')
+          
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
