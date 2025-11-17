@@ -44,15 +44,10 @@ jobs:
         echo "모듈 경로: $MODULE_PATH"
         echo "모듈 이름: $MODULE_NAME"
 
-    - name: Gradle 실행 권한 부여
-      run: |
-        cd ${{ steps.module.outputs.path }}
-        chmod +x gradlew
-
     - name: Gradle로 빌드
       run: |
         cd ${{ steps.module.outputs.path }}
-        ./gradlew bootJar --parallel --build-cache --no-daemon
+        ./gradle bootJar --parallel --build-cache --no-daemon
 
     - name: 빌드 결과물 업로드
       uses: actions/upload-artifact@v4
