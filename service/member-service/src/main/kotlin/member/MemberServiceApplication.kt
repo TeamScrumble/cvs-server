@@ -3,7 +3,9 @@ package member
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
+@SpringBootApplication(
+    scanBasePackages = ["member", "security"]
+)
 class MemberServiceApplication
 
 fun main(args: Array<String>) {
