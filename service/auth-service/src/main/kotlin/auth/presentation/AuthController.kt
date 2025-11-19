@@ -18,10 +18,17 @@ class AuthController(
     override suspend fun reissue(
         @RequestHeader("X-Refresh-Token") refreshHeader: String
     ): ApiResponse<TokenReissueApi.Response> {
-        val refreshToken = refreshHeader.removePrefix("Bearer ").trim()
+        val refreshToken = extractToken(refreshHeader)
         val reissuedTokens = tokenService.reissue(refreshToken)
         val response = TokenReissueApi.Response(reissuedTokens.accessToken, reissuedTokens.refreshToken)
 
         return ApiResponse.of(response)
+    }
+
+    private fun extractToken(header: String): String {
+        if (!header.startsWith("Bearer ")) {
+            throw IllegalArgumentException("Invalid token format")
+        }
+        return header.substringAfter("Bearer ").trim()
     }
 }

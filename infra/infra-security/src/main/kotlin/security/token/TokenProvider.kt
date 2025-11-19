@@ -8,7 +8,7 @@ import java.util.*
 
 @Component
 class TokenProvider(
-    props: SecurityProperties
+    private val props: SecurityProperties
 ) {
     private val key = Keys.hmacShaKeyFor(props.secretKey.toByteArray())
 
@@ -22,9 +22,9 @@ class TokenProvider(
         return Jwts.builder()
             .subject(principal.memberId.toString())
             .claim("type", principal.type.name)
-            .also {
+            .apply {
                 if (principal.type == TokenType.ACCESS) {
-                    it.claim("roles", principal.roles)
+                    claim("roles", principal.roles)
                 }
             }
             .issuedAt(now)
@@ -46,12 +46,12 @@ class TokenProvider(
         }
 
         val memberId = payload.subject.toLongOrNull() ?: return null
-        val type = payload["type"] as? String ?: return null
-        val roles = payload["roles"] as? List<String>?
+        val type = payload.get("type", String::class.java) ?: return null
+        val roles = payload.get("roles", List::class.java)?.filterIsInstance<String>()
 
         return AuthPrincipal(
             memberId = memberId,
-            roles = roles?.toSet(),
+            roles = roles?.toSet() ?: emptySet(),
             type = TokenType.valueOf(type),
         )
     }

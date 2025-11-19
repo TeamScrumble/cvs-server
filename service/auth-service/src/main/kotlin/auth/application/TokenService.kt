@@ -15,7 +15,7 @@ class TokenService(
     private val memberApi: MemberApi,
     private val tokenProperties: TokenProperties
 ) {
-    suspend fun reissue(refreshToken: String): Tokens {
+    suspend fun reissue(refreshToken: String): AuthTokens {
         val principal = tokenProvider.decodeToken(refreshToken)
             ?: throw IllegalArgumentException("잘못된 갱신 토큰 입니다.")
 
@@ -36,22 +36,27 @@ class TokenService(
         }
         val member = memberResponse.body
 
-        val accessTokenPrincipal = AuthPrincipal.accessToken(
-            memberId = member.memberId,
-            roles = member.roles
-        )
-        val accessToken = tokenProvider.encodeToken(accessTokenPrincipal, tokenProperties.accessTokenExpires)
-
-        val refreshTokenPrincipal = AuthPrincipal.refreshToken(member.memberId)
-        val refreshToken = tokenProvider.encodeToken(refreshTokenPrincipal, tokenProperties.refreshTokenExpires)
+        val tokens = createTokens(member.memberId, member.roles)
 
         cacheMemory.set(
             key = refreshTokenCacheKey(member.memberId),
-            value = refreshToken,
+            value = tokens.refreshToken,
             ttlMillis = tokenProperties.refreshTokenExpires
         )
 
-        return Tokens(accessToken, refreshToken)
+        return tokens
+    }
+
+    private fun createTokens(memberId: Long, roles: Set<String>): AuthTokens {
+        val accessToken = tokenProvider.encodeToken(
+            AuthPrincipal.accessToken(memberId, roles),
+            tokenProperties.accessTokenExpires
+        )
+        val refreshToken = tokenProvider.encodeToken(
+            AuthPrincipal.refreshToken(memberId),
+            tokenProperties.refreshTokenExpires
+        )
+        return AuthTokens(accessToken, refreshToken)
     }
 
     private fun refreshTokenCacheKey(memberId: Long): String {
