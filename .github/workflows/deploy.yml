@@ -80,6 +80,24 @@ jobs:
         name: app-jar
         path: ${{ needs.gradle-build.outputs.module_path }}/build/libs
 
+    - name: Docker 레지스트리 설정
+      id: registry
+      run: |
+        CURRENT_IP=$(curl -s ifconfig.me)
+        echo "현재 러너 IP: $CURRENT_IP"
+        
+        if [ "$CURRENT_IP" = "${{ secrets.RYEO_HOME_IP }}" ]; then
+          echo "host=${{ secrets.DOCKER_REGISTRY_HOST }}" >> $GITHUB_OUTPUT
+          echo "username=${{ secrets.DOCKER_REGISTRY_USERNAME }}" >> $GITHUB_OUTPUT
+          echo "password=${{ secrets.DOCKER_REGISTRY_PASSWORD }}" >> $GITHUB_OUTPUT
+          echo "내부 레지스트리 사용 (ryeo-home)"
+        else
+          echo "host=${{ secrets.DOCKER_REGISTRY_HOST_EX }}" >> $GITHUB_OUTPUT
+          echo "username=${{ secrets.DOCKER_REGISTRY_USERNAME_EX }}" >> $GITHUB_OUTPUT
+          echo "password=${{ secrets.DOCKER_REGISTRY_PASSWORD_EX }}" >> $GITHUB_OUTPUT
+          echo "외부 레지스트리 사용"
+        fi
+
     - name: Dockerfile에서 EXPOSE 포트 추출
       id: port
       run: |
@@ -98,33 +116,35 @@ jobs:
     - name: Docker 레지스트리 로그인
       uses: docker/login-action@v3
       with:
-        registry: registry.scrumble.kro.kr
-        username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
-        password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+        registry: ${{ steps.registry.outputs.host }}
+        username: ${{ steps.registry.outputs.username }}
+        password: ${{ steps.registry.outputs.password }}
 
     - name: Docker 이미지 빌드
       run: |
         MODULE_PATH="${{ needs.gradle-build.outputs.module_path }}"
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
+        REGISTRY_HOST="${{ steps.registry.outputs.host }}"
         
         cd $MODULE_PATH
         
         docker build \
-          --cache-from registry.scrumble.kro.kr/$MODULE_NAME:latest \
+          --cache-from $REGISTRY_HOST/$MODULE_NAME:latest \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
-          -t registry.scrumble.kro.kr/$MODULE_NAME:latest \
-          -t registry.scrumble.kro.kr/$MODULE_NAME:${{ github.sha }} \
+          -t $REGISTRY_HOST/$MODULE_NAME:latest \
+          -t $REGISTRY_HOST/$MODULE_NAME:${{ github.sha }} \
           .
 
     - name: Docker 이미지 푸시
       run: |
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
-        docker push registry.scrumble.kro.kr/$MODULE_NAME:latest
-        docker push registry.scrumble.kro.kr/$MODULE_NAME:${{ github.sha }}
+        REGISTRY_HOST="${{ steps.registry.outputs.host }}"
+        docker push $REGISTRY_HOST/$MODULE_NAME:latest
+        docker push $REGISTRY_HOST/$MODULE_NAME:${{ github.sha }}
 
     - name: 로그아웃
       if: always()
-      run: docker logout registry.scrumble.kro.kr
+      run: docker logout ${{ steps.registry.outputs.host }}
 
   docker-deploy:
     runs-on: deploy-runner
