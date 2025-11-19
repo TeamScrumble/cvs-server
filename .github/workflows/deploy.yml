@@ -129,18 +129,18 @@ jobs:
         cd $MODULE_PATH
         
         docker build \
-          --cache-from $REGISTRY_HOST/$MODULE_NAME:latest \
+          --cache-from ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
-          -t $REGISTRY_HOST/$MODULE_NAME:latest \
-          -t $REGISTRY_HOST/$MODULE_NAME:${{ github.sha }} \
+          -t ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest \
+          -t ${{ steps.registry.outputs.host }}/$MODULE_NAME:${{ github.sha }} \
           .
 
     - name: Docker 이미지 푸시
       run: |
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
         REGISTRY_HOST="${{ steps.registry.outputs.host }}"
-        docker push $REGISTRY_HOST/$MODULE_NAME:latest
-        docker push $REGISTRY_HOST/$MODULE_NAME:${{ github.sha }}
+        docker push ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest
+        docker push ${{ steps.registry.outputs.host }}/$MODULE_NAME:${{ github.sha }}
 
     - name: 로그아웃
       if: always()
