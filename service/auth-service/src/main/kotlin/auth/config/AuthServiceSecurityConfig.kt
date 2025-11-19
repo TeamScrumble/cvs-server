@@ -1,6 +1,6 @@
 package auth.config
 
-import auth.oauth.OAuth2SuccessHandler
+import auth.infra.oauth.OAuth2SuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
@@ -9,9 +9,8 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 
 @Configuration
 @EnableWebFluxSecurity
-class SecurityConfig1(
-    private val oAuth2SuccessHandler: OAuth2SuccessHandler,
-//    private val jwtAuthFilter: JwtAuthFilter, // WebFlux용 filter로 바꿔야 함 (WebFilter)
+class AuthServiceSecurityConfig(
+    private val oAuth2SuccessHandler: OAuth2SuccessHandler
 ) {
 
     @Bean
@@ -20,14 +19,11 @@ class SecurityConfig1(
             .csrf { it.disable() }
             .cors { }
             .authorizeExchange { exchanges ->
-                exchanges
-                    .pathMatchers("/auth/**", "/oauth2/**").permitAll()
-                    .anyExchange().authenticated()
+                exchanges.anyExchange().permitAll()
             }
             .oauth2Login { oauth2 ->
                 oauth2.authenticationSuccessHandler(oAuth2SuccessHandler)
             }
-            // .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
             .build()
     }
 }
