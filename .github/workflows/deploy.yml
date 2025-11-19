@@ -46,11 +46,16 @@ jobs:
 
     - name: Gradle로 빌드
       run: |
-        if [ "${{ steps.module.outputs.path }}" = "." ]; then
+        MODULE_PATH="${{ steps.module.outputs.path }}"
+        
+        if [ "$MODULE_PATH" = "." ]; then
           GRADLE_TASK="bootJar"
         else
-          GRADLE_TASK=":${{ steps.module.outputs.name }}:bootJar"
+          GRADLE_MODULE=$(echo "$MODULE_PATH" | sed 's/\//:/g')
+          GRADLE_TASK=":${GRADLE_MODULE}:bootJar"
         fi
+        
+        echo "실행할 태스크: $GRADLE_TASK"
         ./gradlew $GRADLE_TASK --parallel --build-cache --no-daemon
 
     - name: 빌드 결과물 업로드
