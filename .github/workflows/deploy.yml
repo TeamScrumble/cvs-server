@@ -46,8 +46,12 @@ jobs:
 
     - name: Gradle로 빌드
       run: |
-        cd ${{ steps.module.outputs.path }}
-        ./gradle bootJar --parallel --build-cache --no-daemon
+        if [ "${{ steps.module.outputs.path }}" = "." ]; then
+          GRADLE_TASK="bootJar"
+        else
+          GRADLE_TASK=":${{ steps.module.outputs.name }}:bootJar"
+        fi
+        ./gradlew $GRADLE_TASK --parallel --build-cache --no-daemon
 
     - name: 빌드 결과물 업로드
       uses: actions/upload-artifact@v4
