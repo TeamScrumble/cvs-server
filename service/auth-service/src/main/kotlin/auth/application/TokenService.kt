@@ -15,6 +15,10 @@ class TokenService(
     private val memberApi: MemberApi,
     private val tokenProperties: TokenProperties
 ) {
+    suspend fun issue(memberId: Long): AuthTokens {
+        return issueTokens(memberId)
+    }
+
     suspend fun reissue(refreshToken: String): AuthTokens {
         val principal = tokenProvider.decodeToken(refreshToken)
             ?: throw IllegalArgumentException("잘못된 갱신 토큰 입니다.")
@@ -29,33 +33,32 @@ class TokenService(
             throw IllegalArgumentException("갱신 토큰이 일치하지 않습니다.")
         }
 
-        val memberResponse = memberApi.get(principal.memberId)
+        return issueTokens(principal.memberId)
+    }
+
+    private suspend fun issueTokens(memberId: Long): AuthTokens {
+        val memberResponse = memberApi.get(memberId)
 
         if (memberResponse.status == 404) {
             throw IllegalArgumentException("존재하지 않는 회원입니다.")
         }
         val member = memberResponse.body
 
-        val tokens = createTokens(member.memberId, member.roles)
-
-        cacheMemory.set(
-            key = refreshTokenCacheKey(member.memberId),
-            value = tokens.refreshToken,
-            ttlMillis = tokenProperties.refreshTokenExpires
-        )
-
-        return tokens
-    }
-
-    private fun createTokens(memberId: Long, roles: Set<String>): AuthTokens {
         val accessToken = tokenProvider.encodeToken(
-            AuthPrincipal.accessToken(memberId, roles),
+            AuthPrincipal.accessToken(memberId, member.roles),
             tokenProperties.accessTokenExpires
         )
         val refreshToken = tokenProvider.encodeToken(
             AuthPrincipal.refreshToken(memberId),
             tokenProperties.refreshTokenExpires
         )
+
+        cacheMemory.set(
+            key = refreshTokenCacheKey(member.memberId),
+            value = refreshToken,
+            ttlMillis = tokenProperties.refreshTokenExpires
+        )
+
         return AuthTokens(accessToken, refreshToken)
     }
 
@@ -64,6 +67,6 @@ class TokenService(
     }
 
     companion object {
-        const val REFRESH_TOKEN_CACHE_KEY_PREFIX = "refresh_token:"
+        const val REFRESH_TOKEN_CACHE_KEY_PREFIX = "RefreshToken:"
     }
 }
