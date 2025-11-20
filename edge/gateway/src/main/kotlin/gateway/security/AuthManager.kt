@@ -16,10 +16,12 @@ class AuthManager(
     override fun authenticate(
         authentication: Authentication
     ): Mono<Authentication> {
-        val token = authentication.credentials as String
+        val token = authentication.credentials as? String
+            ?: return Mono.empty()
 
         return Mono.fromCallable {
             val principal = tokenProvider.decodeToken(token)
+                ?: throw IllegalArgumentException("Invalid Token")
 
             UsernamePasswordAuthenticationToken(
                 principal.memberId,
