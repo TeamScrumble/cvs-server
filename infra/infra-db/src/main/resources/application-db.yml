@@ -1,0 +1,17 @@
+spring:
+  sql:
+    init:
+      mode: never
+  r2dbc:
+    url: r2dbc:pool:mysql://localhost:3306/brd
+    username: root
+    password: root
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+
+db:
+  url: r2dbc:pool:mysql://localhost:3306
+  username: root
+  password: root
