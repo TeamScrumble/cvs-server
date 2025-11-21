@@ -11,7 +11,8 @@ interface MemberGetApi {
 
     data class Response(
         val memberId: Long,
+        val email: String,
         val roles: Set<String>,
-        val nickname: String
+        val nickname: String,
     )
 }

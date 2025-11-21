@@ -16,7 +16,6 @@ import security.passport.RequestPassport
 @RestController
 class MemberController(
 ) : MemberApi {
-
     @PostMapping(MemberAddApi.PATH)
     override suspend fun add(
         @RequestBody request: MemberAddApi.Request
@@ -28,6 +27,6 @@ class MemberController(
     override suspend fun get(
         @PathVariable memberId: Long
     ): ApiResponse<MemberGetApi.Response> {
-        return ApiResponse.of(MemberGetApi.Response(1L, setOf("user"), "nickname"))
+        return ApiResponse.of(MemberGetApi.Response(1L, "xx@gmail.com", setOf("user"), "nickname"))
     }
 }

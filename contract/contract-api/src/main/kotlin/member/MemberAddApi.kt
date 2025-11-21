@@ -10,7 +10,7 @@ interface MemberAddApi {
     suspend fun add(request: Request): ApiResponse<Response>
 
     data class Request(
-        val nickname: String
+        val email: String
     )
 
     data class Response(
