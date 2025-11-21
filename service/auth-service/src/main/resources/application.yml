@@ -43,6 +43,7 @@ spring:
     active:
       - security
       - cache
+      - db
 
 server:
   port: 8081

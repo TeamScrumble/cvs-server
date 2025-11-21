@@ -33,4 +33,5 @@ dependencies {
     // --- Modules
     implementation(project(":contract:contract-api"))
     implementation(project(":infra:infra-security"))
+    implementation(project(":infra:infra-db"))
 }

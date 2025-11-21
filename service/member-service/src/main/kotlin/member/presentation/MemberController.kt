@@ -30,12 +30,4 @@ class MemberController(
     ): ApiResponse<MemberGetApi.Response> {
         return ApiResponse.of(MemberGetApi.Response(1L, setOf("user"), "nickname"))
     }
-
-    @GetMapping("/api/member/test")
-    suspend fun test(
-        @RequestPassport passport: Passport
-    ): String {
-        println(passport)
-        return "success"
-    }
 }
