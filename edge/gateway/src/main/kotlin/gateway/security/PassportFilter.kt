@@ -27,29 +27,32 @@ class PassportFilter(
 
         return exchange.getPrincipal<Authentication>()
             .flatMap { auth ->
-                val memberId = auth.principal
-                if (memberId !is Long) {
+                val memberId = auth.principal as? Long
+                    ?: return@flatMap Mono.empty<String>()
+
+                mono {
+                    cacheMemory.get<String>("Passport:$memberId") ?: EMPTY_STRING
+                }
+            }
+            .defaultIfEmpty(EMPTY_STRING)
+            .flatMap { passport ->
+                if (passport.isBlank()) {
                     return@flatMap chain.filter(exchange)
                 }
 
-                mono {
-                    cacheMemory.get<String>("Passport:${memberId}")
-                }.flatMap { passport: String? ->
-                    println(passport)
-                    if (passport == null) {
-                        return@flatMap chain.filter(exchange)
-                    }
+                val mutatedReq = exchange.request.mutate()
+                    .header(PassportHeader.KEY, passport)
+                    .build()
 
-                    val mutatedReq = exchange.request.mutate()
-                        .header(PassportHeader.KEY, passport)
-                        .build()
+                val mutatedExchange = exchange.mutate()
+                    .request(mutatedReq)
+                    .build()
 
-                    val mutatedExchange = exchange.mutate()
-                        .request(mutatedReq)
-                        .build()
-
-                    chain.filter(mutatedExchange)
-                }
+                chain.filter(mutatedExchange)
             }
+    }
+
+    companion object {
+        private const val EMPTY_STRING = ""
     }
 }

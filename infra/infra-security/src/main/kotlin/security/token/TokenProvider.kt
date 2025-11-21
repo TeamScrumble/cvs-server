@@ -4,7 +4,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
 import security.config.SecurityProperties
-import java.util.Date
+import java.util.*
 
 @Component
 class TokenProvider(
@@ -12,13 +12,21 @@ class TokenProvider(
 ) {
     private val key = Keys.hmacShaKeyFor(props.secretKey.toByteArray())
 
-    fun encodeToken(memberPrincipal: AuthPrincipal): String {
+    fun encodeToken(
+        principal: AuthPrincipal,
+        ttl: Long
+    ): String {
         val now = Date()
-        val expiry = Date(now.time + props.accessTokenExpires)
+        val expiry = Date(now.time + ttl)
 
         return Jwts.builder()
-            .subject(memberPrincipal.memberId.toString())
-            .claim("roles", memberPrincipal.roles)
+            .subject(principal.memberId.toString())
+            .claim("type", principal.type.name)
+            .apply {
+                if (principal.type == TokenType.ACCESS) {
+                    claim("roles", principal.roles)
+                }
+            }
             .issuedAt(now)
             .expiration(expiry)
             .signWith(key)
@@ -26,18 +34,25 @@ class TokenProvider(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun decodeToken(token: String): AuthPrincipal {
-        val payload = Jwts.parser()
-            .verifyWith(key)
-            .build()
-            .parseSignedClaims(token)
-            .payload
+    fun decodeToken(token: String): AuthPrincipal? {
+        val payload = runCatching {
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .payload
+        }.getOrElse {
+            return null
+        }
 
-        val memberId = payload.subject.toLongOrNull()
-            ?: throw IllegalArgumentException("Invalid Token")
-        val roles = payload["roles"] as? List<String>
-            ?: throw IllegalArgumentException("Invalid Token")
+        val memberId = payload.subject.toLongOrNull() ?: return null
+        val type = payload.get("type", String::class.java) ?: return null
+        val roles = payload.get("roles", List::class.java)?.filterIsInstance<String>()
 
-        return AuthPrincipal(memberId, roles.toSet())
+        return AuthPrincipal(
+            memberId = memberId,
+            roles = roles?.toSet() ?: emptySet(),
+            type = TokenType.valueOf(type),
+        )
     }
 }

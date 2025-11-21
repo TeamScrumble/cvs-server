@@ -35,7 +35,8 @@ class MemberApiClient(
             .uri { builder ->
                 builder
                     .scheme(Scheme.HTTP)
-                    .host(host)
+                    .host("localhost")
+                    .port(8080)
                     .path(MemberGetApi.PATH)
                     .pathSegment(memberId.toString())
                     .build()
