@@ -15,7 +15,7 @@ class Transactional(
 ) {
     private val manager = R2dbcTransactionManager(connectionFactory)
 
-    suspend fun <T> invoke(action: suspend () -> T): T {
+    suspend operator fun <T> invoke(action: suspend () -> T): T {
         val operator = TransactionalOperator.create(manager)
         return operator.executeAndAwait { action() }
     }
