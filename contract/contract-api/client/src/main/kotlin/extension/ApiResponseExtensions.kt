@@ -2,6 +2,7 @@ package extension
 
 import ApiResponse
 import error.errorcode.ErrorCode
+import error.exception.BusinessException
 import error.exception.InternalServerException
 
 fun <T> ApiResponse<T>.getOrNull(): T? = when (this) {
@@ -10,12 +11,12 @@ fun <T> ApiResponse<T>.getOrNull(): T? = when (this) {
 }
 
 suspend fun <T> ApiResponse<T>.getOrThrow(
-    exceptionMapper: suspend (errorCode: ErrorCode) -> Throwable
+    exceptionMapper: (suspend (errorCode: ErrorCode) -> Throwable)? = null
 ): T = when (this) {
     is ApiResponse.Success -> requireBody()
     is ApiResponse.Error -> {
         val errorCode = requireErrorCode()
-        throw exceptionMapper(errorCode)
+        throw exceptionMapper?.invoke(errorCode) ?: throw BusinessException(errorCode)
     }
 }
 
