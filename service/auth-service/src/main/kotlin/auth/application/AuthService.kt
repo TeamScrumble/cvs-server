@@ -43,9 +43,7 @@ class AuthService(
         val memberAddRequest = MemberAddApi.Request(
             email = email
         )
-        val memberAddResponse = memberApi.add(memberAddRequest).getOrThrow {
-            throw IllegalStateException()
-        }
+        val memberAddResponse = memberApi.add(memberAddRequest).getOrThrow()
         val memberId = memberAddResponse.memberId
 
         return transactional {
