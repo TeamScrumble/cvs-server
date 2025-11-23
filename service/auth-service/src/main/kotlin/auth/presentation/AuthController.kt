@@ -4,7 +4,6 @@ import ApiResponse
 import auth.AuthApi
 import auth.TokenReissueApi
 import auth.application.TokenService
-import of
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
@@ -22,7 +21,7 @@ class AuthController(
         val reissuedTokens = tokenService.reissue(refreshToken)
         val response = TokenReissueApi.Response(reissuedTokens.accessToken, reissuedTokens.refreshToken)
 
-        return ApiResponse.of(response)
+        return ApiResponse.Success(response)
     }
 
     private fun extractToken(header: String): String {

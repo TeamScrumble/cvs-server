@@ -9,62 +9,59 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
-val logger = LoggerFactory.getLogger("ContractApiClient")
-
 inline fun <reified T> WebClient.RequestHeadersSpec<*>.exchangeToApiResponse(): Mono<ApiResponse<T>> {
-    val successType = object : ParameterizedTypeReference<ApiResponse<T>>() {}
-    val errorType   = object : ParameterizedTypeReference<ApiResponse<ErrorResponse>>() {}
+    val logger = LoggerFactory.getLogger(T::class.java)
 
-    return exchangeToMono { response ->
+    val successType = object : ParameterizedTypeReference<ApiResponse.Success<T>>() {}
+    val errorType   = object : ParameterizedTypeReference<ApiResponse.Error<ErrorResponse>>() {}
+
+    return exchangeToMono<ApiResponse<T>> { response ->
         val status = response.statusCode()
 
+        fun buildFallbackError(message: String): Mono<ApiResponse<T>> =
+            response.bodyToMono(String::class.java)
+                .defaultIfEmpty("")
+                .map {
+                    ApiResponse.Error(
+                        error = ErrorResponse(
+                            code = BaseErrorCode.E_000.code,
+                            description = message,
+                        ),
+                        status = status.value()
+                    )
+                }
+
         if (status.is2xxSuccessful) {
+            // 2xx → Success<T>
             response.bodyToMono(successType)
+                .map<ApiResponse<T>> { it }
                 .onErrorResume { e ->
                     logger.warn("응답 파싱 실패(status=${status.value()}): ${e.message}", e)
-
-                    response.bodyToMono(String::class.java)
-                        .defaultIfEmpty("")
-                        .map {
-                            ApiResponse.error<T>(
-                                ErrorResponse(
-                                    code = BaseErrorCode.E_000.code,
-                                    description = "응답 파싱 실패: ${e.message}",
-                                ),
-                                status = status.value()
-                            )
-                        }
+                    buildFallbackError("응답 파싱 실패: ${e.message}")
                 }
         } else {
+            // 4xx / 5xx → Error<ErrorResponse>
             response.bodyToMono(errorType)
-                .map { apiError ->
-                    val err = apiError.error ?: apiError.body!!
-                    logger.info("Downstream 에러 응답(status=${status.value()}, code=${err.code}): ${err.description}")
-
-                    ApiResponse.error<T>(err, status = status.value())
+                .map<ApiResponse<T>> { apiError ->
+                    logger.info(
+                        "Downstream 에러 응답(status=${status.value()}, code=${apiError.error.code}): ${apiError.error.description}"
+                    )
+                    ApiResponse.Error(
+                        error = apiError.error,
+                        status = apiError.status
+                    )
                 }
                 .onErrorResume { e ->
                     logger.warn("Downstream 에러 응답 형식 비정상(status=${status.value()}): ${e.message}", e)
-
-                    response.bodyToMono(String::class.java)
-                        .defaultIfEmpty("")
-                        .map {
-                            ApiResponse.error(
-                                ErrorResponse(
-                                    code = BaseErrorCode.E_000.code,
-                                    description = "에러 응답 비정상(HTTP $status): ${e.message}",
-                                ),
-                                status = status.value()
-                            )
-                        }
+                    buildFallbackError("에러 응답 비정상(HTTP $status): ${e.message}")
                 }
         }
     }.onErrorResume { e ->
         logger.error("Downstream 연결 실패: ${e.message}", e)
 
         Mono.just(
-            ApiResponse.error(
-                ErrorResponse(
+            ApiResponse.Error(
+                error = ErrorResponse(
                     code = BaseErrorCode.E_000.code,
                     description = "연결 실패: ${e.message}",
                 ),

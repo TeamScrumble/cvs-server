@@ -20,31 +20,31 @@ class RestControllerAdvice {
     private val log = LoggerFactory.getLogger(javaClass)
 
     @ExceptionHandler(BusinessException::class)
-    fun handleBusinessException(e: BusinessException): ResponseEntity<ApiResponse<Any>> {
+    fun handleBusinessException(e: BusinessException): ResponseEntity<ApiResponse<Nothing>> {
         log.info(e.logMessage)
         return buildErrorResponse(e.errorCode, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(InternalServerException::class)
-    fun handleInternalServerException(e: InternalServerException): ResponseEntity<ApiResponse<Any>> {
+    fun handleInternalServerException(e: InternalServerException): ResponseEntity<ApiResponse<Nothing>> {
         log.error(e.logMessage, e)
         return buildErrorResponse(e.errorCode, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<ApiResponse<Any>> {
+    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<ApiResponse<Nothing>> {
         log.info(e.message)
         return buildErrorResponse(BaseErrorCode.E_001, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(MissingRequestValueException::class)
-    fun handleMissingRequestValueException(e: MissingRequestValueException): ResponseEntity<ApiResponse<Any>> {
+    fun handleMissingRequestValueException(e: MissingRequestValueException): ResponseEntity<ApiResponse<Nothing>> {
         log.info(e.message)
         return buildErrorResponse(BaseErrorCode.E_002, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(e: Exception): ResponseEntity<ApiResponse<Any>> {
+    fun handleException(e: Exception): ResponseEntity<ApiResponse<Nothing>> {
         log.error("Unexpected exception", e)
         return buildErrorResponse(BaseErrorCode.E_000, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -52,9 +52,9 @@ class RestControllerAdvice {
     private fun buildErrorResponse(
         errorCode: ErrorCode,
         status: HttpStatus,
-    ): ResponseEntity<ApiResponse<Any>> {
-        val body = ApiResponse.error<Any>(
-            errorResponse = ErrorResponse(
+    ): ResponseEntity<ApiResponse<Nothing>> {
+        val body = ApiResponse.Error<Nothing>(
+            error = ErrorResponse(
                 code = errorCode.code,
                 description = errorCode.description
             ),
