@@ -2,8 +2,9 @@ package member
 
 import ApiResponse
 import common.Scheme
+import extension.applyHost
+import extension.exchangeToApiResponse
 import kotlinx.coroutines.reactor.awaitSingle
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.client.WebClient
 
 class MemberApiClient(
@@ -18,13 +19,12 @@ class MemberApiClient(
             .uri { builder ->
                 builder
                     .scheme(Scheme.HTTP)
-                    .host(host)
+                    .applyHost(host)
                     .path(MemberAddApi.PATH)
                     .build()
             }
             .bodyValue(request)
-            .retrieve()
-            .bodyToMono(object : ParameterizedTypeReference<ApiResponse<MemberAddApi.Response>>() {})
+            .exchangeToApiResponse<MemberAddApi.Response>()
             .awaitSingle()
     }
 
@@ -35,14 +35,12 @@ class MemberApiClient(
             .uri { builder ->
                 builder
                     .scheme(Scheme.HTTP)
-                    .host("localhost")
-                    .port(8080)
+                    .applyHost(host)
                     .path(MemberGetApi.PATH)
                     .pathSegment(memberId.toString())
                     .build()
             }
-            .retrieve()
-            .bodyToMono(object : ParameterizedTypeReference<ApiResponse<MemberGetApi.Response>>() {})
+            .exchangeToApiResponse<MemberGetApi.Response>()
             .awaitSingle()
     }
 }
