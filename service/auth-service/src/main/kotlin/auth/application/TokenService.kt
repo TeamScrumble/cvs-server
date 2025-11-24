@@ -1,7 +1,7 @@
 package auth.application
 
 import auth.config.TokenProperties
-import cache.CacheMemory
+import auth.infra.cache.RefreshTokenCacheMemory
 import error.errorcode.AuthErrorCode
 import error.exception.BusinessException
 import extension.getOrThrow
@@ -14,7 +14,7 @@ import security.token.TokenType
 @Service
 class TokenService(
     private val tokenProvider: TokenProvider,
-    private val cacheMemory: CacheMemory,
+    private val refreshTokenCacheMemory: RefreshTokenCacheMemory,
     private val memberApi: MemberApi,
     private val tokenProperties: TokenProperties
 ) {
@@ -30,7 +30,7 @@ class TokenService(
             throw BusinessException(AuthErrorCode.A_002)
         }
 
-        val savedToken = cacheMemory.get<String>(refreshTokenCacheKey(principal.memberId))
+        val savedToken = refreshTokenCacheMemory.get(principal.memberId)
             ?: throw BusinessException(AuthErrorCode.A_002)
         if (refreshToken != savedToken) {
             throw BusinessException(AuthErrorCode.A_002)
@@ -51,20 +51,11 @@ class TokenService(
             tokenProperties.refreshTokenExpires
         )
 
-        cacheMemory.set(
-            key = refreshTokenCacheKey(memberResponse.memberId),
-            value = refreshToken,
-            ttlMillis = tokenProperties.refreshTokenExpires
+        refreshTokenCacheMemory.set(
+            memberId = memberResponse.memberId,
+            refreshToken = refreshToken,
         )
 
         return AuthTokens(accessToken, refreshToken)
-    }
-
-    private fun refreshTokenCacheKey(memberId: Long): String {
-        return REFRESH_TOKEN_CACHE_KEY_PREFIX + memberId
-    }
-
-    companion object {
-        const val REFRESH_TOKEN_CACHE_KEY_PREFIX = "RefreshToken:"
     }
 }
