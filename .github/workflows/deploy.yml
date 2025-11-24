@@ -129,6 +129,7 @@ jobs:
         cd $MODULE_PATH
         
         docker build \
+          --platform linux/arm64 \
           --cache-from ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
           -t ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest \
