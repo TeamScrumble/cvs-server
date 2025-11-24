@@ -137,6 +137,7 @@ jobs:
 
     - name: Docker 이미지 푸시
       run: |
+        echo "${{steps.registry.outputs.host}}"
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
         REGISTRY_HOST="${{ steps.registry.outputs.host }}"
         docker push ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest
