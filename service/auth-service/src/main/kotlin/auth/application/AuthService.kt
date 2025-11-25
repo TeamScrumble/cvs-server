@@ -2,18 +2,21 @@ package auth.application
 
 import auth.domain.auth.Auth
 import auth.domain.auth.AuthRepository
+import auth.infra.cache.RefreshTokenCacheMemory
 import db.extension.upsert
 import db.transactional.Transactional
 import extension.getOrThrow
 import member.MemberAddApi
 import member.MemberApi
 import org.springframework.stereotype.Service
+import passport.Passport
 
 @Service
 class AuthService(
     private val transactional: Transactional,
     private val authRepository: AuthRepository,
-    private val memberApi: MemberApi
+    private val memberApi: MemberApi,
+    private val refreshTokenCacheMemory: RefreshTokenCacheMemory,
 ) {
 
     suspend fun findOrInsertByProvider(
@@ -57,5 +60,9 @@ class AuthService(
                 findByProviderAndProviderId(providerKey.provider, providerKey.providerId)
             }
         }
+    }
+
+    suspend fun logout(passport: Passport) {
+        refreshTokenCacheMemory.evict(passport.memberId)
     }
 }
