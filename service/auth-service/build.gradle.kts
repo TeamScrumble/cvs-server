@@ -47,4 +47,5 @@ dependencies {
     implementation(project(":contract:contract-api"))
     implementation(project(":contract:contract-api:client"))
     implementation(project(":contract:contract-error"))
+    implementation(project(":support:support-docs"))
 }

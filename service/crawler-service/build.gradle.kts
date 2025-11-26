@@ -39,4 +39,5 @@ dependencies {
 
     // --- Modules
     implementation(project(":contract:contract-event"))
+    implementation(project(":support:support-docs"))
 }
