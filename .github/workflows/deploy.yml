@@ -98,21 +98,6 @@ jobs:
           echo "외부 레지스트리 사용"
         fi
 
-    - name: Dockerfile에서 EXPOSE 포트 추출
-      id: port
-      run: |
-        DOCKERFILE_PATH="${{ needs.gradle-build.outputs.module_path }}/Dockerfile"
-        if [ -f "$DOCKERFILE_PATH" ]; then
-          EXPOSED_PORT=$(docker inspect $IMAGE --format='{{range $p, $conf := .Config.ExposedPorts}}{{$p}}{{end}}' | cut -d'/' -f1)
-          if [ -z "$EXPOSED_PORT" ]; then
-            EXPOSED_PORT="8080"
-          fi
-        else
-          EXPOSED_PORT="8080"
-        fi
-        echo "port=$EXPOSED_PORT" >> $GITHUB_OUTPUT
-        echo "감지된 포트: $EXPOSED_PORT"
-
     - name: Docker 레지스트리 로그인
       uses: docker/login-action@v3
       with:
@@ -191,7 +176,7 @@ jobs:
     - name: 새 컨테이너 실행
       run: |
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
-        EXPOSED_PORT="${{ needs.docker-build.outputs.exposed_port }}"
+        EXPOSED_PORT=$(docker inspect localhost:5000/$MODULE_NAME:latest --format='{{range $p, $conf := .Config.ExposedPorts}}{{$p}}{{end}}' | cut -d'/' -f1)
         
         echo "컨테이너 이름: $MODULE_NAME"
         echo "포트 매핑: $EXPOSED_PORT:$EXPOSED_PORT"
