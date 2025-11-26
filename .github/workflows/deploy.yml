@@ -103,7 +103,7 @@ jobs:
       run: |
         DOCKERFILE_PATH="${{ needs.gradle-build.outputs.module_path }}/Dockerfile"
         if [ -f "$DOCKERFILE_PATH" ]; then
-          EXPOSED_PORT=$(grep -i "^EXPOSE" $DOCKERFILE_PATH | awk '{print $2}' | head -n 1)
+          EXPOSED_PORT=$(grep -i "^EXPOSE" $DOCKERFILE_PATH | awk '{print $2}' | head -n 1 | tr -d '\n\r ')
           if [ -z "$EXPOSED_PORT" ]; then
             EXPOSED_PORT="8080"
           fi
