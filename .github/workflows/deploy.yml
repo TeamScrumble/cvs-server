@@ -121,13 +121,38 @@ jobs:
           -t ${{ steps.registry.outputs.host }}/$MODULE_NAME:${{ github.sha }} \
           .
 
-    - name: Docker 이미지 푸시
+    - name: Docker 이미지 푸시 (재시도 로직)
       run: |
-        echo "${{steps.registry.outputs.host}}"
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
         REGISTRY_HOST="${{ steps.registry.outputs.host }}"
-        docker push ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest
-        docker push ${{ steps.registry.outputs.host }}/$MODULE_NAME:${{ github.sha }}
+        
+        push_with_retry() {
+          local image=$1
+          local max_attempts=3
+          local attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "이미지 푸시 시도 $attempt/$max_attempts: $image"
+            
+            if docker push $image; then
+              echo "푸시 성공: $image"
+              return 0
+            else
+              echo "푸시 실패: $image"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "10초 후 재시도..."
+                sleep 10
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          return 1
+        }
+        
+        push_with_retry "$REGISTRY_HOST/$MODULE_NAME:latest"
+        push_with_retry "$REGISTRY_HOST/$MODULE_NAME:${{ github.sha }}"
 
     - name: 로그아웃
       if: always()
