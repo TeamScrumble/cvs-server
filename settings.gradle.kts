@@ -20,3 +20,6 @@ include("infra")
 include("infra:infra-db")
 include("infra:infra-cache")
 include("infra:infra-security")
+
+include("support")
+include("support:support-docs")
