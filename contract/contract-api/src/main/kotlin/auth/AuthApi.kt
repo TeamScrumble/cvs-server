@@ -1,4 +1,3 @@
 package auth
 
-interface AuthApi : TokenReissueApi {
-}
+interface AuthApi : TokenReissueApi, LogoutApi

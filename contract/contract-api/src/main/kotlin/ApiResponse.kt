@@ -1,20 +1,6 @@
-data class ApiResponse<T>(
-    val body: T,
-    val status: Int,
-) {
-    companion object
-}
+import error.ErrorResponse
 
-fun <T> ApiResponse.Companion.of(
-    body :T,
-    status: Int = 200
-) : ApiResponse<T> {
-    return ApiResponse(body, status)
-}
-
-fun <T> ApiResponse.Companion.error(
-    body :T,
-    status: Int = 500
-) : ApiResponse<T> {
-    return ApiResponse(body, status)
+sealed class ApiResponse<T> {
+    data class Success<T>(val body: T, val status: Int = 200) : ApiResponse<T>()
+    data class Error<T>(val error: ErrorResponse, val status: Int = 500) : ApiResponse<T>()
 }

@@ -32,4 +32,5 @@ dependencies {
 
     // --- Modules
     implementation(project(":contract:contract-api"))
+    implementation(project(":contract:contract-error"))
 }

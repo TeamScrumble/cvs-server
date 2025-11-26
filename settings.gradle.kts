@@ -4,6 +4,7 @@ include("contract")
 include("contract:contract-api")
 include("contract:contract-api:client")
 include("contract:contract-event")
+include("contract:contract-error")
 
 include("edge")
 include("edge:gateway")
