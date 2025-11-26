@@ -24,7 +24,7 @@ spring:
         - id: auth-login-callback
           uri: lb://auth-service
           predicates:
-            - Path=/login/oauth2/**
+            - Path=/login/**
         - id: member-service
           uri: lb://member-service
           predicates:
