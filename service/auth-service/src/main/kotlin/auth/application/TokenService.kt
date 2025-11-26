@@ -1,7 +1,10 @@
 package auth.application
 
 import auth.config.TokenProperties
-import cache.CacheMemory
+import auth.infra.cache.RefreshTokenCacheMemory
+import error.errorcode.AuthErrorCode
+import error.exception.BusinessException
+import extension.getOrThrow
 import member.MemberApi
 import org.springframework.stereotype.Service
 import security.token.AuthPrincipal
@@ -11,7 +14,7 @@ import security.token.TokenType
 @Service
 class TokenService(
     private val tokenProvider: TokenProvider,
-    private val cacheMemory: CacheMemory,
+    private val refreshTokenCacheMemory: RefreshTokenCacheMemory,
     private val memberApi: MemberApi,
     private val tokenProperties: TokenProperties
 ) {
@@ -21,31 +24,26 @@ class TokenService(
 
     suspend fun reissue(refreshToken: String): AuthTokens {
         val principal = tokenProvider.decodeToken(refreshToken)
-            ?: throw IllegalArgumentException("잘못된 갱신 토큰 입니다.")
+            ?: throw BusinessException(AuthErrorCode.A_002)
 
         if (principal.type != TokenType.REFRESH) {
-            throw IllegalArgumentException("갱신 토큰이 아닙니다.")
+            throw BusinessException(AuthErrorCode.A_002)
         }
 
-        val savedToken = cacheMemory.get<String>(refreshTokenCacheKey(principal.memberId))
-            ?: throw IllegalArgumentException("존재하지 않는 갱신 토큰 입니다.")
+        val savedToken = refreshTokenCacheMemory.get(principal.memberId)
+            ?: throw BusinessException(AuthErrorCode.A_002)
         if (refreshToken != savedToken) {
-            throw IllegalArgumentException("갱신 토큰이 일치하지 않습니다.")
+            throw BusinessException(AuthErrorCode.A_002)
         }
 
         return issueTokens(principal.memberId)
     }
 
     private suspend fun issueTokens(memberId: Long): AuthTokens {
-        val memberResponse = memberApi.get(memberId)
-
-        if (memberResponse.status == 404) {
-            throw IllegalArgumentException("존재하지 않는 회원입니다.")
-        }
-        val member = memberResponse.body
+        val memberResponse = memberApi.get(memberId).getOrThrow()
 
         val accessToken = tokenProvider.encodeToken(
-            AuthPrincipal.accessToken(memberId, member.roles),
+            AuthPrincipal.accessToken(memberId, memberResponse.roles),
             tokenProperties.accessTokenExpires
         )
         val refreshToken = tokenProvider.encodeToken(
@@ -53,20 +51,11 @@ class TokenService(
             tokenProperties.refreshTokenExpires
         )
 
-        cacheMemory.set(
-            key = refreshTokenCacheKey(member.memberId),
-            value = refreshToken,
-            ttlMillis = tokenProperties.refreshTokenExpires
+        refreshTokenCacheMemory.set(
+            memberId = memberResponse.memberId,
+            refreshToken = refreshToken,
         )
 
         return AuthTokens(accessToken, refreshToken)
-    }
-
-    private fun refreshTokenCacheKey(memberId: Long): String {
-        return REFRESH_TOKEN_CACHE_KEY_PREFIX + memberId
-    }
-
-    companion object {
-        const val REFRESH_TOKEN_CACHE_KEY_PREFIX = "RefreshToken:"
     }
 }
