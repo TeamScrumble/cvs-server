@@ -40,7 +40,7 @@ class ApiDocumentService(
 
     private val specCache: MutableMap<String, Map<String, Any?>> = ConcurrentHashMap()
 
-    suspend fun generateOasJson(): Map<String, Any?> = coroutineScope {
+    suspend fun generateOasJson(publicOnly: Boolean): Map<String, Any?> = coroutineScope {
         val results: List<ServiceResult> = services.map {
             async { fetchServiceResult(it) }
         }.awaitAll()
@@ -51,14 +51,14 @@ class ApiDocumentService(
             return@coroutineScope emptyMap()
         }
 
-        val merged = mergeSpecs(specs)
+        val merged = mergeSpecs(specs, publicOnly)
 
         merged["openapi"] = merged["openapi"] ?: "3.0.1"
 
         val baseInfo = merged["info"] as? Map<*, *> ?: emptyMap<String, Any?>()
         val version = baseInfo["version"] ?: "v0"
 
-        val statusDescription = buildDescription(results)
+        val statusDescription = buildDescription(results, publicOnly)
 
         merged["info"] = mapOf(
             "title" to "Pyunpyun Api Documents",
@@ -112,25 +112,29 @@ class ApiDocumentService(
         }
     }
 
-    private fun buildDescription(results: List<ServiceResult>): String {
+    private fun buildDescription(
+        results: List<ServiceResult>,
+        publicOnly: Boolean
+    ): String {
         return buildString {
-            appendLine("**Microservices**<br/>")
+            if (!publicOnly) {
+                appendLine("**Microservices**<br/>")
+                results.forEachIndexed { idx, result ->
+                    val (emoji, statusText) = when {
+                        result.alive -> "🟢" to "UP"
+                        result.spec != null -> "🟡" to "CACHED"
+                        else -> "🔴" to "DOWN"
+                    }
 
-            results.forEachIndexed { idx, result ->
-                val (emoji, statusText) = when {
-                    result.alive -> "🟢" to "UP"
-                    result.spec != null -> "🟡" to "CACHED"
-                    else -> "🔴" to "DOWN"
+                    if (idx == results.size - 1) {
+                        appendLine("$emoji ${result.info.name} ($statusText)")
+                    } else {
+                        appendLine("$emoji ${result.info.name} ($statusText)<br/>")
+                    }
                 }
-
-                if (idx == results.size - 1) {
-                    appendLine("$emoji ${result.info.name} ($statusText)")
-                } else {
-                    appendLine("$emoji ${result.info.name} ($statusText)<br/>")
-                }
+                appendLine()
             }
 
-            appendLine()
             appendLine("**Social Logins** <br/>")
             appendLine("☑️ kakao : <a href=\"https://dev-api.pyunpyun.com/oauth2/authorization/kakao\">https://dev-api.pyunpyun.com/oauth2/authorization/kakao</a><br/>")
             appendLine("☑️ google : <a href=\"https://dev-api.pyunpyun.com/oauth2/authorization/google\">https://dev-api.pyunpyun.com/oauth2/authorization/google</a><br/>")
@@ -138,7 +142,10 @@ class ApiDocumentService(
         }
     }
 
-    private fun mergeSpecs(specs: List<Map<String, Any?>>): MutableMap<String, Any?> {
+    private fun mergeSpecs(
+        specs: List<Map<String, Any?>>,
+        publicOnly: Boolean
+    ): MutableMap<String, Any?> {
         if (specs.isEmpty()) return mutableMapOf()
 
         val base = specs.first().toMutableMap()
@@ -149,7 +156,14 @@ class ApiDocumentService(
 
         specs.forEach { spec ->
             val paths = spec["paths"] as? Map<String, Any?> ?: emptyMap()
-            mergedPaths.putAll(paths)
+
+            val filteredPaths = if (publicOnly) {
+                paths.filterKeys { path -> !path.contains("internal") }
+            } else {
+                paths
+            }
+
+            mergedPaths.putAll(filteredPaths)
 
             val components = spec["components"] as? Map<String, Any?> ?: emptyMap()
             val schemas = components["schemas"] as? Map<String, Any?> ?: emptyMap()

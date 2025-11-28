@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>Documentations</title>
+    <title>[Internal] Documentations</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <style>
@@ -87,7 +87,7 @@
 </head>
 <body>
 <div class="container">
-    <h1 class="title">Pyunpyun Documentation</h1>
+    <h1 class="title">[Internal] Pyunpyun Documentation</h1>
     <p class="subtitle">서비스의 API / 에러 코드 / 이벤트 문서를 한 곳에서 확인할 수 있습니다.</p>
 
     <div class="card-grid">
@@ -96,19 +96,29 @@
         <div class="card">
             <div class="card-title">API Docs</div>
             <div class="card-desc">
-                API 스펙을 통합한 Swagger UI 문서입니다.
+                전체 MSA API 스펙을 통합한 Swagger UI 문서입니다.
             </div>
-            <a href="/docs/api/index.html" class="card-btn">Open API Docs</a>
+            <a href="/docs/internal/api/index.html" class="card-btn">Open API Docs</a>
         </div>
 
         <!-- Error Docs -->
         <div class="card">
             <div class="card-title">Error Codes</div>
             <div class="card-desc">
-                API 호출 시 발생할 수 있는 모든 에러 코드들을 정리한 문서입니다.
+                서비스 전역에서 사용하는 비즈니스/시스템 에러 코드 목록입니다.
             </div>
-            <a href="/docs/error/index.html" class="card-btn">Open Error Docs</a>
+            <a href="/docs/internal/error/index.html" class="card-btn">Open Error Docs</a>
         </div>
+
+        <!-- Event Docs -->
+        <div class="card">
+            <div class="card-title">Event Docs</div>
+            <div class="card-desc">
+                Kafka/Event 기반 메시지 구조와 필드 설명을 확인할 수 있습니다.
+            </div>
+            <a href="/docs/internal/event/index.html" class="card-btn">Open Event Docs</a>
+        </div>
+
     </div>
 </div>
 </body>

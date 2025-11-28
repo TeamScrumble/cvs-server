@@ -11,8 +11,14 @@ class DocumentController(
 ) {
     @GetMapping("/oas.json")
     @ResponseBody
-    suspend fun oas(): Map<String, Any?> {
-        return apiDocumentService.generateOasJson()
+    suspend fun oasPublic(): Map<String, Any?> {
+        return apiDocumentService.generateOasJson(publicOnly = true)
+    }
+
+    @GetMapping("/internal/oas.json")
+    @ResponseBody
+    suspend fun oasInternal(): Map<String, Any?> {
+        return apiDocumentService.generateOasJson(publicOnly = false)
     }
 
     @GetMapping("/error.json")
