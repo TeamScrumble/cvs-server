@@ -17,5 +17,7 @@ sealed interface ErrorCode {
 
         fun from(code: String): ErrorCode = errorCodeCache[code]
             ?: throw RuntimeException("Invalid Error Code")
+
+        fun allErrorCodes(): List<ErrorCode> = errorCodeCache.values.toList()
     }
 }

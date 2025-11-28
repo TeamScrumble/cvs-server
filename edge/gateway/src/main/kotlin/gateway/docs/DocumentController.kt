@@ -1,17 +1,23 @@
 package gateway.docs
 
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class DocumentController(
     private val apiDocumentService: ApiDocumentService,
+    private val errorDocumentService: ErrorDocumentService
 ) {
-    @GetMapping("/docs")
-    fun forwardDocs(): String = "forward:/docs/index.html"
-
     @GetMapping("/oas.json")
-    suspend fun aggregate(): Map<String, Any?> {
+    @ResponseBody
+    suspend fun oas(): Map<String, Any?> {
         return apiDocumentService.generateOasJson()
+    }
+
+    @GetMapping("/error.json")
+    @ResponseBody
+    suspend fun error(): Map<String, Any?> {
+        return errorDocumentService.generateErrorJson()
     }
 }
