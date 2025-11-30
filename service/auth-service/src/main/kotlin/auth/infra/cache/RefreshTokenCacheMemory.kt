@@ -1,13 +1,13 @@
 package auth.infra.cache
 
-import auth.config.TokenProperties
+import auth.config.AuthServiceTokenProperties
 import cache.CacheMemory
 import org.springframework.stereotype.Component
 
 @Component
 class RefreshTokenCacheMemory(
     private val cacheMemory: CacheMemory,
-    private val tokenProperties: TokenProperties,
+    private val tokenProperties: AuthServiceTokenProperties,
 ) {
 
     private fun key(memberId: Long): String =

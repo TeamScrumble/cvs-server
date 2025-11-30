@@ -52,7 +52,11 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL}
 token:
   access-token-expires: 3_600_000
   refresh-token-expires: 604_800_000
+
+service:
+  gateway-host: ${GATEWAY_HOST}
+  db_schema: ${AUTH_DB_SCHEMA}

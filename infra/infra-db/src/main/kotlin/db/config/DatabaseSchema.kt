@@ -1,5 +1,5 @@
 package db.config
 
-data class DatabaseScheme(
+data class DatabaseSchema(
     val value: String
 )

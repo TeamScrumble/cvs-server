@@ -13,7 +13,7 @@ class DatabaseConnectionConfig {
     @Bean
     fun connectionFactory(
         props: DatabaseProperties,
-        scheme: DatabaseScheme
+        scheme: DatabaseSchema
     ): ConnectionFactory {
         val connectionUrl = "${props.url}/${scheme.value}"
         return ConnectionFactoryBuilder

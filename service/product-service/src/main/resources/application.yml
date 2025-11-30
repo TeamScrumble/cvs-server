@@ -1,6 +1,10 @@
 spring:
   application:
     name: product-service
+  profiles:
+    active:
+      - db
+      - security
 
 server:
   port: 8083
@@ -8,4 +12,8 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL}
+
+service:
+  gateway-host: ${GATEWAY_HOST}
+  db_schema: ${PRODUCT_DB_SCHEMA}
