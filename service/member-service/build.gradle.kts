@@ -36,4 +36,5 @@ dependencies {
     implementation(project(":contract:contract-error"))
     implementation(project(":infra:infra-security"))
     implementation(project(":infra:infra-db"))
+    implementation(project(":support:support-docs"))
 }

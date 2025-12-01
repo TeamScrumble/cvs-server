@@ -57,6 +57,11 @@ token:
   access-token-expires: 3_600_000
   refresh-token-expires: 604_800_000
 
+springdoc:
+  api-docs:
+    path: /api/auth/oas.json
+  writer-with-default-pretty-printer: true
+  
 service:
   gateway-host: ${GATEWAY_HOST}
   db_schema: ${AUTH_DB_SCHEMA}

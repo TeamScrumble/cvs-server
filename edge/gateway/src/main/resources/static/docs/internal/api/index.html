@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>[Internal] API Docs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Swagger UI -->
+    <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css"/>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        /* 상단 헤더 - error 문서와 동일 스타일 (클래스명 충돌 방지용) */
+        .doc-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background-color: #232f3e;
+            color: #fff;
+        }
+
+        .doc-topbar-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .doc-topbar-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .doc-topbar-subtitle {
+            font-size: 13px;
+            color: #d1d5db;
+        }
+
+        .doc-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .doc-nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .doc-nav-link {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.25);
+            font-size: 12px;
+            color: #e5e7eb;
+            text-decoration: none;
+            background-color: rgba(15,23,42,0.25);
+        }
+
+        .doc-nav-link:hover {
+            background-color: rgba(15,23,42,0.45);
+        }
+
+        .badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-size: 11px;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e5e7eb;
+        }
+
+        /* Swagger UI 전체 래퍼에 약간의 마진 */
+        #swagger-ui {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="doc-topbar">
+    <div class="doc-topbar-left">
+        <div class="doc-topbar-title">[Internal] API Docs</div>
+        <div class="doc-topbar-subtitle">Pyunpyun 통합 API 문서</div>
+    </div>
+
+    <div class="doc-topbar-right">
+        <div class="doc-nav-links">
+            <a class="doc-nav-link" href="/docs/internal/index.html">Home</a>
+            <a class="doc-nav-link" href="/docs/internal/api/index.html">API Docs</a>
+            <a class="doc-nav-link" href="/docs/internal/error/index.html">Error Docs</a>
+            <a class="doc-nav-link" href="/docs/internal/event/index.html">Event Docs</a>
+        </div>
+        <div>from <span class="badge">/internal/oas.json</span></div>
+    </div>
+</div>
+
+<div id="swagger-ui"></div>
+
+<script>
+    window.onload = function () {
+        const ui = SwaggerUIBundle({
+            url: "/internal/oas.json",  // 게이트웨이 기준 경로
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIBundle.SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+        })
+        window.ui = ui
+    }
+</script>
+</body>
+</html>
