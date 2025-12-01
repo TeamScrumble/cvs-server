@@ -10,7 +10,7 @@ interface SendVerificationCodeEmailApi {
     }
     @Documented(
         summary = "이메일 인증번호 전송 API",
-        description = "이메일로 인증번호를 전송합니다.",
+        description = "이메일로 인증번호를 전송합니다. 인증 코드는 5분간 유효합니다.",
         request = Request::class,
         response = Response::class,
     )
