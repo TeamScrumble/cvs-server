@@ -1,3 +1,3 @@
 package auth.emailAuth
 
-interface EmailAuthApi : SendVerificationCodeEmailApi
+interface EmailAuthApi : SendVerificationCodeEmailApi, VerifyEmailApi

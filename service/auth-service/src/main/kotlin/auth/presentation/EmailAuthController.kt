@@ -4,6 +4,7 @@ import ApiResponse
 import auth.application.EmailAuthService
 import auth.emailAuth.EmailAuthApi
 import auth.emailAuth.SendVerificationCodeEmailApi
+import auth.emailAuth.VerifyEmailApi
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -19,6 +20,16 @@ class EmailAuthController(
     ): ApiResponse<SendVerificationCodeEmailApi.Response> {
         emailAuthService.sendVerificationCodeEmail(request.email)
         val response = SendVerificationCodeEmailApi.Response(true)
+
+        return ApiResponse.Success(response)
+    }
+
+    @PostMapping(VerifyEmailApi.PATH)
+    override suspend fun verifyEmail(
+        @RequestBody request: VerifyEmailApi.Request
+    ): ApiResponse<VerifyEmailApi.Response> {
+        emailAuthService.verify(request.email, request.verificationCode)
+        val response = VerifyEmailApi.Response(true)
 
         return ApiResponse.Success(response)
     }

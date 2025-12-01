@@ -31,8 +31,34 @@ class EmailAuthService(
         emailVerifyCacheMemory.setVerificationCode(email, verificationCode)
     }
 
+    suspend fun verify(
+        email: String,
+        verificationCode: String
+    ) {
+        if (!isValidEmail(email)) {
+            throw BusinessException(AuthErrorCode.A_004)
+        }
+        if (!isValidVerificationCode(verificationCode)) {
+            throw BusinessException(AuthErrorCode.A_007)
+        }
+
+        val savedCode = emailVerifyCacheMemory.getVerificationCode(email)
+            ?: throw BusinessException(AuthErrorCode.A_005)
+
+        if (savedCode != verificationCode) {
+            throw BusinessException(AuthErrorCode.A_006)
+        }
+
+        emailVerifyCacheMemory.setVerified(email)
+    }
+
     private fun isValidEmail(email: String): Boolean {
         val regex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
         return email.matches(regex)
+    }
+
+    private fun isValidVerificationCode(verificationCode: String): Boolean {
+        val regex = "^[0-9]{6}$".toRegex()
+        return verificationCode.matches(regex)
     }
 }
