@@ -30,6 +30,8 @@ class MemberController(
     override suspend fun get(
         @PathVariable memberId: Long
     ): ApiResponse<MemberGetApi.Response> {
-        return ApiResponse.Success(MemberGetApi.Response(1L, "xx@gmail.com", setOf("user"), "nickname"))
+        val response = memberService.findById(memberId)
+
+        return ApiResponse.Success(response)
     }
 }

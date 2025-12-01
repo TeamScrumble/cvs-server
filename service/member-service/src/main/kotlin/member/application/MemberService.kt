@@ -1,6 +1,9 @@
 package member.application
 
 import db.transactional.Transactional
+import error.errorcode.MemberErrorCode
+import error.exception.BusinessException
+import member.MemberGetApi
 import member.domain.member.Member
 import member.domain.member.MemberRepository
 import member.domain.member.MemberRole
@@ -40,5 +43,16 @@ class MemberService(
         val prefix = nicknamePrefixes.random()
         val suffix = nicknameSuffixes.random()
         return "$prefix $suffix"
+    }
+
+    suspend fun findById(id: Long): MemberGetApi.Response = transactional {
+        val member = memberRepository.findById(id)
+            ?: throw BusinessException(MemberErrorCode.M_001)
+        MemberGetApi.Response(
+            memberId = member.id,
+            email = member.email,
+            roles = member.roles.map { it.name }.toSet(),
+            nickname = member.nickname
+        )
     }
 }
