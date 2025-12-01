@@ -19,8 +19,8 @@ eureka:
 springdoc:
   api-docs:
     path: /api/crawler/oas.json
-  writer-with-default-pretty-printer: true
-      defaultZone: ${EUREKA_URL}
+    writer-with-default-pretty-printer: true
+    defaultZone: ${EUREKA_URL}
 
 service:
   gateway-host: ${GATEWAY_HOST}
