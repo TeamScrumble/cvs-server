@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(
-    scanBasePackages = ["auth", "cache", "security", "db", "docs"]
+    scanBasePackages = ["auth", "cache", "security", "db", "docs", "mail"]
 )
 class AuthServiceApplication
 
