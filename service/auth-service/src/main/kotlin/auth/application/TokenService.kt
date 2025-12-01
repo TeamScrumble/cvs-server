@@ -1,6 +1,6 @@
 package auth.application
 
-import auth.config.TokenProperties
+import auth.config.AuthServiceTokenProperties
 import auth.infra.cache.RefreshTokenCacheMemory
 import error.errorcode.AuthErrorCode
 import error.exception.BusinessException
@@ -16,7 +16,7 @@ class TokenService(
     private val tokenProvider: TokenProvider,
     private val refreshTokenCacheMemory: RefreshTokenCacheMemory,
     private val memberApi: MemberApi,
-    private val tokenProperties: TokenProperties
+    private val tokenProperties: AuthServiceTokenProperties
 ) {
     suspend fun issue(memberId: Long): AuthTokens {
         return issueTokens(memberId)

@@ -7,17 +7,18 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class ClientConfig{
+class AuthServiceClientConfig{
 
     @Bean
     fun webClient() = WebClient.builder().build()
 
     @Bean
     fun memberApi(
+        props: AuthServiceProperties,
         webClient: WebClient
     ): MemberApi {
         return MemberApiClient(
-            host = "localhost:8080",
+            host = props.gatewayHost,
             webClient = webClient
         )
     }

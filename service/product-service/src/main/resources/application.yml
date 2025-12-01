@@ -1,6 +1,10 @@
 spring:
   application:
     name: product-service
+  profiles:
+    active:
+      - db
+      - security
 
 server:
   port: 8083
@@ -15,3 +19,8 @@ springdoc:
   api-docs:
     path: /api/product/oas.json
   writer-with-default-pretty-printer: true
+      defaultZone: ${EUREKA_URL}
+
+service:
+  gateway-host: ${GATEWAY_HOST}
+  db_schema: ${PRODUCT_DB_SCHEMA}

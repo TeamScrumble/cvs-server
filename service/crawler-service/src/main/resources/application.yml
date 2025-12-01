@@ -3,6 +3,10 @@ spring:
     name: crawler-service
   kafka:
     bootstrap-servers: localhost:9092
+  profiles:
+    active:
+      - db
+      - security
 
 server:
   port: 8084
@@ -16,3 +20,8 @@ springdoc:
   api-docs:
     path: /api/crawler/oas.json
   writer-with-default-pretty-printer: true
+      defaultZone: ${EUREKA_URL}
+
+service:
+  gateway-host: ${GATEWAY_HOST}
+  db_schema: ${CRAWLER_DB_SCHEMA}

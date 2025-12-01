@@ -1,2 +1,2 @@
 security:
-  secret-key: VnVEoldfwso5zQVHuvanruLCXSx2rhWm/F8mOK+VVtjt7lsxMH1lxPI3oCkWC4Rxk3r/37jqCIvIJTvjZatIVg==
+  secret-key: ${JWT_SECRET}

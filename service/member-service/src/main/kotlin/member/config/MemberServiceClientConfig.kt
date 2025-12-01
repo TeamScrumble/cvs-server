@@ -1,12 +1,12 @@
 package member.config
 
-import db.config.DatabaseScheme
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class DatabaseConfig {
+class MemberServiceClientConfig{
 
     @Bean
-    fun databaseScheme() = DatabaseScheme("cvs_member")
+    fun webClient() = WebClient.builder().build()
 }

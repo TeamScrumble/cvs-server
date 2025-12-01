@@ -44,15 +44,19 @@ jobs:
         echo "모듈 경로: $MODULE_PATH"
         echo "모듈 이름: $MODULE_NAME"
 
-    - name: Gradle 실행 권한 부여
-      run: |
-        cd ${{ steps.module.outputs.path }}
-        chmod +x gradlew
-
     - name: Gradle로 빌드
       run: |
-        cd ${{ steps.module.outputs.path }}
-        ./gradlew bootJar --parallel --build-cache --no-daemon
+        MODULE_PATH="${{ steps.module.outputs.path }}"
+        
+        if [ "$MODULE_PATH" = "." ]; then
+          GRADLE_TASK="bootJar"
+        else
+          GRADLE_MODULE=$(echo "$MODULE_PATH" | sed 's/\//:/g')
+          GRADLE_TASK=":${GRADLE_MODULE}:bootJar"
+        fi
+        
+        echo "실행할 태스크: $GRADLE_TASK"
+        ./gradlew $GRADLE_TASK --parallel --build-cache --no-daemon
 
     - name: 빌드 결과물 업로드
       uses: actions/upload-artifact@v4
@@ -76,51 +80,83 @@ jobs:
         name: app-jar
         path: ${{ needs.gradle-build.outputs.module_path }}/build/libs
 
-    - name: Dockerfile에서 EXPOSE 포트 추출
-      id: port
+    - name: Docker 레지스트리 설정
+      id: registry
       run: |
-        DOCKERFILE_PATH="${{ needs.gradle-build.outputs.module_path }}/Dockerfile"
-        if [ -f "$DOCKERFILE_PATH" ]; then
-          EXPOSED_PORT=$(grep -i "^EXPOSE" $DOCKERFILE_PATH | awk '{print $2}' | head -n 1)
-          if [ -z "$EXPOSED_PORT" ]; then
-            EXPOSED_PORT="8080"
-          fi
+        CURRENT_IP=$(curl -s ifconfig.me)
+        echo "현재 러너 IP: $CURRENT_IP"
+        
+        if [ "$CURRENT_IP" = "${{ secrets.RYEO_HOME_IP }}" ]; then
+          echo "host=${{ secrets.DOCKER_REGISTRY_HOST }}" >> $GITHUB_OUTPUT
+          echo "username=${{ secrets.DOCKER_REGISTRY_USERNAME }}" >> $GITHUB_OUTPUT
+          echo "password=${{ secrets.DOCKER_REGISTRY_PASSWORD }}" >> $GITHUB_OUTPUT
+          echo "내부 레지스트리 사용 (ryeo-home)"
         else
-          EXPOSED_PORT="8080"
+          echo "host=${{ secrets.DOCKER_REGISTRY_HOST_EX }}" >> $GITHUB_OUTPUT
+          echo "username=${{ secrets.DOCKER_REGISTRY_USERNAME_EX }}" >> $GITHUB_OUTPUT
+          echo "password=${{ secrets.DOCKER_REGISTRY_PASSWORD_EX }}" >> $GITHUB_OUTPUT
+          echo "외부 레지스트리 사용"
         fi
-        echo "port=$EXPOSED_PORT" >> $GITHUB_OUTPUT
-        echo "감지된 포트: $EXPOSED_PORT"
 
     - name: Docker 레지스트리 로그인
       uses: docker/login-action@v3
       with:
-        registry: registry.scrumble.kro.kr
-        username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
-        password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+        registry: ${{ steps.registry.outputs.host }}
+        username: ${{ steps.registry.outputs.username }}
+        password: ${{ steps.registry.outputs.password }}
 
     - name: Docker 이미지 빌드
       run: |
         MODULE_PATH="${{ needs.gradle-build.outputs.module_path }}"
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
+        REGISTRY_HOST="${{ steps.registry.outputs.host }}"
         
         cd $MODULE_PATH
         
         docker build \
-          --cache-from registry.scrumble.kro.kr/$MODULE_NAME:latest \
+          --platform linux/arm64 \
+          --cache-from ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest \
           --build-arg BUILDKIT_INLINE_CACHE=1 \
-          -t registry.scrumble.kro.kr/$MODULE_NAME:latest \
-          -t registry.scrumble.kro.kr/$MODULE_NAME:${{ github.sha }} \
+          -t ${{ steps.registry.outputs.host }}/$MODULE_NAME:latest \
+          -t ${{ steps.registry.outputs.host }}/$MODULE_NAME:${{ github.sha }} \
           .
 
-    - name: Docker 이미지 푸시
+    - name: Docker 이미지 푸시 (재시도 로직)
       run: |
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
-        docker push registry.scrumble.kro.kr/$MODULE_NAME:latest
-        docker push registry.scrumble.kro.kr/$MODULE_NAME:${{ github.sha }}
+        REGISTRY_HOST="${{ steps.registry.outputs.host }}"
+        
+        push_with_retry() {
+          local image=$1
+          local max_attempts=3
+          local attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "이미지 푸시 시도 $attempt/$max_attempts: $image"
+            
+            if docker push $image; then
+              echo "푸시 성공: $image"
+              return 0
+            else
+              echo "푸시 실패: $image"
+              if [ $attempt -lt $max_attempts ]; then
+                echo "10초 후 재시도..."
+                sleep 10
+              fi
+            fi
+            
+            attempt=$((attempt + 1))
+          done
+          
+          return 1
+        }
+        
+        push_with_retry "$REGISTRY_HOST/$MODULE_NAME:latest"
+        push_with_retry "$REGISTRY_HOST/$MODULE_NAME:${{ github.sha }}"
 
     - name: 로그아웃
       if: always()
-      run: docker logout registry.scrumble.kro.kr
+      run: docker logout ${{ steps.registry.outputs.host }}
 
   docker-deploy:
     runs-on: deploy-runner
@@ -130,14 +166,26 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: TeamScrumble/env
+        ref: main  # 브랜치 명시
         token: ${{ secrets.ENV_REPO_TOKEN }}
-        path: cvs-server
+        path: env-repo  # 명확한 이름 사용
     
     - name: env 파일 준비
       run: |
         mkdir -p ~/app-env
-        cp cvs-server/server.env ~/app-env/.env
-        ls -la ~/app-env/
+        
+        # 파일 존재 확인 후 복사
+        if [ -f "env-repo/cvs-server/server.env" ]; then
+          cp env-repo/cvs-server/server.env ~/app-env/.env
+          echo "✅ env 파일 복사 완료"
+          ls -la ~/app-env/
+        else
+          echo "❌ server.env 파일을 찾을 수 없습니다"
+          echo "=== 디렉토리 구조 ==="
+          ls -la env-repo/
+          ls -la env-repo/cvs-server/ || echo "cvs-server 디렉토리 없음"
+          exit 1
+        fi
 
     - name: 도커 이미지 가져오기
       run: |
@@ -153,7 +201,7 @@ jobs:
     - name: 새 컨테이너 실행
       run: |
         MODULE_NAME="${{ needs.gradle-build.outputs.module_name }}"
-        EXPOSED_PORT="${{ needs.docker-build.outputs.exposed_port }}"
+        EXPOSED_PORT=$(docker inspect localhost:5000/$MODULE_NAME:latest --format='{{range $p, $conf := .Config.ExposedPorts}}{{$p}}{{end}}' | cut -d'/' -f1)
         
         echo "컨테이너 이름: $MODULE_NAME"
         echo "포트 매핑: $EXPOSED_PORT:$EXPOSED_PORT"

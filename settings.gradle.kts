@@ -19,6 +19,7 @@ include("service:crawler-service")
 include("infra")
 include("infra:infra-db")
 include("infra:infra-cache")
+include("infra:infra-message-broker")
 include("infra:infra-security")
 
 include("support")
