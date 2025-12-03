@@ -1,6 +1,7 @@
 package auth.presentation
 
 import ApiResponse
+import auth.LoginRedirect
 import auth.application.EmailAuthService
 import auth.application.EmailJoinFacadeService
 import auth.application.EmailLoginFacadeService
@@ -44,11 +45,9 @@ class EmailAuthController(
     @PostMapping(EmailJoinApi.PATH)
     override suspend fun join(
         @RequestBody request: EmailJoinApi.Request
-    ): ApiResponse<EmailJoinApi.Response> {
-        val tokens = emailJoinFacadeService.join(request.email, request.password)
-        val response = EmailJoinApi.Response(tokens.accessToken, tokens.refreshToken)
-
-        return ApiResponse.Success(response)
+    ): String {
+        val ticket = emailJoinFacadeService.join(request.email, request.password)
+        return LoginRedirect.springRedirectWithTicket(ticket)
     }
 
     @PostMapping(EmailExistsApi.PATH)
@@ -64,10 +63,8 @@ class EmailAuthController(
     @PostMapping(EmailLoginApi.PATH)
     override suspend fun login(
         @RequestBody request: EmailLoginApi.Request
-    ): ApiResponse<EmailLoginApi.Response> {
-        val tokens = emailLoginFacadeService.login(request.email, request.password)
-        val response = EmailLoginApi.Response(tokens.accessToken, tokens.refreshToken)
-
-        return ApiResponse.Success(response)
+    ): String {
+        val ticket = emailLoginFacadeService.login(request.email, request.password)
+        return LoginRedirect.springRedirectWithTicket(ticket)
     }
 }

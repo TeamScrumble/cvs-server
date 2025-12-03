@@ -11,8 +11,8 @@ class EmailJoinFacadeService(
     suspend fun join(
         email: String,
         password: String
-    ): AuthTokens {
+    ): String {
         val memberId = emailAuthService.join(email, password)
-        return tokenService.issueTokens(memberId)
+        return tokenService.issueTicket(memberId)
     }
 }

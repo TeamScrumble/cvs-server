@@ -1,5 +1,6 @@
 package auth.infra.oauth
 
+import auth.LoginRedirect
 import auth.application.TokenService
 import cache.CacheMemory
 import kotlinx.coroutines.reactor.mono
@@ -38,9 +39,9 @@ class OAuth2SuccessHandler(
             val encodedPassport = passportProvider.encodePassport(passport)
             cacheMemory.set("Passport:" + authenticatedUser.memberId, encodedPassport)
 
-            val authTokens = tokenService.issue(authenticatedUser.memberId)
+            val ticket = tokenService.issueTicket(authenticatedUser.memberId)
 
-            "http://localhost:3000/auth/callback?access=${authTokens.accessToken}&refresh=${authTokens.refreshToken}"
+            LoginRedirect.withTicket(ticket)
         }.flatMap { redirectUrl ->
             val response = webFilterExchange.exchange.response
             response.statusCode = HttpStatus.FOUND
