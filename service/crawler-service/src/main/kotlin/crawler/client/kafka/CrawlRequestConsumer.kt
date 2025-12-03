@@ -1,6 +1,7 @@
 package crawler.client.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import cvs.crawler.CrawlerFailedEvent
 import cvs.crawler.CrawlerRequestEvent
 import cvs.crawler.CrawlerResultEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -26,7 +27,7 @@ class CrawlRequestConsumer(
     }
 
     private val workerScope = CoroutineScope(Dispatchers.IO + exceptionHandler)
-    private val semaphore = Semaphore(5)
+    private val semaphore = Semaphore(4)
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -34,21 +35,21 @@ class CrawlRequestConsumer(
     fun consume(message: String) {
         workerScope.launch {
             semaphore.withPermit {
-                try {
-                    val event = objectMapper.readValue(message, CrawlerRequestEvent::class.java)
-                    val target = event.target
-                    logger.info("크롤링 요청 수신: ${target.name}")
+                val event = objectMapper.readValue(message, CrawlerRequestEvent::class.java)
+                val target = event.target
+                logger.info("크롤링 요청 수신: ${target.name}")
 
+                try {
                     val crawledData = crawlerService.crawl(target)
                     val result = CrawlerResultEvent(target = target, data = crawledData)
                     kafkaTemplate.send("crawl.response", objectMapper.writeValueAsString(result))
-
-                    logger.info("크롤링 결과 발행 완료: $target")
                 } catch (ex: Exception) {
                     logger.error("크롤링 처리 중 오류 발생: ${ex.message}", ex)
 
-                    kafkaTemplate.send("crawl.response", "FAILED")
+                    val result = CrawlerFailedEvent(target, ex.message ?: "Crawling failed")
+                    kafkaTemplate.send("crawl.response.fail", objectMapper.writeValueAsString(result))
                 }
+                logger.info("크롤링 결과 발행 완료: $target")
             }
         }
     }
