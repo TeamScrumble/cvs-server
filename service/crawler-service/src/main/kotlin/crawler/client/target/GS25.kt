@@ -1,6 +1,7 @@
 package crawler.client.target
 
 import cvs.crawler.CrawlerData
+import cvs.crawler.CvsTarget
 import kotlinx.coroutines.delay
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
@@ -58,7 +59,7 @@ class GS25 : CVS() {
             val flagText = item.findElements(By.cssSelector(".flag_box span")).firstOrNull()?.text?.trim().orEmpty()
 
             val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
-            val id = generateId("$productImgId|$title")
+            val id = generateId("${CvsTarget.GS25.name}|$title")
 
             CrawlerData(id, title, price.toPrice(), imgUrl, flagText, false)
         } catch (e: Exception) {

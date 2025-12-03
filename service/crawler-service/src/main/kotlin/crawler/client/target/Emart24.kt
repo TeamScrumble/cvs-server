@@ -1,6 +1,7 @@
 package crawler.client.target
 
 import cvs.crawler.CrawlerData
+import cvs.crawler.CvsTarget
 import kotlinx.coroutines.delay
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
@@ -44,7 +45,7 @@ class Emart24 : CVS() {
 
             val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
 
-            val id = generateId("$productImgId|$title")
+            val id = generateId("${CvsTarget.EMART_24.name}|$title")
 
             CrawlerData(id, title, price.toPrice(), imgUrl, eventText, false)
         }
