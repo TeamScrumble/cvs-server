@@ -3,9 +3,11 @@ package auth.presentation
 import ApiResponse
 import auth.application.EmailAuthService
 import auth.application.EmailJoinFacadeService
+import auth.application.EmailLoginFacadeService
 import auth.emailAuth.EmailAuthApi
 import auth.emailAuth.EmailExistsApi
 import auth.emailAuth.EmailJoinApi
+import auth.emailAuth.EmailLoginApi
 import auth.emailAuth.SendVerificationCodeEmailApi
 import auth.emailAuth.VerifyEmailApi
 import org.springframework.web.bind.annotation.PostMapping
@@ -15,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class EmailAuthController(
     private val emailAuthService: EmailAuthService,
-    private val emailJoinFacadeService: EmailJoinFacadeService
+    private val emailJoinFacadeService: EmailJoinFacadeService,
+    private val emailLoginFacadeService: EmailLoginFacadeService
 ) : EmailAuthApi {
 
     @PostMapping(SendVerificationCodeEmailApi.PATH)
@@ -54,6 +57,16 @@ class EmailAuthController(
     ): ApiResponse<EmailExistsApi.Response> {
         val exists = emailAuthService.emailExists(request.email)
         val response = EmailExistsApi.Response(exists)
+
+        return ApiResponse.Success(response)
+    }
+
+    @PostMapping(EmailLoginApi.PATH)
+    override suspend fun login(
+        @RequestBody request: EmailLoginApi.Request
+    ): ApiResponse<EmailLoginApi.Response> {
+        val tokens = emailLoginFacadeService.login(request.email, request.password)
+        val response = EmailLoginApi.Response(tokens.accessToken, tokens.refreshToken)
 
         return ApiResponse.Success(response)
     }

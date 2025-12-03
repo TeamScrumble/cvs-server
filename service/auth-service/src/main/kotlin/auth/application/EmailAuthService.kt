@@ -10,6 +10,7 @@ import auth.infra.mail.MailSender
 import db.transactional.Transactional
 import error.errorcode.AuthErrorCode
 import error.exception.BusinessException
+import error.exception.InternalServerException
 import extension.getOrThrow
 import member.MemberAddApi
 import member.MemberApi
@@ -126,5 +127,24 @@ class EmailAuthService(
 
     suspend fun emailExists(email: String): Boolean {
         return emailAuthRepository.existsByEmail(email)
+    }
+
+    suspend fun login(
+        email: String,
+        rawPassword: String
+    ): Long {
+        val emailAuth = emailAuthRepository.findByEmail(email)
+            ?: throw BusinessException(AuthErrorCode.A_011)
+
+        if (!passwordEncoder.matches(rawPassword, emailAuth.encodedPassword)) {
+            throw BusinessException(AuthErrorCode.A_012)
+        }
+
+        val auth = authRepository.findByProviderAndProviderId(
+            AuthProvider.INTERNAL,
+            emailAuth.id.toString()
+        ) ?: throw InternalServerException("이메일 로그인 정보는 있지만, 인증 정보가 없습니다. email : ${emailAuth.email}")
+
+        return auth.memberId
     }
 }
