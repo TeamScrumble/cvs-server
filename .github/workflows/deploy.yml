@@ -211,8 +211,9 @@ jobs:
           --network cvs \
           -p $EXPOSED_PORT:$EXPOSED_PORT \
           --env-file ~/app-env/.env \
-          -e SPRING_PROFILES_ACTIVE=production \
           localhost:5000/$MODULE_NAME:latest
+
+ #         -e SPRING_PROFILES_ACTIVE=production \
 
   notify-discord-on-pr-and-approve:
     if: |
