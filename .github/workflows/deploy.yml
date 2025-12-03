@@ -211,13 +211,14 @@ jobs:
           --network cvs \
           -p $EXPOSED_PORT:$EXPOSED_PORT \
           --env-file ~/app-env/.env \
-          -e SPRING_PROFILES_ACTIVE=production \
           localhost:5000/$MODULE_NAME:latest
+
+ #         -e SPRING_PROFILES_ACTIVE=production \
 
   notify-discord-on-pr-and-approve:
     if: |
-      github.event_name == 'pull_request_review' && 
-      (github.event.review.state == 'approved' || github.event.review.state == 'commented')
+      (github.event_name == 'pull_request' && github.event.action == 'opened') ||
+      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')
     runs-on: ubuntu-latest
     steps:
       - name: 디스코드로 PR 리뷰 알림 전송
