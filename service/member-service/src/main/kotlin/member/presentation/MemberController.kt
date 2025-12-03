@@ -4,6 +4,7 @@ import ApiResponse
 import member.MemberAddApi
 import member.MemberApi
 import member.MemberGetApi
+import member.NicknameExistsApi
 import member.UpdateNicknameApi
 import member.application.MemberService
 import org.springframework.web.bind.annotation.GetMapping
@@ -38,13 +39,23 @@ class MemberController(
         return ApiResponse.Success(response)
     }
 
-    @GetMapping(UpdateNicknameApi.PATH + "/{memberId}")
+    @PostMapping(UpdateNicknameApi.PATH)
     override suspend fun updateNickname(
         @RequestBody request: UpdateNicknameApi.Request,
         @RequestPassport passport: Passport
     ): ApiResponse<UpdateNicknameApi.Response> {
         memberService.updateNickname(passport, request.nickname)
         val response = UpdateNicknameApi.Response(passport.memberId, request.nickname)
+
+        return ApiResponse.Success(response)
+    }
+
+    @PostMapping(NicknameExistsApi.PATH)
+    override suspend fun nicknameExists(
+        @RequestBody request: NicknameExistsApi.Request
+    ): ApiResponse<NicknameExistsApi.Response> {
+        val exists = memberService.nicknameExists(request.nickname)
+        val response = NicknameExistsApi.Response(exists)
 
         return ApiResponse.Success(response)
     }

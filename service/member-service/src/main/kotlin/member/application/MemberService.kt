@@ -81,4 +81,8 @@ class MemberService(
             throw BusinessException(MemberErrorCode.M_002)
         }
     }
+
+    suspend fun nicknameExists(nickname: String): Boolean {
+        return memberRepository.existsByNickname(nickname)
+    }
 }
