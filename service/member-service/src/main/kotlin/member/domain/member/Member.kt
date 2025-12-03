@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("member")
-class Member(
+data class Member(
     @Id
     @Column("member_id")
     override val id: Long = 0,
