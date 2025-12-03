@@ -123,4 +123,8 @@ class EmailAuthService(
             throw BusinessException(AuthErrorCode.A_009)
         }
     }
+
+    suspend fun emailExists(email: String): Boolean {
+        return emailAuthRepository.existsByEmail(email)
+    }
 }

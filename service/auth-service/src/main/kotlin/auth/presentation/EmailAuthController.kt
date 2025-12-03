@@ -4,6 +4,7 @@ import ApiResponse
 import auth.application.EmailAuthService
 import auth.application.EmailJoinFacadeService
 import auth.emailAuth.EmailAuthApi
+import auth.emailAuth.EmailExistsApi
 import auth.emailAuth.EmailJoinApi
 import auth.emailAuth.SendVerificationCodeEmailApi
 import auth.emailAuth.VerifyEmailApi
@@ -43,6 +44,16 @@ class EmailAuthController(
     ): ApiResponse<EmailJoinApi.Response> {
         val tokens = emailJoinFacadeService.join(request.email, request.password)
         val response = EmailJoinApi.Response(tokens.accessToken, tokens.refreshToken)
+
+        return ApiResponse.Success(response)
+    }
+
+    @PostMapping(EmailExistsApi.PATH)
+    override suspend fun emailExits(
+        @RequestBody request: EmailExistsApi.Request
+    ): ApiResponse<EmailExistsApi.Response> {
+        val exists = emailAuthService.emailExists(request.email)
+        val response = EmailExistsApi.Response(exists)
 
         return ApiResponse.Success(response)
     }
