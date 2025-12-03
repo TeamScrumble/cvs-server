@@ -12,7 +12,7 @@ interface TokenExchangeApi {
         summary = "토큰 교환 API",
         description = "로그인 시 받은 ticket으로 토큰을 발급하는 API 입니다. <br/>." +
                 "1분간 유효하며, 한번만 교환 가능 합니다.",
-        response = TokenReissueApi.Response::class,
+        response = Response::class,
     )
     suspend fun exchange(request: Request): ApiResponse<Response>
 
