@@ -1,6 +1,7 @@
 package crawler.client.target
 
 import cvs.crawler.CrawlerData
+import kotlinx.coroutines.delay
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -26,7 +27,7 @@ class Emart24 : CVS() {
     }
 
     // ===== 상품 파싱 =====
-    override fun findProductList(driver: WebDriver): List<CrawlerData> {
+    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
         val items = driver.findElements(By.cssSelector(SELECTOR_ITEM))
         if (items.isEmpty()) return emptyList()
 
@@ -50,7 +51,7 @@ class Emart24 : CVS() {
     }
 
     // ===== 마지막 페이지 탐색 =====
-    private fun findLastPageNumber(driver: WebDriver): Int {
+    private suspend fun findLastPageNumber(driver: WebDriver): Int {
         waitForElement(driver, SELECTOR_DOUBLE_NEXT)
 
         while (true) {
@@ -61,7 +62,7 @@ class Emart24 : CVS() {
 
             (driver as JavascriptExecutor).executeScript("arguments[0].click();", doubleNext)
             waitForElement(driver, SELECTOR_PAGE_FOCUS)
-            Thread.sleep(SLEEP_SHORT_MS)
+            delay(DELAY_BASIC_MS)
         }
 
         val lastPage = driver.findElement(By.cssSelector(SELECTOR_PAGE_FOCUS)).text.trim().toInt()
@@ -69,26 +70,24 @@ class Emart24 : CVS() {
     }
 
     // ===== 페이지 이동 처리 =====
-    private fun goToNextPage(driver: WebDriver): Boolean {
-        return try {
-            val nextBtn = driver.findElement(By.cssSelector(SELECTOR_NEXT_BTN))
-            val opacity = nextBtn.getCssValue("opacity").toDoubleOrNull() ?: 1.0
+    private suspend fun goToNextPage(driver: WebDriver): Boolean = try {
+        val nextBtn = driver.findElement(By.cssSelector(SELECTOR_NEXT_BTN))
+        val opacity = nextBtn.getCssValue("opacity").toDoubleOrNull() ?: 1.0
 
-            if (opacity <= 0.3) {
-                false
-            } else {
-                (driver as JavascriptExecutor).executeScript("arguments[0].click();", nextBtn)
-                waitForElement(driver, SELECTOR_ITEM)
-                scrollToBottom(driver)
-                true
-            }
-        } catch (e: Exception) {
+        if (opacity <= 0.3) {
             false
+        } else {
+            (driver as JavascriptExecutor).executeScript("arguments[0].click();", nextBtn)
+            waitForElement(driver, SELECTOR_ITEM)
+            scrollToBottom(driver)
+            true
         }
+    } catch (e: Exception) {
+        false
     }
 
     // ===== 전체 크롤링 흐름 =====
-    override fun crawl(driver: WebDriver): List<CrawlerData> {
+    override suspend fun crawl(driver: WebDriver): List<CrawlerData> {
         driver.get(BASE_URL)
         waitForElement(driver, SELECTOR_ITEM)
         scrollToBottom(driver)
@@ -113,6 +112,8 @@ class Emart24 : CVS() {
             allProducts += productList
 
             if (!goToNextPage(driver)) break
+            delay(500L)
+
             pageNum++
         }
 
