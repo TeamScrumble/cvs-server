@@ -39,7 +39,7 @@ class TokenService(
         return issueTokens(principal.memberId)
     }
 
-    private suspend fun issueTokens(memberId: Long): AuthTokens {
+    suspend fun issueTokens(memberId: Long): AuthTokens {
         val memberResponse = memberApi.get(memberId).getOrThrow()
 
         val accessToken = tokenProvider.encodeToken(

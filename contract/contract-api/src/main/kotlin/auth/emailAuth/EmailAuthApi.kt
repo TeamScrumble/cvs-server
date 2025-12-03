@@ -1,3 +1,6 @@
 package auth.emailAuth
 
-interface EmailAuthApi : SendVerificationCodeEmailApi, VerifyEmailApi
+import io.swagger.v3.oas.annotations.tags.Tag
+
+@Tag(name = "EmailAuth", description = "이메일 로그인 API")
+interface EmailAuthApi : SendVerificationCodeEmailApi, VerifyEmailApi, EmailJoinApi
