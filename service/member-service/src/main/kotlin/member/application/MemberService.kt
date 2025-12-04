@@ -18,6 +18,9 @@ class MemberService(
 
     private val defaultRoles = setOf(MemberRole.ROLE_USER)
 
+    private val defaultProfileImage =
+        "https://github.com/user-attachments/assets/bad2c81e-2cb6-4a07-8c69-fe3972d8f03d"
+
     private val nicknamePrefixes = listOf(
         "청초한", "유쾌한", "따뜻한", "감성적인",
         "차분한", "도도한", "용감한", "섬세한"
@@ -32,7 +35,8 @@ class MemberService(
         val member = Member(
             email = email,
             roles = defaultRoles,
-            nickname = generateNickname()
+            nickname = generateNickname(),
+            profileImage = defaultProfileImage
         )
 
         val saved = memberRepository.save(member)
@@ -53,7 +57,8 @@ class MemberService(
             memberId = member.id,
             email = member.email,
             roles = member.roles.map { it.name }.toSet(),
-            nickname = member.nickname
+            nickname = member.nickname,
+            profileImage = member.profileImage,
         )
     }
 
