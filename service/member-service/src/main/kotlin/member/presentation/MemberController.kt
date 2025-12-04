@@ -6,6 +6,7 @@ import member.MemberApi
 import member.MemberGetApi
 import member.NicknameExistsApi
 import member.UpdateNicknameApi
+import member.UpdateProfileImageApi
 import member.application.MemberService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -56,6 +57,17 @@ class MemberController(
     ): ApiResponse<NicknameExistsApi.Response> {
         val exists = memberService.nicknameExists(request.nickname)
         val response = NicknameExistsApi.Response(exists)
+
+        return ApiResponse.Success(response)
+    }
+
+    @PostMapping(UpdateProfileImageApi.PATH)
+    override suspend fun updateProfileImage(
+        @RequestBody request: UpdateProfileImageApi.Request,
+        @RequestPassport passport: Passport
+    ): ApiResponse<UpdateProfileImageApi.Response> {
+        memberService.updateProfileImage(passport, request.profileImageUrl)
+        val response = UpdateProfileImageApi.Response(passport.memberId, request.profileImageUrl)
 
         return ApiResponse.Success(response)
     }

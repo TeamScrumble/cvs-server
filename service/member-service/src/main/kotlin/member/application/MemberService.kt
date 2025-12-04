@@ -79,7 +79,7 @@ class MemberService(
         memberRepository.save(updated)
     }
 
-    fun validateNickname(nickname: String) {
+    private fun validateNickname(nickname: String) {
         val nicknameRegex = "^[A-Za-z0-9가-힣_]{2,15}$".toRegex()
 
         if (!nicknameRegex.matches(nickname)) {
@@ -89,5 +89,16 @@ class MemberService(
 
     suspend fun nicknameExists(nickname: String): Boolean {
         return memberRepository.existsByNickname(nickname)
+    }
+
+    suspend fun updateProfileImage(
+        passport: Passport,
+        profileImageUrl: String
+    ) = transactional {
+        val member = memberRepository.findById(passport.memberId)
+            ?: throw BusinessException(MemberErrorCode.M_001)
+
+        val updated = member.copy(profileImage = profileImageUrl)
+        memberRepository.save(updated)
     }
 }
