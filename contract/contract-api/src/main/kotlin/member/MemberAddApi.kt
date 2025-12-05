@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 interface MemberAddApi {
     companion object {
-        const val PATH = "/api/member"
+        const val PATH = "/api/member/internal"
     }
 
     @Documented(

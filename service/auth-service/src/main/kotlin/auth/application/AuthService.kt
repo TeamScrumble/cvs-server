@@ -3,8 +3,11 @@ package auth.application
 import auth.domain.auth.Auth
 import auth.domain.auth.AuthRepository
 import auth.infra.cache.RefreshTokenCacheMemory
+import auth.infra.cache.TokenTicketCacheMemory
 import db.extension.upsert
 import db.transactional.Transactional
+import error.errorcode.AuthErrorCode
+import error.exception.BusinessException
 import extension.getOrThrow
 import member.MemberAddApi
 import member.MemberApi
@@ -17,6 +20,7 @@ class AuthService(
     private val authRepository: AuthRepository,
     private val memberApi: MemberApi,
     private val refreshTokenCacheMemory: RefreshTokenCacheMemory,
+    private val tokenTicketCacheMemory: TokenTicketCacheMemory
 ) {
 
     suspend fun findOrInsertByProvider(
@@ -64,5 +68,13 @@ class AuthService(
 
     suspend fun logout(passport: Passport) {
         refreshTokenCacheMemory.evict(passport.memberId)
+    }
+
+    suspend fun exchange(ticket: String): AuthTokens {
+        val tokens = tokenTicketCacheMemory.get(ticket)
+            ?: throw BusinessException(AuthErrorCode.A_013)
+        tokenTicketCacheMemory.evict(ticket)
+
+        return tokens
     }
 }
