@@ -1,4 +1,4 @@
-package productservice.review.presentation
+package product.review.presentation
 
 import org.springframework.web.bind.annotation.RestController
 

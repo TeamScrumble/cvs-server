@@ -1,4 +1,4 @@
-package productservice.product.config
+package product.product.config
 
 import db.config.DatabaseSchema
 import org.springframework.context.annotation.Bean
