@@ -1,18 +1,18 @@
 package auth.application
 
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class EmailJoinFacadeService(
+@Component
+class EmailLoginFacadeService(
     private val emailAuthService: EmailAuthService,
     private val tokenService: TokenService
 ) {
 
-    suspend fun join(
+    suspend fun login(
         email: String,
-        password: String
+        rawPassword: String
     ): String {
-        val memberId = emailAuthService.join(email, password)
+        val memberId = emailAuthService.login(email, rawPassword)
         return tokenService.issueTicket(memberId)
     }
 }

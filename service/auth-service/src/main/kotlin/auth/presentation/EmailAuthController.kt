@@ -1,11 +1,14 @@
 package auth.presentation
 
 import ApiResponse
+import auth.LoginRedirect
 import auth.application.EmailAuthService
 import auth.application.EmailJoinFacadeService
+import auth.application.EmailLoginFacadeService
 import auth.emailAuth.EmailAuthApi
 import auth.emailAuth.EmailExistsApi
 import auth.emailAuth.EmailJoinApi
+import auth.emailAuth.EmailLoginApi
 import auth.emailAuth.SendVerificationCodeEmailApi
 import auth.emailAuth.VerifyEmailApi
 import org.springframework.web.bind.annotation.PostMapping
@@ -15,7 +18,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class EmailAuthController(
     private val emailAuthService: EmailAuthService,
-    private val emailJoinFacadeService: EmailJoinFacadeService
+    private val emailJoinFacadeService: EmailJoinFacadeService,
+    private val emailLoginFacadeService: EmailLoginFacadeService
 ) : EmailAuthApi {
 
     @PostMapping(SendVerificationCodeEmailApi.PATH)
@@ -41,11 +45,9 @@ class EmailAuthController(
     @PostMapping(EmailJoinApi.PATH)
     override suspend fun join(
         @RequestBody request: EmailJoinApi.Request
-    ): ApiResponse<EmailJoinApi.Response> {
-        val tokens = emailJoinFacadeService.join(request.email, request.password)
-        val response = EmailJoinApi.Response(tokens.accessToken, tokens.refreshToken)
-
-        return ApiResponse.Success(response)
+    ): String {
+        val ticket = emailJoinFacadeService.join(request.email, request.password)
+        return LoginRedirect.springRedirectWithTicket(ticket)
     }
 
     @PostMapping(EmailExistsApi.PATH)
@@ -56,5 +58,13 @@ class EmailAuthController(
         val response = EmailExistsApi.Response(exists)
 
         return ApiResponse.Success(response)
+    }
+
+    @PostMapping(EmailLoginApi.PATH)
+    override suspend fun login(
+        @RequestBody request: EmailLoginApi.Request
+    ): String {
+        val ticket = emailLoginFacadeService.login(request.email, request.password)
+        return LoginRedirect.springRedirectWithTicket(ticket)
     }
 }

@@ -3,17 +3,17 @@ package auth.emailAuth
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
 
-interface EmailJoinApi {
+interface EmailLoginApi {
     companion object {
-        const val PATH = "/api/auth/email-auth/join"
+        const val PATH = "/api/auth/email-auth/login"
     }
     @Documented(
-        summary = "이메일 회원가입 API",
-        description = "이메일 화원가입 API 입니다. 이메일 인증 완료 후 이 API를 호출해 주세요 (안하면 에러) <br/>" +
+        summary = "이메일 로그인 API",
+        description = "이메일 로그인 API 입니다. <br/>" +
                 "redirect:pyunpyun://auth/login/redirect?ticket=\${ticket} 으로 리다이렉트 됩니다.",
         request = Request::class,
     )
-    suspend fun join(request: Request): String
+    suspend fun login(request: Request): String
 
     data class Request(
         @Schema(description = "이메일", example = "mobility42@gmail.com")
