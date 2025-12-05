@@ -19,7 +19,7 @@ class MemberService(
     private val defaultRoles = setOf(MemberRole.ROLE_USER)
 
     private val defaultProfileImage =
-        "https://github.com/user-attachments/assets/bad2c81e-2cb6-4a07-8c69-fe3972d8f03d"
+        "https://i.imgur.com/CHUednA_d.png"
 
     private val nicknamePrefixes = listOf(
         "청초한", "유쾌한", "따뜻한", "감성적인",
