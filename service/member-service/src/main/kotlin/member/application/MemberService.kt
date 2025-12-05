@@ -18,6 +18,9 @@ class MemberService(
 
     private val defaultRoles = setOf(MemberRole.ROLE_USER)
 
+    private val defaultProfileImage =
+        "https://i.imgur.com/CHUednA_d.png"
+
     private val nicknamePrefixes = listOf(
         "청초한", "유쾌한", "따뜻한", "감성적인",
         "차분한", "도도한", "용감한", "섬세한"
@@ -32,7 +35,8 @@ class MemberService(
         val member = Member(
             email = email,
             roles = defaultRoles,
-            nickname = generateNickname()
+            nickname = generateNickname(),
+            profileImage = defaultProfileImage
         )
 
         val saved = memberRepository.save(member)
@@ -53,7 +57,8 @@ class MemberService(
             memberId = member.id,
             email = member.email,
             roles = member.roles.map { it.name }.toSet(),
-            nickname = member.nickname
+            nickname = member.nickname,
+            profileImage = member.profileImage,
         )
     }
 
@@ -74,7 +79,7 @@ class MemberService(
         memberRepository.save(updated)
     }
 
-    fun validateNickname(nickname: String) {
+    private fun validateNickname(nickname: String) {
         val nicknameRegex = "^[A-Za-z0-9가-힣_]{2,15}$".toRegex()
 
         if (!nicknameRegex.matches(nickname)) {
@@ -84,5 +89,16 @@ class MemberService(
 
     suspend fun nicknameExists(nickname: String): Boolean {
         return memberRepository.existsByNickname(nickname)
+    }
+
+    suspend fun updateProfileImage(
+        passport: Passport,
+        profileImageUrl: String
+    ) = transactional {
+        val member = memberRepository.findById(passport.memberId)
+            ?: throw BusinessException(MemberErrorCode.M_001)
+
+        val updated = member.copy(profileImage = profileImageUrl)
+        memberRepository.save(updated)
     }
 }
