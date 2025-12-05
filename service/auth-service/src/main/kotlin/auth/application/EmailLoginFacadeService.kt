@@ -11,8 +11,8 @@ class EmailLoginFacadeService(
     suspend fun login(
         email: String,
         rawPassword: String
-    ): AuthTokens {
+    ): String {
         val memberId = emailAuthService.login(email, rawPassword)
-        return tokenService.issueTokens(memberId)
+        return tokenService.issueTicket(memberId)
     }
 }
