@@ -1,6 +1,7 @@
 CREATE TABLE product
 (
     product_id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    cvs_target      VARCHAR(50)       NOT NULL,
     title           VARCHAR(255)      NOT NULL,
     img             VARCHAR(500)      NOT NULL,
     price           INT               NOT NULL,
