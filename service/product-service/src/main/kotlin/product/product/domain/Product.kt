@@ -12,6 +12,9 @@ data class Product(
     @Column("product_id")
     override val id: Long = 0,
 
+    @Column("cvs_product_id")
+    val cvsProductId: Long,
+
     @Column("cvs_target")
     val cvsTarget: CvsTarget,
 
@@ -28,5 +31,5 @@ data class Product(
     val event: String,
 
     @Column("is_new")
-    val isNew: Boolean
+    val isNewProduct: Boolean
 ) : LongIdEntity()
