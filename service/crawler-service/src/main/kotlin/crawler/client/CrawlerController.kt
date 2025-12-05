@@ -1,6 +1,5 @@
 package crawler.client
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import crawler.client.kafka.CrawlerService
 import crawler.client.util.calculateTimeMillis
 import cvs.crawler.CrawlerData

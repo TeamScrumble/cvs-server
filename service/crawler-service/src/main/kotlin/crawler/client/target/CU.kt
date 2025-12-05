@@ -1,6 +1,7 @@
 package crawler.client.target
 
 import cvs.crawler.CrawlerData
+import kotlinx.coroutines.delay
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -20,7 +21,7 @@ class CU : CVS() {
         private const val SELECTOR_MORE_BUTTON = ".prodListBtn .prodListBtn-w a"
     }
     // ===== 상품 수집 =====
-    override fun findProductList(driver: WebDriver): List<CrawlerData> {
+    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
         waitForElement(driver, SELECTOR_PRODUCT_ITEM)
         val items = driver.findElements(By.cssSelector(SELECTOR_PRODUCT_ITEM))
         if (items.isEmpty()) {
@@ -48,11 +49,11 @@ class CU : CVS() {
     }
 
     // ===== '더보기' 버튼 처리 =====
-    private fun clickAllPages(driver: WebDriver) {
+    private suspend fun clickAllPages(driver: WebDriver) {
         var pageCount = 0
         while (true) {
             try {
-                Thread.sleep(SLEEP_SHORT_MS)
+                delay(DELAY_BASIC_MS)
                 // 버튼이 DOM 상 존재하고 보일 때만 처리
                 val moreButton = WebDriverWait(driver, Duration.ofSeconds(3))
                     .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(SELECTOR_MORE_BUTTON)))
@@ -73,7 +74,7 @@ class CU : CVS() {
     }
 
     // ===== 전체 흐름 =====
-    override fun crawl(driver: WebDriver): List<CrawlerData> = CATEGORIES.flatMap { id ->
+    override suspend fun crawl(driver: WebDriver): List<CrawlerData> = CATEGORIES.flatMap { id ->
         driver.get(BASE_URL + id)
 
         waitForElement(driver, SELECTOR_PRODUCT_ITEM)

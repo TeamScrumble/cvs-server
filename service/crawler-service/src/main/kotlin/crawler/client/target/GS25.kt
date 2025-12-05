@@ -1,6 +1,8 @@
 package crawler.client.target
 
 import cvs.crawler.CrawlerData
+import cvs.crawler.CvsTarget
+import kotlinx.coroutines.delay
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -19,22 +21,21 @@ class GS25 : CVS() {
         private const val SELECTOR_ITEM = "ul.prod_list li"
         private const val SELECTOR_NEXT2 = ".paging .next2"
         private const val SELECTOR_TAB_TOTAL = "#TOTAL"
-        private const val WAIT_SHORT_MS = 500L
 
         private val PRODUCT_IMG_URL_REGEX = Regex(""".*/([A-Za-z0-9_]+)\.[A-Za-z0-9]+$""")
     }
 
     // ===== 페이지 이동 =====
-    private fun moveToPage(driver: WebDriver, pageNum: Int) {
+    private suspend fun moveToPage(driver: WebDriver, pageNum: Int) {
         (driver as JavascriptExecutor).executeScript("goodsPageController.movePage($pageNum);")
         waitForElement(driver, SELECTOR_ITEM)
-        Thread.sleep(WAIT_SHORT_MS)
+        delay(DELAY_SHORT_MS)
     }
 
     // ===== 마지막 페이지 번호 추출 =====
     private fun getLastPageNumber(driver: WebDriver): Int {
         return try {
-            val wait = WebDriverWait(driver, Duration.ofSeconds(WAIT_TIMEOUT_SEC))
+            val wait = WebDriverWait(driver, Duration.ofSeconds(MAX_TIMEOUT_SEC))
             wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(SELECTOR_NEXT2)))
 
             val next2Elem = driver.findElement(By.cssSelector(SELECTOR_NEXT2))
@@ -58,7 +59,7 @@ class GS25 : CVS() {
             val flagText = item.findElements(By.cssSelector(".flag_box span")).firstOrNull()?.text?.trim().orEmpty()
 
             val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
-            val id = generateId("$productImgId|$title")
+            val id = generateId("${CvsTarget.GS25.name}|$title")
 
             CrawlerData(id, title, price.toPrice(), imgUrl, flagText, false)
         } catch (e: Exception) {
@@ -67,9 +68,10 @@ class GS25 : CVS() {
     }
 
     // ===== 상품 리스트 수집 =====
-    override fun findProductList(driver: WebDriver): List<CrawlerData> {
+    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
         waitForElement(driver, SELECTOR_ITEM)
-        Thread.sleep(WAIT_SHORT_MS)
+
+        delay(DELAY_SHORT_MS)
 
         val items = driver.findElements(By.cssSelector(SELECTOR_ITEM))
         if (items.isEmpty()) {
@@ -81,15 +83,15 @@ class GS25 : CVS() {
     }
 
     // ===== 전체 크롤링 흐름 =====
-    override fun crawl(driver: WebDriver): List<CrawlerData> {
+    override suspend fun crawl(driver: WebDriver): List<CrawlerData> {
         driver.get(BASE_URL)
 
         // "전체" 탭 클릭
-        WebDriverWait(driver, Duration.ofSeconds(WAIT_TIMEOUT_SEC))
+        WebDriverWait(driver, Duration.ofSeconds(MAX_TIMEOUT_SEC))
             .until(ExpectedConditions.elementToBeClickable(By.cssSelector(SELECTOR_TAB_TOTAL)))
         driver.findElement(By.cssSelector(SELECTOR_TAB_TOTAL)).click()
 
-        Thread.sleep(WAIT_SHORT_MS)
+        delay(DELAY_SHORT_MS)
 
         // 페이지 수 확인
         val lastPage = getLastPageNumber(driver)
