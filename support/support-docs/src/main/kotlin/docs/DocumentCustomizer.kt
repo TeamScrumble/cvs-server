@@ -41,13 +41,15 @@ class DocumentCustomizer : OperationCustomizer {
     ) {
         if (documented.request == Nothing::class) return
 
-        val schemaRef = "#/components/schemas/${documented.request.simpleName}"
+        val requestClass = documented.request.java
+        val models = ModelConverters.getInstance().read(requestClass)
+        val requestSchema = models.values.firstOrNull() ?: return
 
         val requestBody = operation.requestBody ?: RequestBody()
         val content = requestBody.content ?: Content()
         val mediaType = content[APPLICATION_JSON_VALUE] ?: MediaType()
 
-        mediaType.schema = Schema<Any>().apply { `$ref` = schemaRef }
+        mediaType.schema = requestSchema
 
         content.addMediaType(APPLICATION_JSON_VALUE, mediaType)
         requestBody.content = content
