@@ -30,7 +30,6 @@ class TokenService(
 
     suspend fun reissue(refreshToken: String): AuthTokens {
         val principal = tokenProvider.decodeToken(refreshToken)
-            ?: throw BusinessException(AuthErrorCode.A_002)
 
         if (principal.type != TokenType.REFRESH) {
             throw BusinessException(AuthErrorCode.A_002)
