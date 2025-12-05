@@ -1,4 +1,4 @@
-package productservice.review.domain
+package product.review.domain
 
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
