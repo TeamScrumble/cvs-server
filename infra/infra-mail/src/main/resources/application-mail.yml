@@ -1,0 +1,4 @@
+mail:
+  api-key: ${MAIL_API_KEY}
+  domain: mail.algolingo.kro.kr
+  from: "알고링고 <noreply@mail.algolingo.kro.kr>"

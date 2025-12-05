@@ -21,6 +21,7 @@ include("infra:infra-db")
 include("infra:infra-cache")
 include("infra:infra-message-broker")
 include("infra:infra-security")
+include("infra:infra-mail")
 
 include("support")
 include("support:support-docs")

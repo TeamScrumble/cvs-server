@@ -1,5 +1,8 @@
 package security.token
 
+import error.errorcode.AuthErrorCode
+import error.exception.BusinessException
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
@@ -34,19 +37,23 @@ class TokenProvider(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun decodeToken(token: String): AuthPrincipal? {
-        val payload = runCatching {
+    fun decodeToken(token: String): AuthPrincipal {
+        val payload = try {
             Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .payload
-        }.getOrElse {
-            return null
+        } catch (e: ExpiredJwtException) {
+            throw BusinessException(AuthErrorCode.A_002)
+        } catch (e: Exception) {
+            throw BusinessException(AuthErrorCode.A_001)
         }
 
-        val memberId = payload.subject.toLongOrNull() ?: return null
-        val type = payload.get("type", String::class.java) ?: return null
+        val memberId = payload.subject.toLongOrNull()
+            ?: throw BusinessException(AuthErrorCode.A_001)
+        val type = payload.get("type", String::class.java)
+            ?: throw BusinessException(AuthErrorCode.A_001)
         val roles = payload.get("roles", List::class.java)?.filterIsInstance<String>()
 
         return AuthPrincipal(
