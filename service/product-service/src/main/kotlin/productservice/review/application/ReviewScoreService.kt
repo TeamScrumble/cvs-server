@@ -1,4 +1,4 @@
-package review.application
+package productservice.review.application
 
 import org.springframework.stereotype.Service
 

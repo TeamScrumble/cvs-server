@@ -1,4 +1,4 @@
-package review.domain
+package productservice.review.domain
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
