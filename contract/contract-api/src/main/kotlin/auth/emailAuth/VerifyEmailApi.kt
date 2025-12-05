@@ -1,6 +1,8 @@
 package auth.emailAuth
 
 import ApiResponse
+import auth.emailAuth.field.Email
+import auth.emailAuth.field.VerificationCode
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
 
@@ -18,8 +20,10 @@ interface VerifyEmailApi {
 
     data class Request(
         @Schema(description = "인증 코드를 전송 받은 이메일", example = "mobility42@gmail.com")
+        @field:Email
         val email: String,
         @Schema(description = "이메일로 전송 받은 인증 코드", example = "41520")
+        @field:VerificationCode
         val verificationCode: String
     )
 

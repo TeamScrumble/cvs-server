@@ -1,4 +1,4 @@
-package auth
+package auth.auth
 
 import ApiResponse
 import docs.Documented

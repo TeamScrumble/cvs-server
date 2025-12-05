@@ -9,7 +9,7 @@ import db.transactional.Transactional
 import error.errorcode.AuthErrorCode
 import error.exception.BusinessException
 import extension.getOrThrow
-import member.MemberAddApi
+import member.member.MemberAddApi
 import member.MemberApi
 import org.springframework.stereotype.Service
 import passport.Passport
