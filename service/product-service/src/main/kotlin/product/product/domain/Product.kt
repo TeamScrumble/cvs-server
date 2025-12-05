@@ -1,5 +1,6 @@
 package product.product.domain
 
+import cvs.crawler.CvsTarget
 import db.base.LongIdEntity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
@@ -10,6 +11,9 @@ data class Product(
     @Id
     @Column("product_id")
     override val id: Long = 0,
+
+    @Column("cvs_target")
+    val cvsTarget: CvsTarget,
 
     @Column("title")
     val title: String,
