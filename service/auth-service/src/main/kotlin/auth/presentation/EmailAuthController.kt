@@ -5,12 +5,13 @@ import auth.LoginRedirect
 import auth.application.EmailAuthService
 import auth.application.EmailJoinFacadeService
 import auth.application.EmailLoginFacadeService
-import auth.emailAuth.EmailAuthApi
+import auth.EmailAuthApi
 import auth.emailAuth.EmailExistsApi
 import auth.emailAuth.EmailJoinApi
 import auth.emailAuth.EmailLoginApi
 import auth.emailAuth.SendVerificationCodeEmailApi
 import auth.emailAuth.VerifyEmailApi
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -24,7 +25,7 @@ class EmailAuthController(
 
     @PostMapping(SendVerificationCodeEmailApi.PATH)
     override suspend fun sendVerificationCodeEmail(
-        @RequestBody request: SendVerificationCodeEmailApi.Request
+        @RequestBody @Valid request: SendVerificationCodeEmailApi.Request
     ): ApiResponse<SendVerificationCodeEmailApi.Response> {
         emailAuthService.sendVerificationCodeEmail(request.email)
         val response = SendVerificationCodeEmailApi.Response(true)
@@ -34,7 +35,7 @@ class EmailAuthController(
 
     @PostMapping(VerifyEmailApi.PATH)
     override suspend fun verifyEmail(
-        @RequestBody request: VerifyEmailApi.Request
+        @RequestBody @Valid request: VerifyEmailApi.Request
     ): ApiResponse<VerifyEmailApi.Response> {
         emailAuthService.verify(request.email, request.verificationCode)
         val response = VerifyEmailApi.Response(true)
@@ -44,7 +45,7 @@ class EmailAuthController(
 
     @PostMapping(EmailJoinApi.PATH)
     override suspend fun join(
-        @RequestBody request: EmailJoinApi.Request
+        @RequestBody @Valid request: EmailJoinApi.Request
     ): String {
         val ticket = emailJoinFacadeService.join(request.email, request.password)
         return LoginRedirect.springRedirectWithTicket(ticket)
@@ -52,7 +53,7 @@ class EmailAuthController(
 
     @PostMapping(EmailExistsApi.PATH)
     override suspend fun emailExits(
-        @RequestBody request: EmailExistsApi.Request
+        @RequestBody @Valid request: EmailExistsApi.Request
     ): ApiResponse<EmailExistsApi.Response> {
         val exists = emailAuthService.emailExists(request.email)
         val response = EmailExistsApi.Response(exists)
@@ -62,7 +63,7 @@ class EmailAuthController(
 
     @PostMapping(EmailLoginApi.PATH)
     override suspend fun login(
-        @RequestBody request: EmailLoginApi.Request
+        @RequestBody @Valid request: EmailLoginApi.Request
     ): String {
         val ticket = emailLoginFacadeService.login(request.email, request.password)
         return LoginRedirect.springRedirectWithTicket(ticket)

@@ -2,11 +2,12 @@ package auth.presentation
 
 import ApiResponse
 import auth.AuthApi
-import auth.LogoutApi
-import auth.TokenExchangeApi
-import auth.TokenReissueApi
+import auth.auth.LogoutApi
+import auth.auth.TokenExchangeApi
+import auth.auth.TokenReissueApi
 import auth.application.AuthService
 import auth.application.TokenService
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -50,7 +51,7 @@ class AuthController(
 
     @PostMapping(TokenExchangeApi.PATH)
     override suspend fun exchange(
-        @RequestBody request: TokenExchangeApi.Request
+        @RequestBody @Valid request: TokenExchangeApi.Request
     ): ApiResponse<TokenExchangeApi.Response> {
         val tokens = authService.exchange(request.ticket)
         val response = TokenExchangeApi.Response(tokens.accessToken, tokens.refreshToken)

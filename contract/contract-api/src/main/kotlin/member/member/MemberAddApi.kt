@@ -1,8 +1,9 @@
-package member
+package member.member
 
 import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
+import member.member.field.Email
 
 interface MemberAddApi {
     companion object {
@@ -19,6 +20,7 @@ interface MemberAddApi {
 
     data class Request(
         @Schema(description = "사용자 이메일", example = "mobility42@gmail.com")
+        @field:Email
         val email: String
     )
 

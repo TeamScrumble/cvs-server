@@ -1,9 +1,9 @@
-package member
+package member.member
 
 import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
-import passport.Passport
+import member.member.field.Nickname
 
 interface NicknameExistsApi {
     companion object {
@@ -20,6 +20,7 @@ interface NicknameExistsApi {
 
     data class Request(
         @Schema(description = "닉네임", example = "John Doe")
+        @field:Nickname
         val nickname: String,
     )
 

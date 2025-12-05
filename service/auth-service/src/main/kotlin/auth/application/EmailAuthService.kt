@@ -13,7 +13,7 @@ import error.errorcode.AuthErrorCode
 import error.exception.BusinessException
 import error.exception.InternalServerException
 import extension.getOrThrow
-import member.MemberAddApi
+import member.member.MemberAddApi
 import member.MemberApi
 import org.springframework.stereotype.Service
 import security.password.PasswordEncoder
@@ -30,8 +30,6 @@ class EmailAuthService(
     private val passwordEncoder: PasswordEncoder
 ) {
     suspend fun sendVerificationCodeEmail(email: String) {
-        validateEmail(email)
-
         val verificationCode = SecureRandom()
             .nextInt(1_000_000)  // 0 ~ 999,999
             .toString()
@@ -55,9 +53,6 @@ class EmailAuthService(
         email: String,
         verificationCode: String
     ) {
-        validateEmail(email)
-        validateVerificationCode(verificationCode)
-
         val savedCode = emailVerifyCacheMemory.getVerificationCode(email)
             ?: throw BusinessException(AuthErrorCode.A_005)
 
@@ -68,20 +63,10 @@ class EmailAuthService(
         emailVerifyCacheMemory.setVerified(email)
     }
 
-    private fun validateVerificationCode(verificationCode: String) {
-        val regex = "^[0-9]{6}$".toRegex()
-        if (!verificationCode.matches(regex)) {
-            throw BusinessException(AuthErrorCode.A_007)
-        }
-    }
-
     suspend fun join(
         email: String,
         password: String
     ) = transactional {
-        validateEmail(email)
-        validatePassword(password)
-
         emailVerifyCacheMemory.getVerified(email)
             ?: throw BusinessException(AuthErrorCode.A_008)
 
@@ -106,30 +91,6 @@ class EmailAuthService(
         authRepository.save(auth)
 
         member.memberId
-    }
-
-    private fun validateEmail(email: String) {
-        val regex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-        if (!email.matches(regex)) {
-            throw BusinessException(AuthErrorCode.A_004)
-        }
-    }
-
-    private fun validatePassword(password: String) {
-        if (password.length !in 8..32) {
-            throw BusinessException(AuthErrorCode.A_009)
-        }
-
-        val hasLetter = { password.any { it.isLetter() } }
-        val hasDigit = { password.any { it.isDigit() } }
-        val hasSpecial = { password.any { it in "!@#$%^&*()_+-={}[]|:;\"'<>,.?/`~" } }
-
-        val conditions = listOf(hasLetter, hasDigit, hasSpecial)
-        val typeCount = conditions.count { it() }
-
-        if (typeCount < 2) {
-            throw BusinessException(AuthErrorCode.A_009)
-        }
     }
 
     suspend fun emailExists(email: String): Boolean {

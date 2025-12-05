@@ -5,6 +5,10 @@ import common.Scheme
 import extension.applyHost
 import extension.exchangeToApiResponse
 import kotlinx.coroutines.reactor.awaitSingle
+import member.member.MemberAddApi
+import member.member.MemberGetApi
+import member.member.NicknameExistsApi
+import member.member.UpdateNicknameApi
 import org.springframework.web.reactive.function.client.WebClient
 import passport.Passport
 

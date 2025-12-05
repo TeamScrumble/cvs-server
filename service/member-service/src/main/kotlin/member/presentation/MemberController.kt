@@ -1,17 +1,14 @@
 package member.presentation
 
 import ApiResponse
-import member.MemberAddApi
+import jakarta.validation.Valid
 import member.MemberApi
-import member.MemberGetApi
-import member.NicknameExistsApi
-import member.UpdateNicknameApi
+import member.member.NicknameExistsApi
+import member.member.UpdateNicknameApi
 import member.application.MemberService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import member.member.MemberAddApi
+import member.member.MemberGetApi
+import org.springframework.web.bind.annotation.*
 import passport.Passport
 import security.passport.RequestPassport
 
@@ -22,7 +19,7 @@ class MemberController(
 
     @PostMapping(MemberAddApi.PATH)
     override suspend fun add(
-        @RequestBody request: MemberAddApi.Request
+        @RequestBody @Valid request: MemberAddApi.Request
     ): ApiResponse<MemberAddApi.Response> {
         val memberId = memberService.add(request.email)
         val response = MemberAddApi.Response(memberId)
@@ -41,7 +38,7 @@ class MemberController(
 
     @PostMapping(UpdateNicknameApi.PATH)
     override suspend fun updateNickname(
-        @RequestBody request: UpdateNicknameApi.Request,
+        @RequestBody @Valid request: UpdateNicknameApi.Request,
         @RequestPassport passport: Passport
     ): ApiResponse<UpdateNicknameApi.Response> {
         memberService.updateNickname(passport, request.nickname)
@@ -52,7 +49,7 @@ class MemberController(
 
     @PostMapping(NicknameExistsApi.PATH)
     override suspend fun nicknameExists(
-        @RequestBody request: NicknameExistsApi.Request
+        @RequestBody @Valid request: NicknameExistsApi.Request
     ): ApiResponse<NicknameExistsApi.Response> {
         val exists = memberService.nicknameExists(request.nickname)
         val response = NicknameExistsApi.Response(exists)

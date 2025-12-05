@@ -1,6 +1,7 @@
 package auth.emailAuth
 
 import ApiResponse
+import auth.emailAuth.field.Email
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
 
@@ -18,6 +19,7 @@ interface EmailExistsApi {
 
     data class Request(
         @Schema(description = "이메일", example = "mobility42@gmail.com")
+        @field:Email
         val email: String
     )
 

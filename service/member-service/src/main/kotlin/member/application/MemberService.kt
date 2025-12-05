@@ -3,10 +3,10 @@ package member.application
 import db.transactional.Transactional
 import error.errorcode.MemberErrorCode
 import error.exception.BusinessException
-import member.MemberGetApi
 import member.domain.member.Member
 import member.domain.member.MemberRepository
 import member.domain.member.MemberRole
+import member.member.MemberGetApi
 import org.springframework.stereotype.Service
 import passport.Passport
 
@@ -61,8 +61,6 @@ class MemberService(
         passport: Passport,
         nickname: String
     ) = transactional {
-        validateNickname(nickname)
-
         if (memberRepository.existsByNickname(nickname)) {
             throw BusinessException(MemberErrorCode.M_002)
         }
@@ -72,14 +70,6 @@ class MemberService(
 
         val updated = member.copy(nickname = nickname)
         memberRepository.save(updated)
-    }
-
-    fun validateNickname(nickname: String) {
-        val nicknameRegex = "^[A-Za-z0-9가-힣_]{2,15}$".toRegex()
-
-        if (!nicknameRegex.matches(nickname)) {
-            throw BusinessException(MemberErrorCode.M_002)
-        }
     }
 
     suspend fun nicknameExists(nickname: String): Boolean {
