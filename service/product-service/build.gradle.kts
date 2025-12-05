@@ -24,6 +24,9 @@ dependencies {
     // -- discovery
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
+    // --- Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
     // -- Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
@@ -31,6 +34,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 
     // --- Modules
+    implementation(project(":contract:contract-event"))
     implementation(project(":contract:contract-api"))
     implementation(project(":contract:contract-api:client"))
     implementation(project(":contract:contract-error"))
