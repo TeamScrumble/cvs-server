@@ -8,6 +8,7 @@ import member.domain.member.Member
 import member.domain.member.MemberRepository
 import member.domain.member.MemberRole
 import org.springframework.stereotype.Service
+import passport.Passport
 
 @Service
 class MemberService(
@@ -54,5 +55,34 @@ class MemberService(
             roles = member.roles.map { it.name }.toSet(),
             nickname = member.nickname
         )
+    }
+
+    suspend fun updateNickname(
+        passport: Passport,
+        nickname: String
+    ) = transactional {
+        validateNickname(nickname)
+
+        if (memberRepository.existsByNickname(nickname)) {
+            throw BusinessException(MemberErrorCode.M_002)
+        }
+
+        val member = memberRepository.findById(passport.memberId)
+            ?: throw BusinessException(MemberErrorCode.M_001)
+
+        val updated = member.copy(nickname = nickname)
+        memberRepository.save(updated)
+    }
+
+    fun validateNickname(nickname: String) {
+        val nicknameRegex = "^[A-Za-z0-9가-힣_]{2,15}$".toRegex()
+
+        if (!nicknameRegex.matches(nickname)) {
+            throw BusinessException(MemberErrorCode.M_002)
+        }
+    }
+
+    suspend fun nicknameExists(nickname: String): Boolean {
+        return memberRepository.existsByNickname(nickname)
     }
 }
