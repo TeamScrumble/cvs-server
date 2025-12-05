@@ -4,14 +4,14 @@ import cvs.crawler.CrawlerFailedEvent
 import cvs.crawler.CrawlerResultEvent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import product.product.application.ProductService
 
 @Service
-class ProductCrawlerResponseHandler {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
-
-    fun handleSuccess(result: CrawlerResultEvent) {
-        // TODO: DB 저장
+class ProductCrawlerResponseHandler(
+    private val productService: ProductService
+) {
+    suspend fun handleSuccess(result: CrawlerResultEvent) {
+        productService.save(result)
     }
 
     fun handleFail(event: CrawlerFailedEvent) {
