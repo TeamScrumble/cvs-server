@@ -19,7 +19,7 @@ class MemberService(
     private val defaultRoles = setOf(MemberRole.ROLE_USER)
 
     private val defaultProfileImage =
-        "https://github.com/user-attachments/assets/bad2c81e-2cb6-4a07-8c69-fe3972d8f03d"
+        "https://i.imgur.com/CHUednA_d.png"
 
     private val nicknamePrefixes = listOf(
         "청초한", "유쾌한", "따뜻한", "감성적인",
@@ -79,7 +79,7 @@ class MemberService(
         memberRepository.save(updated)
     }
 
-    fun validateNickname(nickname: String) {
+    private fun validateNickname(nickname: String) {
         val nicknameRegex = "^[A-Za-z0-9가-힣_]{2,15}$".toRegex()
 
         if (!nicknameRegex.matches(nickname)) {
@@ -89,5 +89,16 @@ class MemberService(
 
     suspend fun nicknameExists(nickname: String): Boolean {
         return memberRepository.existsByNickname(nickname)
+    }
+
+    suspend fun updateProfileImage(
+        passport: Passport,
+        profileImageUrl: String
+    ) = transactional {
+        val member = memberRepository.findById(passport.memberId)
+            ?: throw BusinessException(MemberErrorCode.M_001)
+
+        val updated = member.copy(profileImage = profileImageUrl)
+        memberRepository.save(updated)
     }
 }

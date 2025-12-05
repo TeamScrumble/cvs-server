@@ -77,4 +77,21 @@ class MemberApiClient(
             .exchangeToApiResponse<NicknameExistsApi.Response>()
             .awaitSingle()
     }
+
+    override suspend fun updateProfileImage(
+        request: UpdateProfileImageApi.Request,
+        passport: Passport
+    ): ApiResponse<UpdateProfileImageApi.Response> {
+        return webClient.post()
+            .uri { builder ->
+                builder
+                    .scheme(Scheme.HTTP)
+                    .applyHost(host)
+                    .path(UpdateProfileImageApi.PATH)
+                    .build()
+            }
+            .bodyValue(request)
+            .exchangeToApiResponse<UpdateProfileImageApi.Response>()
+            .awaitSingle()
+    }
 }
