@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":infra:infra-cache"))
     implementation(project(":infra:infra-security"))
     implementation(project(":infra:infra-db"))
+    implementation(project(":infra:infra-mail"))
     implementation(project(":contract:contract-api"))
     implementation(project(":contract:contract-api:client"))
     implementation(project(":contract:contract-error"))
