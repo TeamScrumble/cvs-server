@@ -14,11 +14,11 @@ class CrawlerService(
     private val emart24: Emart24,
     private val sevenEleven: SevenEleven,
 ) {
-    val crawlers = mapOf(
+    private val crawlers = mapOf(
         CvsTarget.CU to cu,
         CvsTarget.GS25 to gs25,
         CvsTarget.EMART_24 to emart24,
         CvsTarget.SEVEN_ELEVEN to sevenEleven
     )
-    fun crawl(target: CvsTarget) = crawlers[target]?.run(target, false) ?: emptyList()
+    suspend fun crawl(target: CvsTarget) = crawlers[target]?.run(target, false) ?: emptyList()
 }
