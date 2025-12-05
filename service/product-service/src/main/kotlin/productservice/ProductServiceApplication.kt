@@ -1,10 +1,10 @@
-package product
+package productservice
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(
-    scanBasePackages = ["product", "db", "security"]
+    scanBasePackages = ["productservice", "db", "security"]
 )
 class ProductServiceApplication
 
