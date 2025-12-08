@@ -2,6 +2,9 @@ package product.product.application
 
 import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
+import error.errorcode.AuthErrorCode
+import error.errorcode.ProductErrorCode
+import error.exception.BusinessException
 import extension.getOrThrow
 import kotlinx.coroutines.flow.toList
 import member.MemberApi
@@ -31,6 +34,9 @@ class ProductService(
         val products = result.data.map { it.toEntity(result.target) }
         return productRepository.saveAll(products).toList().size
     }
+
+    suspend fun findById(id: Long) = productRepository.findById(id)
+        ?: throw BusinessException(ProductErrorCode.P_001)
 
     private fun CrawlerData.toEntity(target: cvs.crawler.CvsTarget): Product {
         return Product(

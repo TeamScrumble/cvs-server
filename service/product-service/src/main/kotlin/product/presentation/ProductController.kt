@@ -1,14 +1,13 @@
 package product.presentation
 
 import ApiResponse
-import member.MemberApiClient
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.ProductAddApi
 import product.ProductApi
+import product.ProductGetApi
 import product.product.application.ProductService
+import product.product.domain.Product
 import product.util.toCrawlerResultDto
 import security.passport.RequestPassport
 
@@ -26,4 +25,18 @@ class ProductController(
 
         return ApiResponse.Success(response)
     }
+
+    @GetMapping("${ProductGetApi.PATH}/{id}")
+    override suspend fun get(
+        @RequestPassport passport: Passport,
+        @PathVariable id: Long
+    ): ApiResponse<ProductGetApi.Response> {
+        val product = productService.findById(id).toResponse()
+
+        return ApiResponse.Success(product)
+    }
+
+    private fun Product.toResponse() = ProductGetApi.Response(
+        id, cvsTarget.name, title, img, price, event, isNewProduct
+    )
 }
