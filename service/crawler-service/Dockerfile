@@ -8,7 +8,7 @@ COPY --chown=spring:spring build/libs/*.jar app.jar
 
 USER spring:spring
 
-EXPOSE 8081
+EXPOSE 8084
 
 ENTRYPOINT ["java", \
     "-XX:+UseContainerSupport", \
