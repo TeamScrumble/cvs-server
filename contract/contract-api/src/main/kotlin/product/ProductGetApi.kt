@@ -13,7 +13,6 @@ interface ProductGetApi {
     @Documented(
         summary = "상품 조회 API",
         description = "상품의 상세 정보를 조회하는 API",
-//        request = Request::class,
         response = Response::class,
     )
     suspend fun get(passport: Passport, id: Long): ApiResponse<Response>

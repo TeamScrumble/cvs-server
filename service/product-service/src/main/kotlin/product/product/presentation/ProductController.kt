@@ -1,11 +1,13 @@
 package product.presentation
 
 import ApiResponse
+import cvs.crawler.CvsTarget
 import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.ProductAddApi
 import product.ProductApi
 import product.ProductGetApi
+import product.ProductListApi
 import product.product.application.ProductService
 import product.product.domain.Product
 import product.util.toCrawlerResultDto
@@ -31,7 +33,19 @@ class ProductController(
         @RequestPassport passport: Passport,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
-        val product = productService.findById(passport, id).toResponse()
+        val product = productService.findById(id).toResponse()
+
+        return ApiResponse.Success(product)
+    }
+
+    @GetMapping(ProductListApi.PATH)
+    override suspend fun list(
+        @RequestPassport passport: Passport,
+        @RequestBody request: ProductListApi.Request
+    ): ApiResponse<List<ProductGetApi.Response>> {
+        val product = productService.findAllByCvsTarget(CvsTarget.valueOf(request.cvsTarget)).map {
+            it.toResponse()
+        }
 
         return ApiResponse.Success(product)
     }
