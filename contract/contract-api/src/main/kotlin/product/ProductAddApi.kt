@@ -3,6 +3,7 @@ package product
 import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
+import passport.Passport
 
 interface ProductAddApi {
     companion object {
@@ -15,7 +16,7 @@ interface ProductAddApi {
         request = Request::class,
         response = Response::class,
     )
-    suspend fun add(request: List<Request>): ApiResponse<Response>
+    suspend fun add(passport: Passport, request: List<Request>): ApiResponse<Response>
 
     data class Request(
         @Schema(description = "편의점 종류", example = "GS25")
