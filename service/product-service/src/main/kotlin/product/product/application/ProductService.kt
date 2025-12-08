@@ -2,6 +2,7 @@ package product.product.application
 
 import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
+import cvs.crawler.CvsTarget
 import error.errorcode.AuthErrorCode
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
@@ -36,10 +37,16 @@ class ProductService(
         return productRepository.saveAll(products).toList().size
     }
 
-    suspend fun findById(passport: Passport, id: Long): Product {
-        validateMember(passport)
+    suspend fun findById(/*passport: Passport, */id: Long): Product {
+//        validateMember(passport)
 
         return productRepository.findById(id) ?: throw BusinessException(ProductErrorCode.P_001)
+    }
+
+    suspend fun findAllByCvsTarget(/*passport: Passport, */cvsTarget: CvsTarget): List<Product> {
+//        validateMember(passport)
+
+        return productRepository.findAllByCvsTarget(cvsTarget)
     }
 
     private fun CrawlerData.toEntity(target: cvs.crawler.CvsTarget): Product {
