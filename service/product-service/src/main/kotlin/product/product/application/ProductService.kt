@@ -1,37 +1,47 @@
 package product.product.application
 
+import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
+import extension.getOrThrow
 import kotlinx.coroutines.flow.toList
+import member.MemberApi
 import org.springframework.stereotype.Service
+import passport.Passport
 import product.product.domain.Product
 import product.product.domain.ProductRepository
 
 @Service
 class ProductService(
     private val productRepository: ProductRepository,
+    private val memberApi: MemberApi,
 ) {
-    suspend fun saveAll(results: List<CrawlerResultEvent>) = results.sumOf {
-        save(it)
+    private suspend fun validateMember(passport: Passport) {
+        memberApi.get(passport.memberId).getOrThrow()
     }
 
+    suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Int {
+        validateMember(passport)
+        return results.sumOf { save(it) }
+    }
+
+    /**
+     * 단일 save의 경우 스케줄러 카프카 이벤트 및 saveAll을 제외한 곳에서 호출되지 않기 때문에 따로 passport 체크가 없음
+     * */
     suspend fun save(result: CrawlerResultEvent): Int {
-        val (target, productList) = result.target to result.data
+        val products = result.data.map { it.toEntity(result.target) }
+        return productRepository.saveAll(products).toList().size
+    }
 
-        val entityList = productList.map { p ->
-            Product(
-                0L,
-                p.id.toLong(),
-                target,
-                p.productName,
-                p.imgUrl,
-                p.price,
-                p.flag,
-                p.isNew
-            )
-        }
-
-        return productRepository.saveAll(entityList).toList().size
+    private fun CrawlerData.toEntity(target: cvs.crawler.CvsTarget): Product {
+        return Product(
+            id = 0L,
+            cvsProductId = this.id.toLong(),
+            cvsTarget = target,
+            title = this.productName,
+            img = this.imgUrl,
+            price = this.price,
+            event = this.flag,
+            isNewProduct = this.isNew
+        )
     }
 }
