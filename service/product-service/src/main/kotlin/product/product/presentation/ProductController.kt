@@ -31,7 +31,7 @@ class ProductController(
         @RequestPassport passport: Passport,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
-        val product = productService.findById(id).toResponse()
+        val product = productService.findById(passport, id).toResponse()
 
         return ApiResponse.Success(product)
     }

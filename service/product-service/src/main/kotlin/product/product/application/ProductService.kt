@@ -24,6 +24,7 @@ class ProductService(
 
     suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Int {
         validateMember(passport)
+
         return results.sumOf { save(it) }
     }
 
@@ -35,8 +36,11 @@ class ProductService(
         return productRepository.saveAll(products).toList().size
     }
 
-    suspend fun findById(id: Long) = productRepository.findById(id)
-        ?: throw BusinessException(ProductErrorCode.P_001)
+    suspend fun findById(passport: Passport, id: Long): Product {
+        validateMember(passport)
+
+        return productRepository.findById(id) ?: throw BusinessException(ProductErrorCode.P_001)
+    }
 
     private fun CrawlerData.toEntity(target: cvs.crawler.CvsTarget): Product {
         return Product(
