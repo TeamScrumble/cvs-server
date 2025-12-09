@@ -6,6 +6,7 @@ import auth.domain.auth.AuthRepository
 import auth.domain.emailauth.EmailAuth
 import auth.domain.emailauth.EmailAuthRepository
 import auth.infra.cache.EmailVerifyCacheMemory
+import auth.infra.mail.MailContent
 import auth.infra.mail.MailSender
 import db.transactional.Transactional
 import error.errorcode.AuthErrorCode
@@ -36,7 +37,13 @@ class EmailAuthService(
             .toString()
             .padStart(6, '0')
 
-        val mailSendResult = mailSender.send(email, "Verify your Email", verificationCode)
+        val mailContent = MailContent.Template(
+            to = email,
+            subject = "이메일 인증 코드를 확인해주세요.",
+            template = "mail-verification",
+            "code" to verificationCode,
+        )
+        val mailSendResult = mailSender.send(mailContent)
         if (!mailSendResult) {
             throw BusinessException(AuthErrorCode.A_003)
         }
