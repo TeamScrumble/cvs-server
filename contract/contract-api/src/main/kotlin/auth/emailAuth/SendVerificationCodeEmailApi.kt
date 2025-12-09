@@ -3,6 +3,8 @@ package auth.emailAuth
 import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
 
 interface SendVerificationCodeEmailApi {
     companion object {
@@ -18,6 +20,7 @@ interface SendVerificationCodeEmailApi {
 
     data class Request(
         @Schema(description = "인증 코드를 전송할 이메일", example = "mobility42@gmail.com")
+        @field:Email
         val email: String
     )
 

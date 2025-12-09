@@ -1,5 +1,7 @@
 package auth.emailAuth
 
+import auth.emailAuth.field.Email
+import auth.emailAuth.field.Password
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
 
@@ -17,8 +19,11 @@ interface EmailJoinApi {
 
     data class Request(
         @Schema(description = "이메일", example = "mobility42@gmail.com")
+        @field:Email
         val email: String,
+
         @Schema(description = "비밀번호", example = "qwer1234!")
+        @field:Password
         val password: String
     )
 }

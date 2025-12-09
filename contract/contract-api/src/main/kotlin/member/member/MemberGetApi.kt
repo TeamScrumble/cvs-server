@@ -1,4 +1,4 @@
-package member
+package member.member
 
 import ApiResponse
 import docs.Documented

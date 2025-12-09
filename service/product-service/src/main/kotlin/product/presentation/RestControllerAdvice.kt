@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.server.MissingRequestValueException
 import ApiResponse
+import jakarta.validation.ConstraintViolationException
+import org.springframework.web.bind.support.WebExchangeBindException
+import org.springframework.web.server.MethodNotAllowedException
 
 @RestControllerAdvice
 class RestControllerAdvice {
@@ -21,7 +24,7 @@ class RestControllerAdvice {
 
     @ExceptionHandler(BusinessException::class)
     fun handleBusinessException(e: BusinessException): ResponseEntity<ApiResponse<Nothing>> {
-        log.info(e.logMessage)
+        log.warn(e.logMessage)
         return buildErrorResponse(e.errorCode, HttpStatus.BAD_REQUEST)
     }
 
@@ -33,14 +36,32 @@ class RestControllerAdvice {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<ApiResponse<Nothing>> {
-        log.info(e.message)
+        log.warn(e.message)
         return buildErrorResponse(BaseErrorCode.E_001, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(MissingRequestValueException::class)
     fun handleMissingRequestValueException(e: MissingRequestValueException): ResponseEntity<ApiResponse<Nothing>> {
-        log.info(e.message)
+        log.warn(e.message)
         return buildErrorResponse(BaseErrorCode.E_002, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(MethodNotAllowedException::class)
+    fun handleMethodNotAllowed(e: MethodNotAllowedException): ResponseEntity<ApiResponse<Nothing>> {
+        log.warn(e.message)
+        return buildErrorResponse(BaseErrorCode.E_003, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(WebExchangeBindException::class)
+    fun handleWebExchangeBindException(e: WebExchangeBindException): ResponseEntity<ApiResponse<Nothing>> {
+        log.warn(e.message)
+        return buildErrorResponse(BaseErrorCode.E_004, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolation(e: ConstraintViolationException): ResponseEntity<ApiResponse<Nothing>> {
+        log.warn(e.message)
+        return buildErrorResponse(BaseErrorCode.E_005, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(Exception::class)
