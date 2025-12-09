@@ -1,0 +1,4 @@
+package review
+
+interface ReviewGetApi {
+}

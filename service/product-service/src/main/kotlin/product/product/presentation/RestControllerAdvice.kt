@@ -1,4 +1,4 @@
-package product.presentation
+package product.product.presentation
 
 import error.ErrorResponse
 import error.errorcode.BaseErrorCode
