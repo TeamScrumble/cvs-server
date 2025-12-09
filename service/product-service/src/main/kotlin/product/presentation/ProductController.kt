@@ -30,7 +30,6 @@ class ProductController(
 
     @GetMapping("${ProductGetApi.PATH}/{id}")
     override suspend fun get(
-        @RequestPassport passport: Passport,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
         val product = productService.findById(id).toResponse()
@@ -40,7 +39,6 @@ class ProductController(
 
     @GetMapping(ProductListApi.PATH)
     override suspend fun list(
-        @RequestPassport passport: Passport,
         @RequestBody request: ProductListApi.Request
     ): ApiResponse<List<ProductGetApi.Response>> {
         val product = productService.findAllByCvsTarget(CvsTarget.valueOf(request.cvsTarget)).map {
