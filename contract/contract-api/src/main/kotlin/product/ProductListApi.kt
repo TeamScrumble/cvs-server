@@ -15,7 +15,7 @@ interface ProductListApi {
         description = "상품의 목록 정보를 조회하는 API",
         response = ProductGetApi.Response::class,
     )
-    suspend fun list(passport: Passport, request: Request): ApiResponse<List<ProductGetApi.Response>>
+    suspend fun list(request: Request): ApiResponse<List<ProductGetApi.Response>>
 
     data class Request(
         val cvsTarget: String

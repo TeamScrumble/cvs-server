@@ -15,7 +15,7 @@ interface ProductGetApi {
         description = "상품의 상세 정보를 조회하는 API",
         response = Response::class,
     )
-    suspend fun get(passport: Passport, id: Long): ApiResponse<Response>
+    suspend fun get(id: Long): ApiResponse<Response>
 
     data class Response(
         @Schema(description = "상품의 id", example = "10")
