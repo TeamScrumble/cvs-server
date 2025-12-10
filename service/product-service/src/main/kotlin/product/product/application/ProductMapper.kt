@@ -1,4 +1,4 @@
-package product.product.util
+package product.product.application
 
 import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
