@@ -7,9 +7,7 @@ import cvs.crawler.CrawlerResultEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import org.slf4j.LoggerFactory
@@ -44,12 +42,8 @@ class CrawlRequestConsumer(
                 try {
                     val crawled = crawlerService.crawl(target)
 
-                    // 5분 텀
-                    delay(5 * 60 * 1000L)
-
                     val result = CrawlerResultEvent(target, crawled)
                     kafkaTemplate.send("crawl.response", objectMapper.writeValueAsString(result))
-
                 } catch (ex: Exception) {
                     val fail = CrawlerFailedEvent(target, ex.message ?: "fail")
                     kafkaTemplate.send("crawl.response.fail", objectMapper.writeValueAsString(fail))
