@@ -1,0 +1,13 @@
+spring:
+  sql:
+    init:
+      mode: never
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+
+db:
+  url: ${DB_URL}
+  username: ${DB_USERNAME}
+  password: ${DB_USERNAME}

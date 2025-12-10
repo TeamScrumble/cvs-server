@@ -1,4 +1,2 @@
 security:
-  secret-key: VnVEoldfwso5zQVHuvanruLCXSx2rhWm/F8mOK+VVtjt7lsxMH1lxPI3oCkWC4Rxk3r/37jqCIvIJTvjZatIVg==
-  access-token-expires: 3600000
-  refresh-token-expires: 604800000
+  secret-key: ${JWT_SECRET}

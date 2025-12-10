@@ -1,14 +1,26 @@
 spring:
   profiles:
     active:
-      -  security
+      - security
+      - db
   application:
     name: member-service
 
 server:
   port: 8082
+  forward-headers-strategy: framework
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+springdoc:
+  api-docs:
+    path: /api/member/oas.json
+    writer-with-default-pretty-printer: true
+    defaultZone: ${EUREKA_URL}
+
+service:
+  gateway-host: ${GATEWAY_HOST}
+  db_schema: ${MEMBER_DB_SCHEMA}

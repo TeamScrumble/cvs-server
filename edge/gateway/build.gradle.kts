@@ -24,8 +24,11 @@ dependencies {
     // --- Gateway
     implementation("org.springframework.cloud:spring-cloud-starter-gateway")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+    implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 
     // --- Module
+    implementation(project(":contract:contract-api"))
+    implementation(project(":contract:contract-error"))
     implementation(project(":infra:infra-security"))
     implementation(project(":infra:infra-cache"))
 }

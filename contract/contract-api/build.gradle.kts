@@ -5,6 +5,8 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":contract:contract-error"))
+    implementation(project(":support:support-docs"))
 }
 
 tasks.getByName<Jar>("jar") {

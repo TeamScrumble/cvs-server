@@ -1,0 +1,10 @@
+package auth.infra.mail.config
+
+import org.springframework.boot.context.properties.ConfigurationProperties
+
+@ConfigurationProperties(prefix = "mail")
+data class MailProperties(
+    val apiKey: String,
+    val domain: String,
+    val from: String
+)

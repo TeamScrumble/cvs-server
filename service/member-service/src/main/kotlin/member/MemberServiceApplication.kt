@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(
-    scanBasePackages = ["member", "security"]
+    scanBasePackages = ["member", "security", "db", "docs"]
 )
 class MemberServiceApplication
 

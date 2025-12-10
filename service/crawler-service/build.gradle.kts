@@ -13,6 +13,14 @@ plugins {
     id("io.spring.dependency-management")
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.seleniumhq.selenium") {
+            useVersion("4.26.0")
+        }
+    }
+}
+
 dependencies {
     // --- Spring
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -27,6 +35,7 @@ dependencies {
     // --- Selenium
     implementation("org.seleniumhq.selenium:selenium-java:4.26.0")
     implementation("org.seleniumhq.selenium:selenium-chrome-driver:4.26.0")
+    implementation("org.seleniumhq.selenium:selenium-remote-driver:4.26.0")
 
     // --- Kafka
     implementation("org.springframework.kafka:spring-kafka")
@@ -39,4 +48,10 @@ dependencies {
 
     // --- Modules
     implementation(project(":contract:contract-event"))
+    implementation(project(":support:support-docs"))
+    implementation(project(":contract:contract-api"))
+    implementation(project(":contract:contract-api:client"))
+    implementation(project(":contract:contract-error"))
+    implementation(project(":infra:infra-db"))
+    implementation(project(":infra:infra-security"))
 }

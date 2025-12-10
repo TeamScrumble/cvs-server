@@ -1,6 +1,7 @@
 package crawler.client.target
 
 import cvs.crawler.CrawlerData
+import kotlinx.coroutines.delay
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -23,12 +24,12 @@ class SevenEleven : CVS() {
     }
 
     // ===== 더보기 버튼 전체 클릭 =====
-    private fun clickAllPages(driver: WebDriver) {
+    private suspend fun clickAllPages(driver: WebDriver) {
         var pageCount = 0
 
         while (true) {
             try {
-                Thread.sleep(SLEEP_SHORT_MS)
+                delay(DELAY_BASIC_MS)
                 val wait = WebDriverWait(driver, Duration.ofSeconds(3))
                 val moreButton = wait.until(
                     ExpectedConditions.presenceOfElementLocated(By.cssSelector(SELECTOR_MORE_BUTTON))
@@ -75,7 +76,7 @@ class SevenEleven : CVS() {
     }
 
     // ===== 상품 리스트 추출 =====
-    override fun findProductList(driver: WebDriver): List<CrawlerData> {
+    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
         waitForElement(driver, SELECTOR_PRODUCT_ITEM)
         val items = driver.findElements(By.cssSelector(SELECTOR_PRODUCT_ITEM))
         if (items.isEmpty()) {
@@ -87,7 +88,7 @@ class SevenEleven : CVS() {
     }
 
     // ===== 전체 크롤링 흐름 =====
-    override fun crawl(driver: WebDriver): List<CrawlerData> {
+    override suspend fun crawl(driver: WebDriver): List<CrawlerData> {
         driver.get(BASE_URL)
         waitForElement(driver, SELECTOR_PRODUCT_ITEM)
         scrollToBottom(driver)
