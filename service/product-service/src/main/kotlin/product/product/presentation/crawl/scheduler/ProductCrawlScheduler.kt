@@ -19,28 +19,17 @@ class ProductCrawlScheduler(
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
-    private val scope = CoroutineScope(Dispatchers.IO)
 
-    @Scheduled(cron = "0 0 2 * * TUE", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 2 * * TUE")
     fun runWeeklyCrawlJob() {
-        log.info("화요일 스케줄러 트리거됨 → 작업은 비동기로 진행")
+        log.info("[Scheduler] 실행 완료")
 
-        scope.launch {
-            val targets = CvsTarget.entries
-
-            for ((index, target) in targets.withIndex()) {
-                val event = CrawlerRequestEvent(target)
-                val payload = objectMapper.writeValueAsString(event)
-
-                kafkaTemplate.send("crawl.request", payload)
-                log.info("[$index] 발행 완료: $target")
-
-                if (index < targets.lastIndex) {
-                    delay(10 * 60 * 1000L)
-                }
-            }
-
-            log.info("모든 타겟 순차 발행 완료")
+        CvsTarget.entries.forEach { target ->
+            val payload = objectMapper.writeValueAsString(CrawlerRequestEvent(target))
+            kafkaTemplate.send("crawl.request", payload)
+            log.info("[Scheduler] $target 티켓 발행 완료")
         }
+
+        log.info("[Scheduler] 전체 티켓 발행 완료")
     }
 }
