@@ -4,9 +4,23 @@ import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
 import cvs.crawler.CvsTarget
 import product.ProductAddApi
+import product.product.domain.Product
 import java.util.zip.CRC32
 
-fun List<ProductAddApi.Request>.toCrawlerResultDto() = groupBy {
+internal fun CrawlerData.toEntity(target: CvsTarget): Product {
+    return Product(
+        id = 0L,
+        cvsProductId = this.id.toLong(),
+        cvsTarget = target,
+        title = this.productName,
+        img = this.imgUrl,
+        price = this.price,
+        event = this.flag,
+        isNewProduct = this.isNew
+    )
+}
+
+internal fun List<ProductAddApi.Request>.toCrawlerResultDto() = groupBy {
     CvsTarget.valueOf(it.cvsTarget)
 }.map { (key, value) ->
     CrawlerResultEvent(key, value.map { v ->

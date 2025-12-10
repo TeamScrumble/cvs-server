@@ -1,6 +1,5 @@
 package product.product.application
 
-import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
 import cvs.crawler.CvsTarget
 import db.transactional.Transactional
@@ -10,7 +9,6 @@ import extension.getOrThrow
 import member.MemberApi
 import org.springframework.stereotype.Service
 import passport.Passport
-import product.product.domain.Product
 import product.product.domain.ProductCustomRepository
 import product.product.domain.ProductRepository
 
@@ -52,17 +50,4 @@ class ProductService(
 
     suspend fun findAllByCvsTarget(cvsTarget: CvsTarget) = productRepository
         .findAllByCvsTarget(cvsTarget)
-
-    private fun CrawlerData.toEntity(target: cvs.crawler.CvsTarget): Product {
-        return Product(
-            id = 0L,
-            cvsProductId = this.id.toLong(),
-            cvsTarget = target,
-            title = this.productName,
-            img = this.imgUrl,
-            price = this.price,
-            event = this.flag,
-            isNewProduct = this.isNew
-        )
-    }
 }
