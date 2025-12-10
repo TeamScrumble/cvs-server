@@ -1,9 +1,9 @@
 -- 리뷰 평가 항목
-INSERT INTO review_aspect (title)
+INSERT INTO review_aspect (title, question)
 VALUES
-    ('품질이 어떠셨나요?'),
-    ('가성비가 어떠셨나요?'),
-    ('재구매 의사가 있으신가요?');
+    ('품질', '품질이 어떠셨나요?'),
+    ('가성비', '가성비가 어떠셨나요?'),
+    ('재구매의사', '재구매의사가 있으신가요?');
 
 -- 리뷰 평가 항목 옵션
 INSERT INTO review_aspect_option (aspect_id, option_text, display_order)

@@ -30,8 +30,9 @@ CREATE TABLE IF NOT EXISTS review (
 
 -- 상품 리뷰 평가 카테고리 테이블 (품질/가성비/재구매의사)
 CREATE TABLE IF NOT EXISTS review_aspect (
-    aspect_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title           VARCHAR(100) NOT NULL
+    aspect_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title       VARCHAR(100) NOT NULL,
+    question    VARCHAR(255) NOT NULL
 );
 
 -- 평가 카테고리별 옵션 테이블 (최고에요/괜찮아요/별로에요)
