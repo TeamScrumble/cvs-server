@@ -21,6 +21,12 @@ data class Review (
     val rating: Int,
 
     @Column("content")
-    val content: String
+    val content: String,
+
+    @Column("is_deleted")
+    val isDeleted: Boolean = false,
+
+    @Column("is_receipt") // 영수증 인증 여부
+    val isReceipt: Boolean
 
 ) : LongIdEntity()

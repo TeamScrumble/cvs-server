@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS review (
     rating      TINYINT UNSIGNED    NOT NULL,
     content     VARCHAR(500)        NOT NULL,
     is_deleted  TINYINT(1)          NOT NULL DEFAULT 0,
+    is_receipt  TINYINT(1)          NOT NULL DEFAULT 0, -- 영수증 인증 여부
     created_at       DATETIME       NOT NULL,
     last_modified_at DATETIME       NOT NULL
 );
@@ -59,4 +60,12 @@ CREATE TABLE IF NOT EXISTS review_like (
     member_id       BIGINT NOT NULL,
 
     UNIQUE KEY uk_review_like (review_id, member_id)
+);
+
+-- 상품 리뷰 이미지 테이블
+CREATE TABLE IF NOT EXISTS review_img (
+    review_img_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    review_id      BIGINT NOT NULL,
+    img_url        VARCHAR(500) NOT NULL,
+    display_order  INT NOT NULL
 );

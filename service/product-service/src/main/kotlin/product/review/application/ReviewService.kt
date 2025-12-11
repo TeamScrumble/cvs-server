@@ -2,12 +2,18 @@ package product.review.application
 
 import error.errorcode.ReviewErrorCode
 import error.exception.BusinessException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.toList
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import passport.Passport
+import product.review.domain.ReviewSortType
 import product.review.domain.entity.Review
 import product.review.domain.repository.ReviewRepository
 import review.ReviewAddApi
+import review.ReviewGetApi
 
 @Service
 class ReviewService(
@@ -30,7 +36,8 @@ class ReviewService(
             productId = request.productId,
             memberId = memberId,
             rating = request.rating,
-            content = request.content
+            content = request.content,
+            isReceipt = request.isReceipt
         )
 
         // 리뷰 저장
@@ -40,6 +47,40 @@ class ReviewService(
         reviewScoreService.addScores(saved.id, request.scores)
 
         return saved.id
+    }
+
+    @Transactional(readOnly = true)
+    suspend fun getList(
+        productId: Long,
+        page: Int,
+        size: Int,
+        sortStr: String
+    ): List<ReviewGetApi.Response> {
+        val sortType = ReviewSortType.from(sortStr)
+        val sort = getSort(sortType)
+        val pageable = PageRequest.of(page, size, sort)
+        val reviews = reviewRepository
+            .findByProductIdAndIsDeletedFalse(
+                productId,
+                pageable
+            ).collectList()
+
+        return emptyList()
+    }
+
+    private fun getSort(sortType: ReviewSortType): Sort {
+        return when(sortType) {
+            ReviewSortType.LATEST -> Sort.by(Sort.Order.desc("createdAt"))
+            ReviewSortType.RATING_HIGH -> Sort.by(
+                Sort.Order.desc("rating"),
+                Sort.Order.desc("createdAt")
+            )
+            ReviewSortType.RATING_LOW -> Sort.by(
+                Sort.Order.asc("rating"),
+                Sort.Order.desc("createdAt")
+            )
+            else -> Sort.unsorted()
+        }
     }
 
     private suspend fun validateMember(passport: Passport) {

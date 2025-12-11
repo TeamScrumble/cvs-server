@@ -6,9 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import passport.Passport
 
 interface ReviewAddApi {
-    companion object {
-        const val PATH = "/api/product/review"
-    }
 
     @Documented(
         summary = "상품 리뷰 등록 API",
@@ -27,6 +24,9 @@ interface ReviewAddApi {
 
         @Schema(description = "상품 리뷰", example = "맛있어요~!")
         val content: String,
+
+        @Schema(description = "상품 리뷰 영수증 인증 여부", example = "false")
+        val isReceipt: Boolean,
 
         @Schema(description = "리뷰 평가 항목별 선택 옵션")
         val scores: List<ScoreRequest> = emptyList()
