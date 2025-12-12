@@ -2,8 +2,7 @@ FROM eclipse-temurin:21-jre-alpine
 
 RUN apk add --no-cache \
     curl
-    && rm -rf /var/cache/apk/*
-
+    
 RUN addgroup --system spring && adduser --system spring --ingroup spring
 
 WORKDIR /app
