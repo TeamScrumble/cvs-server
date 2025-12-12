@@ -1,62 +1,53 @@
-# Stage 1: 의존성 설치 스테이지
-FROM eclipse-temurin:21-jre-alpine AS dependencies
+FROM eclipse-temurin:21-jre-alpine
 
-# Chromium 및 필수 패키지 설치
+# Chromium 및 ChromeDriver 설치
 RUN apk add --no-cache \
     chromium \
     chromium-chromedriver \
-    # 폰트 및 그래픽 라이브러리
+    # 필수 의존성
     ttf-freefont \
     font-noto-emoji \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    nss \
     # 추가 필수 라이브러리
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    nss \
-    && rm -rf /var/cache/apk/*
-
-# Stage 2: 최종 실행 이미지
-FROM eclipse-temurin:21-jre-alpine
-
-# Stage 1에서 설치한 Chromium 관련 파일들 복사
-COPY --from=dependencies /usr/bin/chromium-browser /usr/bin/chromium-browser
-COPY --from=dependencies /usr/bin/chromedriver /usr/bin/chromedriver
-COPY --from=dependencies /usr/lib/chromium /usr/lib/chromium
-COPY --from=dependencies /usr/share/fonts /usr/share/fonts
-COPY --from=dependencies /etc/chromium /etc/chromium
-
-# 런타임 의존성만 설치
-RUN apk add --no-cache \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    nss \
-    curl \
-    libstdc++ \
-    libgcc \
+    udev \
+    ttf-opensans \
     && rm -rf /var/cache/apk/*
 
 # 사용자 및 그룹 생성
 RUN addgroup --system spring && adduser --system spring --ingroup spring
 
-# Chromium 실행을 위한 디렉토리 권한 설정
-RUN mkdir -p /tmp/.X11-unix \
+# Chromium 실행을 위한 디렉토리 생성 및 권한 설정
+RUN mkdir -p /home/spring/.config/chromium \
+    && mkdir -p /home/spring/.cache \
+    && mkdir -p /tmp/.X11-unix \
+    && mkdir -p /dev/shm \
     && chmod 1777 /tmp/.X11-unix \
-    && mkdir -p /home/spring/.config/chromium \
+    && chmod 777 /dev/shm \
     && chown -R spring:spring /home/spring
+
+# ChromeDriver 권한 설정
+RUN chmod +x /usr/bin/chromedriver \
+    && chmod +x /usr/bin/chromium-browser
 
 WORKDIR /app
 
 # 애플리케이션 JAR 복사
 COPY --chown=spring:spring build/libs/*.jar app.jar
 
+# spring 사용자로 전환하기 전에 권한 확인
+RUN chown -R spring:spring /app
+
 USER spring:spring
 
 EXPOSE 8084
 
-# Chromium 환경변수 설정
+# 환경변수 설정
 ENV CHROME_BIN=/usr/bin/chromium-browser \
-    CHROME_DRIVER=/usr/bin/chromedriver
+    CHROME_DRIVER=/usr/bin/chromedriver \
+    DISPLAY=:99
 
 ENTRYPOINT ["java", \
     "-XX:+UseContainerSupport", \
