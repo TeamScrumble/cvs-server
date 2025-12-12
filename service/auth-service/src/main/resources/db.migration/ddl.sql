@@ -19,5 +19,7 @@ CREATE TABLE IF NOT EXISTS email_auth
     created_at       DATETIME(6)  NOT NULL,
     last_modified_at DATETIME(6)  NOT NULL,
 
-    PRIMARY KEY (email_auth_id)
+    PRIMARY KEY (email_auth_id),
+
+    UNIQUE KEY uk_auth_email (email)
 );
