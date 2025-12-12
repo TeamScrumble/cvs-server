@@ -10,7 +10,7 @@ import product.ProductGetApi
 import product.ProductListApi
 import product.product.application.ProductService
 import product.product.domain.Product
-import product.product.util.toCrawlerResultDto
+import product.product.application.toCrawlerResultDto
 import security.passport.RequestPassport
 
 @RestController

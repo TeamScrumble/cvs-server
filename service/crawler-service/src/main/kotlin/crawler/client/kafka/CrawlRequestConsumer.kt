@@ -8,7 +8,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import org.slf4j.LoggerFactory
@@ -37,19 +36,18 @@ class CrawlRequestConsumer(
             semaphore.withPermit {
                 val event = objectMapper.readValue(message, CrawlerRequestEvent::class.java)
                 val target = event.target
-                logger.info("크롤링 요청 수신: ${target.name}")
+
+                logger.info("크롤 요청 수신: ${target.name}")
 
                 try {
-                    val crawledData = crawlerService.crawl(target)
-                    val result = CrawlerResultEvent(target = target, data = crawledData)
+                    val crawled = crawlerService.crawl(target)
+
+                    val result = CrawlerResultEvent(target, crawled)
                     kafkaTemplate.send("crawl.response", objectMapper.writeValueAsString(result))
                 } catch (ex: Exception) {
-                    logger.error("크롤링 처리 중 오류 발생: ${ex.message}", ex)
-
-                    val result = CrawlerFailedEvent(target, ex.message ?: "Crawling failed")
-                    kafkaTemplate.send("crawl.response.fail", objectMapper.writeValueAsString(result))
+                    val fail = CrawlerFailedEvent(target, ex.message ?: "fail")
+                    kafkaTemplate.send("crawl.response.fail", objectMapper.writeValueAsString(fail))
                 }
-                logger.info("크롤링 결과 발행 완료: $target")
             }
         }
     }

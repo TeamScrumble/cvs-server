@@ -40,6 +40,6 @@ interface ProductAddApi {
 
     data class Response(
         @Schema(description = "등록된 상품의 개수", example = "10")
-        val savedItemsCount: Int
+        val savedItemsCount: Long
     )
 }
