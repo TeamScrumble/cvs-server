@@ -1,4 +1,4 @@
-CREATE TABLE member
+CREATE TABLE IF NOT EXISTS member
 (
     member_id        BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
