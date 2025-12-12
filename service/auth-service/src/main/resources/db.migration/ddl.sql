@@ -1,4 +1,4 @@
-CREATE TABLE auth
+CREATE TABLE IF NOT EXISTS auth
 (
     auth_id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     provider         VARCHAR(50)  NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE auth
     UNIQUE KEY uk_auth_provider_provider_id (provider, provider_id)
 );
 
-CREATE TABLE email_auth
+CREATE TABLE IF NOT EXISTS email_auth
 (
     email_auth_id    BIGINT       NOT NULL AUTO_INCREMENT,
     email            VARCHAR(255) NOT NULL UNIQUE,
@@ -19,5 +19,7 @@ CREATE TABLE email_auth
     created_at       DATETIME(6)  NOT NULL,
     last_modified_at DATETIME(6)  NOT NULL,
 
-    PRIMARY KEY (email_auth_id)
-)
+    PRIMARY KEY (email_auth_id),
+
+    UNIQUE KEY uk_auth_email (email)
+);
