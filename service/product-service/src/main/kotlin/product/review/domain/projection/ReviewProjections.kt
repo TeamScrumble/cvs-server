@@ -1,4 +1,4 @@
-package product.review.domain.repository
+package product.review.domain.projection
 
 import java.time.LocalDateTime
 

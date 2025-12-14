@@ -1,8 +1,10 @@
-package product.review.domain.repository
+package product.review.domain.repository.reviewLike
 
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import org.springframework.stereotype.Repository
 import product.review.domain.entity.ReviewLike
 
 @Repository
-interface ReviewLikeRepository : CoroutineCrudRepository<ReviewLike, Long>
+interface ReviewLikeRepository :
+    CoroutineCrudRepository<ReviewLike, Long>,
+    ReviewLikeCustomRepository
