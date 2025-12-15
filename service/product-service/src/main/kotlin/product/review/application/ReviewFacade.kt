@@ -1,10 +1,13 @@
 package product.review.application
 
+import error.errorcode.ReviewErrorCode
+import error.exception.BusinessException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import passport.Passport
+import product.product.application.ProductService
 import review.ReviewAddApi
 import review.ReviewGetApi
 
@@ -14,13 +17,18 @@ class ReviewFacade(
     private val likeService: ReviewLikeService,
     private val scoreService: ReviewScoreService,
     private val imgService: ReviewImgService,
+    private val productService: ProductService
 ) {
 
     @Transactional
     suspend fun add(
         request: ReviewAddApi.Request
     ): Long {
-        // todo 회원, 상품 검증
+        // todo 회원 검증
+        if (!productService.existsById(request.productId)) {
+            throw BusinessException(ReviewErrorCode.R_007)
+        }
+
         val memberId = 1L
         val reviewId = reviewService.add(request, memberId)
         scoreService.addScores(reviewId, request.scores)
