@@ -1,4 +1,4 @@
-package product.presentation
+package product.product.presentation.rest
 
 import ApiResponse
 import cvs.crawler.CvsTarget
