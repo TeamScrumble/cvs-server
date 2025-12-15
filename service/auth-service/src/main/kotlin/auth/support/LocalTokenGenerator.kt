@@ -1,7 +1,7 @@
 package auth.support
 
 import auth.domain.auth.AuthProvider
-import cache.CacheMemory
+import auth.infra.cache.PassportCacheMemory
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
@@ -19,7 +19,7 @@ class LocalTokenGenerator(
     private val environment: Environment,
     private val tokenProvider: TokenProvider,
     private val passportProvider: PassportProvider,
-    private val cacheMemory: CacheMemory
+    private val passportCacheMemory: PassportCacheMemory
 ) : ApplicationRunner {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -57,7 +57,7 @@ class LocalTokenGenerator(
 
         runBlocking {
             val encodedPassport = passportProvider.encodePassport(passport)
-            cacheMemory.set("Passport:$memberId", encodedPassport)
+            passportCacheMemory.setPassport(memberId, encodedPassport)
         }
 
         log.info("Local Access Token : {}", token)
