@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.ProductAddApi
 import product.ProductApi
+import product.ProductCrawlApi
 import product.ProductGetApi
 import product.ProductListApi
 import product.product.application.ProductService
@@ -17,6 +18,16 @@ import security.passport.RequestPassport
 class ProductController(
     private val productService: ProductService
 ) : ProductApi {
+    @PostMapping(ProductCrawlApi.PATH)
+    override suspend fun crawl(
+        @RequestPassport passport: Passport,
+        @RequestBody request: List<ProductCrawlApi.Request>
+    ): ApiResponse<ProductCrawlApi.Response> {
+        val isSuccess = productService.crawl(passport, request.map { CvsTarget.valueOf(it.cvsTarget) })
+
+        return ApiResponse.Success(ProductCrawlApi.Response(isSuccess))
+    }
+
     @PostMapping(ProductAddApi.PATH)
     override suspend fun add(
         @RequestPassport passport: Passport,
