@@ -18,6 +18,6 @@ data class ReviewAspectOption(
     val optionText: String,
 
     @Column("display_order")
-    val order: Int
+    val displayOrder: Int
 
 ) : LongIdEntity()

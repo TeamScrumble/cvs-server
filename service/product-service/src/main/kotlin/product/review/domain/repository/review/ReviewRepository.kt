@@ -52,4 +52,14 @@ interface ReviewRepository : CoroutineCrudRepository<Review, Long> {
         """
     )
     suspend fun findReviewStatsForSorting(productId: Long): List<ReviewSortingStatProjection>
+
+    // 평균 별점
+    @Query(
+        """
+        SELECT CAST(AVG(r.rating) AS DOUBLE) AS avgRating
+        FROM review r
+        WHERE r.product_id = :productId AND r.is_deleted = 0
+        """
+    )
+    suspend fun findAvgRatingByProductId(productId: Long): Double?
 }

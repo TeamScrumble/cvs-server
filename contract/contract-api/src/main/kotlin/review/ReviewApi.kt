@@ -7,7 +7,8 @@ interface ReviewApi :
     ReviewAddApi,
     ReviewGetApi,
     ReviewListApi,
-    ReviewSummaryGetApi {
+    ReviewSummaryGetApi
+{
 
     companion object {
         const val PATH = "/api/product/review"

@@ -12,15 +12,4 @@ interface ReviewScoreRepository :
     ReviewScoreCustomRepository
 {
 
-    @Query(
-        """
-        SELECT ras.option_id AS optionId, COUNT(*) AS count 
-        FROM review_aspect_score ras 
-        JOIN review r ON ras.review_id = r.review_id 
-        WHERE r.product_id = :productId AND r.is_deleted = 0 
-        GROUP BY ras.option_id 
-        """
-    )
-    suspend fun findStatsByProductId(productId: Long): List<ReviewStatProjection>
-
 }

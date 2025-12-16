@@ -27,6 +27,9 @@ interface ReviewSummaryGetApi {
         @Schema(description = "영수증 인증 리뷰 개수", example = "54")
         val receiptCount: Long,
 
+        @Schema(description = "평균 별점", example = "4.8")
+        val averageRating: Double,
+
         @Schema(description = "평가 정보")
         val aspects: List<AspectStat>
     ){

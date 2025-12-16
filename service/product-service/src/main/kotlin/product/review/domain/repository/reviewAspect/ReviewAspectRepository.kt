@@ -6,17 +6,16 @@ import org.springframework.stereotype.Repository
 import product.review.domain.entity.ReviewAspect
 
 @Repository
-interface ReviewAspectRepository : CoroutineCrudRepository<ReviewAspect, Long> {
+interface ReviewAspectRepository :
+    CoroutineCrudRepository<ReviewAspect, Long>,
+    AspectCustomRepository
+{
     @Query(
         """
-        SELECT * 
-        FROM review_aspect 
-        WHERE aspect_id IN (:ids) 
+        SELECT *
+        FROM review_aspect
         ORDER BY aspect_id ASC
         """
     )
-    suspend fun findAllByIdInOrderByIdAsc(
-        ids: Iterable<Long>
-    ): List<ReviewAspect>
-
+    suspend fun findAllOrderByIdAsc(): List<ReviewAspect>
 }

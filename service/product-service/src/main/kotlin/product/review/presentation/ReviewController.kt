@@ -55,7 +55,9 @@ class ReviewController(
     override suspend fun getSummary(
         @RequestParam productId: Long
     ): ApiResponse<ReviewSummaryGetApi.Response> {
-        TODO("Not yet implemented")
+        val result = reviewFacade.getSummary(productId)
+
+        return ApiResponse.Success(result)
     }
 
 

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import product.review.domain.entity.Review
 import product.review.domain.repository.review.ReviewRepository
 import review.ReviewAddApi
+import kotlin.math.round
 
 @Service
 class ReviewService(
@@ -47,6 +48,23 @@ class ReviewService(
         return reviewRepository
             .findById(reviewId)
             ?: throw BusinessException(ReviewErrorCode.R_001)
+    }
+
+    suspend fun getReviewCount(productId: Long): Long {
+        return reviewRepository
+            .countByProductIdAndIsDeletedFalse(productId)
+    }
+
+    suspend fun getReceiptCount(productId: Long): Long {
+        return reviewRepository
+            .countByProductIdAndIsReceiptTrueAndIsDeletedFalse(productId)
+    }
+
+    suspend fun getAvgRating(productId: Long): Double {
+        val avg = reviewRepository
+            .findAvgRatingByProductId(productId) ?: return 0.0
+
+        return round(avg * 10) / 10.0
     }
 
 }

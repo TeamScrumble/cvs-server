@@ -4,12 +4,14 @@ import error.errorcode.ReviewErrorCode
 import error.exception.BusinessException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.supervisorScope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import passport.Passport
 import product.product.application.ProductService
 import review.ReviewAddApi
 import review.ReviewGetApi
+import review.ReviewSummaryGetApi
 
 @Service
 class ReviewFacade(
@@ -75,6 +77,22 @@ class ReviewFacade(
                 imgList = images[review.id] ?: emptyList()
             )
         }
+    }
+
+    suspend fun getSummary(
+        productId: Long
+    ): ReviewSummaryGetApi.Response = supervisorScope{
+        val totalCount = async { reviewService.getReviewCount(productId) }
+        val receiptCount = async { reviewService.getReceiptCount(productId) }
+        val avgRating = async { reviewService.getAvgRating(productId) }
+        val aspects = async { scoreService.getAspectStatsForSummary(productId) }
+
+        ReviewSummaryGetApi.Response(
+            totalCount = totalCount.await(),
+            receiptCount = receiptCount.await(),
+            averageRating = avgRating.await(),
+            aspects = aspects.await()
+        )
     }
 
     private suspend fun validateMember(passport: Passport) {
