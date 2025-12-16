@@ -3,7 +3,6 @@ package product.review.application
 import error.errorcode.ReviewErrorCode
 import error.exception.BusinessException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import product.review.domain.entity.Review
 import product.review.domain.repository.review.ReviewRepository
 import review.ReviewAddApi
@@ -14,7 +13,6 @@ class ReviewService(
     private val reviewRepository: ReviewRepository
 ) {
 
-    @Transactional
     suspend fun add(
         request: ReviewAddApi.Request,
         memberId: Long,

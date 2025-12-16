@@ -1,12 +1,12 @@
 package product.review.application
 
+import db.transactional.Transactional
 import error.errorcode.ReviewErrorCode
 import error.exception.BusinessException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.supervisorScope
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import passport.Passport
 import product.product.application.ProductService
 import review.ReviewAddApi
@@ -15,6 +15,7 @@ import review.ReviewSummaryGetApi
 
 @Service
 class ReviewFacade(
+    private val transactional: Transactional,
     private val reviewService: ReviewService,
     private val likeService: ReviewLikeService,
     private val scoreService: ReviewScoreService,
@@ -22,10 +23,9 @@ class ReviewFacade(
     private val productService: ProductService
 ) {
 
-    @Transactional
     suspend fun add(
         request: ReviewAddApi.Request
-    ): Long {
+    ): Long = transactional {
         // todo 회원 검증
         if (!productService.existsById(request.productId)) {
             throw BusinessException(ReviewErrorCode.R_007)
@@ -35,7 +35,7 @@ class ReviewFacade(
         val reviewId = reviewService.add(request, memberId)
         scoreService.addScores(reviewId, request.scores)
 
-        return reviewId
+        reviewId
     }
 
     suspend fun getReviewList(
