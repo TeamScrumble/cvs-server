@@ -31,7 +31,7 @@ class PassportFilter(
                     ?: return@flatMap Mono.empty<String>()
 
                 mono {
-                    cacheMemory.get<String>("Passport:$memberId") ?: EMPTY_STRING
+                    cacheMemory.get<String>("PASSPORT:$memberId") ?: EMPTY_STRING
                 }
             }
             .defaultIfEmpty(EMPTY_STRING)
