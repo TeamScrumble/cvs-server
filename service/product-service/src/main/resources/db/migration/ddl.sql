@@ -67,5 +67,8 @@ CREATE TABLE IF NOT EXISTS review_img (
     review_img_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
     review_id      BIGINT NOT NULL,
     img_url        VARCHAR(500) NOT NULL,
-    display_order  INT NOT NULL
+    display_order  INT NOT NULL,
+    is_deleted     TINYINT(1)       NOT NULL DEFAULT 0,
+    created_at       DATETIME       NOT NULL,
+    last_modified_at DATETIME       NOT NULL
 );

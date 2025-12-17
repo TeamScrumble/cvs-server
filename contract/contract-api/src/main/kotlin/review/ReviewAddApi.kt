@@ -39,7 +39,11 @@ interface ReviewAddApi {
         val isReceipt: Boolean,
 
         @Schema(description = "리뷰 평가 항목별 선택 옵션")
-        val scores: List<ScoreRequest> = emptyList()
+        val scores: List<ScoreRequest> = emptyList(),
+
+        @Schema(description = "리뷰 이미지")
+        @field:Size(max = 10)
+        val images: List<ImageRequest> = emptyList()
     ) {
         data class ScoreRequest(
             @Schema(description = "평가 항목 id", example = "1")
@@ -47,6 +51,16 @@ interface ReviewAddApi {
 
             @Schema(description = "선택한 옵션 id", example = "2")
             val optionId: Long
+        )
+
+        data class ImageRequest(
+            @Schema(description = "이미지 url")
+            val imgUrl: String,
+
+            @Schema(description = "이미지 순서", example = "1")
+            @field:Min(1)
+            @field:Max(10)
+            val displayOrder: Int
         )
     }
 

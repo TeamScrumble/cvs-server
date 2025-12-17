@@ -28,6 +28,7 @@ class ReviewImgCustomRepositoryImpl(
             JOIN (
                 $unionSql
             ) r ON ri.review_id = r.review_id
+            WHERE ri.is_deleted = 0
         """
 
         return databaseClient.sql(sql)

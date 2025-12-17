@@ -33,7 +33,10 @@ class ReviewFacade(
 
         val memberId = 1L
         val reviewId = reviewService.add(request, memberId)
+        // 평가 저장
         scoreService.addScores(reviewId, request.scores)
+        // 이미지 저장
+        imgService.addImages(reviewId, request.images)
 
         reviewId
     }
