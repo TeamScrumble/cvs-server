@@ -14,7 +14,6 @@ interface ReviewListApi {
         description = "상품의 리뷰 목록을 조회하는 API",
         response = ReviewGetApi.Response::class
     )
-    @GetMapping
     suspend fun list(
         @RequestParam
         @Parameter(

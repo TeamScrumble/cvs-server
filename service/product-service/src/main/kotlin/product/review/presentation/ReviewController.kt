@@ -2,11 +2,7 @@ package product.review.presentation
 
 import ApiResponse
 import jakarta.validation.Valid
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.review.application.ReviewFacade
 import review.*
@@ -17,6 +13,7 @@ class ReviewController(
     private val reviewFacade: ReviewFacade
 ) : ReviewApi {
 
+    @PostMapping
     override suspend fun add(
 //        @RequestPassport passport: Passport,
         @RequestBody @Valid request: ReviewAddApi.Request
@@ -28,12 +25,14 @@ class ReviewController(
         return ApiResponse.Success(response)
     }
 
+    @GetMapping("/{reviewId}")
     override suspend fun get(
         @PathVariable reviewId: Long
     ): ApiResponse<ReviewGetApi.Response> {
         TODO("Not yet implemented")
     }
 
+    @GetMapping
     override suspend fun list(
         @RequestParam productId: Long,
         @RequestParam page: Int,
@@ -52,6 +51,7 @@ class ReviewController(
         return ApiResponse.Success(result)
     }
 
+    @GetMapping("/summary")
     override suspend fun getSummary(
         @RequestParam productId: Long
     ): ApiResponse<ReviewSummaryGetApi.Response> {

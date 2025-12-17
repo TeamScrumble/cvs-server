@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
-import org.springframework.web.bind.annotation.PostMapping
 import passport.Passport
 
 interface ReviewAddApi {
@@ -19,7 +18,6 @@ interface ReviewAddApi {
         request = Request::class,
         response = Response::class
     )
-    @PostMapping
     suspend fun add(request: Request): ApiResponse<Response>
 
     data class Request(

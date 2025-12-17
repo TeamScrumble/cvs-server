@@ -5,7 +5,6 @@ import docs.Documented
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.web.bind.annotation.GetMapping
 
 interface ReviewSummaryGetApi {
 
@@ -14,7 +13,6 @@ interface ReviewSummaryGetApi {
         description = "상품 리뷰에 대한 정보를 조회하는 API",
         response = Response::class
     )
-    @GetMapping("/summary")
     suspend fun getSummary(
         @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.QUERY)
         productId: Long

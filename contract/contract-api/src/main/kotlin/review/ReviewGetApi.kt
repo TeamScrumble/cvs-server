@@ -14,7 +14,6 @@ interface ReviewGetApi {
         description = "상품의 리뷰를 조회하는 API",
         response = Response::class
     )
-    @GetMapping("/{reviewId}")
     suspend fun get(
         @Parameter(description = "상품 리뷰 id", example = "1", `in` = ParameterIn.PATH)
         reviewId: Long
