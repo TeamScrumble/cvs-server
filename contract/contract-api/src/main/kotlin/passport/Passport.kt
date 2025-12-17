@@ -6,6 +6,6 @@ data class Passport(
 
     val memberId: Long,
     val email: String,
-    val roles: Set<String>,
+    val roles: Set<MemberRole>,
     val nickname: String,
 )

@@ -12,6 +12,7 @@ import member.MemberApi
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import passport.Passport
+import passport.isAdmin
 import product.product.domain.ProductCustomRepository
 import product.product.domain.ProductRepository
 
@@ -59,7 +60,7 @@ class ProductService(
     suspend fun crawl(passport: Passport, targets: List<CvsTarget>): Boolean {
         validateMember(passport)
 
-        if (!passport.roles.any { it == "ROLE_ADMIN" }) {
+        if (!passport.isAdmin) {
             throw BusinessException(ProductErrorCode.P_002)
         }
 

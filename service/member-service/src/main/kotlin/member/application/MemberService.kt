@@ -6,8 +6,9 @@ import error.exception.BusinessException
 import member.MemberGetApi
 import member.domain.member.Member
 import member.domain.member.MemberRepository
-import member.domain.member.MemberRole
+import passport.MemberRole
 import org.springframework.stereotype.Service
+import passport.MemberRole.Companion.toStringSet
 import passport.Passport
 
 @Service
@@ -55,7 +56,7 @@ class MemberService(
         MemberGetApi.Response(
             memberId = member.id,
             email = member.email,
-            roles = member.roles.map { it.name }.toSet(),
+            roles = member.roles.toStringSet(),
             nickname = member.nickname,
             profileImage = member.profileImage
         )
