@@ -23,3 +23,4 @@ springdoc:
 service:
   gateway-host: ${GATEWAY_HOST}
   db_schema: ${PRODUCT_DB_SCHEMA}
+  service-key: ${SERVICE_KEY}

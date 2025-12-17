@@ -1,10 +1,8 @@
-package auth.config
+package gateway.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "service")
-data class AuthServiceProperties(
-    val gatewayHost: String,
-    val dbSchema: String,
+data class GatewayProperties(
     val serviceKey: String
 )
