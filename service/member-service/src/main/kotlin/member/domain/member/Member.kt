@@ -18,5 +18,8 @@ data class Member(
     val roles: Set<MemberRole>,
 
     @Column("nickname")
-    val nickname: String
+    val nickname: String,
+
+    @Column("profile_image")
+    val profileImage: String
 ) : LongIdEntity()

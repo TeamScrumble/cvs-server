@@ -16,6 +16,8 @@ class MemberService(
     private val memberRepository: MemberRepository
 ) {
 
+    private val defaultProfileImage = "https://i.imgur.com/CHUednA_d.png"
+
     private val defaultRoles = setOf(MemberRole.ROLE_USER)
 
     private val nicknamePrefixes = listOf(
@@ -32,7 +34,8 @@ class MemberService(
         val member = Member(
             email = email,
             roles = defaultRoles,
-            nickname = generateNickname()
+            nickname = generateNickname(),
+            profileImage = defaultProfileImage
         )
 
         val saved = memberRepository.save(member)
@@ -53,7 +56,8 @@ class MemberService(
             memberId = member.id,
             email = member.email,
             roles = member.roles.map { it.name }.toSet(),
-            nickname = member.nickname
+            nickname = member.nickname,
+            profileImage = member.profileImage
         )
     }
 

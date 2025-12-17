@@ -66,3 +66,4 @@ springdoc:
 service:
   gateway-host: ${GATEWAY_HOST}
   db_schema: ${AUTH_DB_SCHEMA}
+  service-key: ${SERVICE_KEY}
