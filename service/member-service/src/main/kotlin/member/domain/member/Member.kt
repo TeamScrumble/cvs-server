@@ -4,6 +4,7 @@ import db.base.LongIdEntity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import passport.MemberRole
 
 @Table("member")
 data class Member(

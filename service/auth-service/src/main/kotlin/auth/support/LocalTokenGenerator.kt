@@ -9,6 +9,8 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.core.env.Environment
 import org.springframework.core.env.Profiles
 import org.springframework.stereotype.Component
+import passport.MemberRole
+import passport.MemberRole.Companion.toRoleSet
 import passport.Passport
 import security.passport.PassportProvider
 import security.token.AuthPrincipal
@@ -51,7 +53,7 @@ class LocalTokenGenerator(
             authProvider = AuthProvider.INTERNAL.name,
             memberId = memberId,
             email = "dev",
-            roles = roles,
+            roles = roles.toRoleSet(),
             nickname = "dev",
         )
 

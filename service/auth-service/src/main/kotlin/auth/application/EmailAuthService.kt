@@ -17,6 +17,8 @@ import extension.getOrThrow
 import member.MemberAddApi
 import member.MemberApi
 import org.springframework.stereotype.Service
+import passport.MemberRole
+import passport.MemberRole.Companion.toRoleSet
 import passport.Passport
 import security.passport.PassportProvider
 import security.password.PasswordEncoder
@@ -164,7 +166,7 @@ class EmailAuthService(
             authProvider = auth.provider.name,
             memberId = member.memberId,
             email = member.email,
-            roles = member.roles,
+            roles = member.roles.toRoleSet(),
             nickname = member.nickname,
         )
         val encodedPassport = passportProvider.encodePassport(passport)

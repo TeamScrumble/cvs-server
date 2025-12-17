@@ -1,6 +1,6 @@
 package member.infra.db.converter
 
-import member.domain.member.MemberRole
+import passport.MemberRole
 import org.springframework.core.convert.converter.Converter
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.stereotype.Component
