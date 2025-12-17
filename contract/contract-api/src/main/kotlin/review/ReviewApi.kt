@@ -7,7 +7,8 @@ interface ReviewApi :
     ReviewAddApi,
     ReviewGetApi,
     ReviewListApi,
-    ReviewSummaryGetApi
+    ReviewSummaryGetApi,
+    ReviewAspectGetApi
 {
 
     companion object {

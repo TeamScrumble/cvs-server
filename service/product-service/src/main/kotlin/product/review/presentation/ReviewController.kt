@@ -60,5 +60,13 @@ class ReviewController(
         return ApiResponse.Success(result)
     }
 
+    @GetMapping("/aspectInfo")
+    override suspend fun getAspectInfo():
+            ApiResponse<List<ReviewAspectGetApi.Response>> {
+        val result = reviewFacade.getAspectInfo()
+
+        return ApiResponse.Success(result)
+    }
+
 
 }

@@ -5,6 +5,7 @@ import error.exception.BusinessException
 import org.springframework.stereotype.Service
 import product.review.domain.repository.reviewAspect.ReviewAspectOptionRepository
 import product.review.domain.repository.reviewAspect.ReviewAspectRepository
+import review.ReviewAspectGetApi
 import review.ReviewGetApi.Response.ScoreResponse
 
 @Service
@@ -41,7 +42,7 @@ class ReviewAspectService(
     suspend fun getOptions(aspectIds: List<Long>) = optionRepository
         .findAllByAspectIdInOrderByAspectAndDisplay(aspectIds)
 
-    data class SummaryOptionMeta(
+    data class AspectOptionMeta(
         val aspectId: Long,
         val aspectTitle: String,
         val aspectQuestion: String,
@@ -52,7 +53,7 @@ class ReviewAspectService(
 
     suspend fun getSummaryOptionMeta(
         optionIds: Set<Long>
-    ): List<SummaryOptionMeta> {
+    ): List<AspectOptionMeta> {
         if(optionIds.isEmpty()) return emptyList()
 
         val options = optionRepository
@@ -66,13 +67,41 @@ class ReviewAspectService(
             val aspect = aspectMap[option.aspectId]
                 ?: throw BusinessException(ReviewErrorCode.R_004)
 
-            SummaryOptionMeta(
+            AspectOptionMeta(
                 aspectId = aspect.id,
                 aspectTitle = aspect.title,
                 aspectQuestion = aspect.question,
                 optionId = option.id,
                 optionText = option.optionText,
                 displayOrder = option.displayOrder
+            )
+        }
+    }
+
+    suspend fun getAspectInfo(): List<ReviewAspectGetApi.Response> {
+        // aspect
+        val aspects = getAspects()
+        val aspectIds = aspects.map { it.id }
+        // option
+        val options = getOptions(aspectIds)
+        val optionGroup = options.groupBy { it.aspectId }
+
+        return aspects.map { aspect ->
+            val optionResponses = (optionGroup[aspect.id] ?: emptyList())
+                .sortedBy { it.displayOrder }
+                .map { option ->
+                    ReviewAspectGetApi.Response.Option(
+                        optionId = option.id,
+                        optionText = option.optionText,
+                        displayOrder = option.displayOrder
+                    )
+                }
+
+            ReviewAspectGetApi.Response(
+                aspectId = aspect.id,
+                aspectTitle = aspect.title,
+                aspectQuestion = aspect.question,
+                options = optionResponses
             )
         }
     }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import passport.Passport
 import product.product.application.ProductService
 import review.ReviewAddApi
+import review.ReviewAspectGetApi
 import review.ReviewGetApi
 import review.ReviewSummaryGetApi
 
@@ -20,7 +21,8 @@ class ReviewFacade(
     private val likeService: ReviewLikeService,
     private val scoreService: ReviewScoreService,
     private val imgService: ReviewImgService,
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val aspectService: ReviewAspectService
 ) {
 
     suspend fun add(
@@ -96,6 +98,10 @@ class ReviewFacade(
             averageRating = avgRating.await(),
             aspects = aspects.await()
         )
+    }
+
+    suspend fun getAspectInfo(): List<ReviewAspectGetApi.Response> {
+        return aspectService.getAspectInfo()
     }
 
 
