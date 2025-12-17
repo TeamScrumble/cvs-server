@@ -1,5 +1,7 @@
 package product.product.application
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import cvs.crawler.CrawlerRequestEvent
 import cvs.crawler.CrawlerResultEvent
 import cvs.crawler.CvsTarget
 import db.transactional.Transactional
@@ -7,6 +9,7 @@ import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
 import extension.getOrThrow
 import member.MemberApi
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import passport.Passport
 import product.product.domain.ProductCustomRepository
@@ -14,10 +17,12 @@ import product.product.domain.ProductRepository
 
 @Service
 class ProductService(
-    private val productRepository: ProductRepository,
-    private val productCustomRepository: ProductCustomRepository,
     private val memberApi: MemberApi,
+    private val objectMapper: ObjectMapper,
     private val transactional: Transactional,
+    private val productRepository: ProductRepository,
+    private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val productCustomRepository: ProductCustomRepository,
 ) {
     private suspend fun validateMember(passport: Passport) {
         memberApi.get(passport.memberId).getOrThrow()
@@ -50,4 +55,19 @@ class ProductService(
 
     suspend fun findAllByCvsTarget(cvsTarget: CvsTarget) = productRepository
         .findAllByCvsTarget(cvsTarget)
+
+    suspend fun crawl(passport: Passport, targets: List<CvsTarget>): Boolean {
+        validateMember(passport)
+
+        if (!passport.roles.any { it == "ROLE_ADMIN" }) {
+            throw BusinessException(ProductErrorCode.P_002)
+        }
+
+        targets.forEach { target ->
+            val payload = objectMapper.writeValueAsString(CrawlerRequestEvent(target))
+            kafkaTemplate.send("crawl.request", payload)
+        }
+
+        return true
+    }
 }

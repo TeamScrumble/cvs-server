@@ -12,7 +12,7 @@ interface ProductAddApi {
 
     @Documented(
         summary = "상품 생성 API",
-        description = "크롤링된 상품 정보를 바탕으로 상품을 생성하는 내부 API",
+        description = "상품을 생성하는 내부 API",
         request = Request::class,
         response = Response::class,
     )
