@@ -70,4 +70,6 @@ class ProductService(
 
         return true
     }
+
+    suspend fun existsById(id: Long): Boolean = productRepository.existsById(id)
 }

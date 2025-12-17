@@ -24,14 +24,16 @@ CREATE TABLE IF NOT EXISTS review (
     rating      TINYINT UNSIGNED    NOT NULL,
     content     VARCHAR(500)        NOT NULL,
     is_deleted  TINYINT(1)          NOT NULL DEFAULT 0,
+    is_receipt  TINYINT(1)          NOT NULL DEFAULT 0, -- 영수증 인증 여부
     created_at       DATETIME       NOT NULL,
     last_modified_at DATETIME       NOT NULL
 );
 
 -- 상품 리뷰 평가 카테고리 테이블 (품질/가성비/재구매의사)
 CREATE TABLE IF NOT EXISTS review_aspect (
-    aspect_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title           VARCHAR(100) NOT NULL
+    aspect_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title       VARCHAR(100) NOT NULL,
+    question    VARCHAR(255) NOT NULL
 );
 
 -- 평가 카테고리별 옵션 테이블 (최고에요/괜찮아요/별로에요)
@@ -58,4 +60,15 @@ CREATE TABLE IF NOT EXISTS review_like (
     member_id       BIGINT NOT NULL,
 
     UNIQUE KEY uk_review_like (review_id, member_id)
+);
+
+-- 상품 리뷰 이미지 테이블
+CREATE TABLE IF NOT EXISTS review_img (
+    review_img_id  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    review_id      BIGINT NOT NULL,
+    img_url        VARCHAR(500) NOT NULL,
+    display_order  INT NOT NULL,
+    is_deleted     TINYINT(1)       NOT NULL DEFAULT 0,
+    created_at       DATETIME       NOT NULL,
+    last_modified_at DATETIME       NOT NULL
 );

@@ -5,16 +5,19 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
-@Table("review_aspect")
-data class ReviewAspect(
+@Table("review_img")
+data class ReviewImg(
     @Id
-    @Column("aspect_id")
+    @Column("review_img_id")
     override val id: Long = 0L,
 
-    @Column("title")
-    val title: String,
+    @Column("review_id")
+    val reviewId: Long,
 
-    @Column("question")
-    val question: String
+    @Column("img_url")
+    val imgUrl: String,
+
+    @Column("display_order")
+    val displayOrder: Int
 
 ) : LongIdEntity()

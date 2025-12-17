@@ -1,30 +1,72 @@
 package product.review.presentation
 
 import ApiResponse
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import jakarta.validation.Valid
+import org.springframework.web.bind.annotation.*
 import passport.Passport
-import product.review.application.ReviewService
-import review.ReviewAddApi
-import review.ReviewApi
-import security.passport.RequestPassport
+import product.review.application.ReviewFacade
+import review.*
 
 @RestController
+@RequestMapping(ReviewApi.PATH)
 class ReviewController(
-    private val reviewService: ReviewService
+    private val reviewFacade: ReviewFacade
 ) : ReviewApi {
 
-    @PostMapping(ReviewAddApi.PATH)
+    @PostMapping
     override suspend fun add(
 //        @RequestPassport passport: Passport,
-        @RequestBody request: ReviewAddApi.Request
+        @RequestBody @Valid request: ReviewAddApi.Request
     ): ApiResponse<ReviewAddApi.Response> {
 //        val reviewId = reviewService.add(passport, request)
-        val reviewId = reviewService.add(request)
+        val reviewId = reviewFacade.add(request)
         val response = ReviewAddApi.Response(reviewId)
 
         return ApiResponse.Success(response)
     }
+
+    @GetMapping("/{reviewId}")
+    override suspend fun get(
+        @PathVariable reviewId: Long
+    ): ApiResponse<ReviewGetApi.Response> {
+        TODO("Not yet implemented")
+    }
+
+    @GetMapping
+    override suspend fun list(
+        @RequestParam productId: Long,
+        @RequestParam page: Int,
+        @RequestParam pageSize: Int,
+        @RequestParam sort: String
+    ): ApiResponse<List<ReviewGetApi.Response>> {
+        // todo 로그인 회원 꺼내기
+        val memberId = 1L
+        val result = reviewFacade.getReviewList(
+            productId = productId,
+            memberId = memberId,
+            page = page,
+            size = pageSize
+        )
+
+        return ApiResponse.Success(result)
+    }
+
+    @GetMapping("/summary")
+    override suspend fun getSummary(
+        @RequestParam productId: Long
+    ): ApiResponse<ReviewSummaryGetApi.Response> {
+        val result = reviewFacade.getSummary(productId)
+
+        return ApiResponse.Success(result)
+    }
+
+    @GetMapping("/aspectInfo")
+    override suspend fun getAspectInfo():
+            ApiResponse<List<ReviewAspectGetApi.Response>> {
+        val result = reviewFacade.getAspectInfo()
+
+        return ApiResponse.Success(result)
+    }
+
 
 }
