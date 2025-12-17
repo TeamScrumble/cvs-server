@@ -95,9 +95,5 @@ class ReviewFacade(
         )
     }
 
-    private suspend fun validateMember(passport: Passport) {
-        // todo 회원 검증
-    }
-
 
 }

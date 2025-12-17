@@ -48,7 +48,6 @@ class ReviewScoreService(
     ): List<ReviewSummaryGetApi.Response.AspectStat> {
         val stats = scoreRepository.findStatsByProductId(productId)
         if (stats.isEmpty()) return emptyList()
-//        println("=================== $stats")
 
         // 옵션별 count
         val countMap = stats.associate { it.optionId to it.count }

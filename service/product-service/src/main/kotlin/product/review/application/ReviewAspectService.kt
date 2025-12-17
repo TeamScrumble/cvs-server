@@ -1,5 +1,7 @@
 package product.review.application
 
+import error.errorcode.ReviewErrorCode
+import error.exception.BusinessException
 import org.springframework.stereotype.Service
 import product.review.domain.repository.reviewAspect.ReviewAspectOptionRepository
 import product.review.domain.repository.reviewAspect.ReviewAspectRepository
@@ -61,7 +63,9 @@ class ReviewAspectService(
         val aspectMap = aspects.associateBy { it.id }
 
         return options.map { option ->
-            val aspect = aspectMap[option.aspectId]!!
+            val aspect = aspectMap[option.aspectId]
+                ?: throw BusinessException(ReviewErrorCode.R_004)
+
             SummaryOptionMeta(
                 aspectId = aspect.id,
                 aspectTitle = aspect.title,
