@@ -1,17 +1,10 @@
 package member.presentation
 
 import ApiResponse
-import member.MemberAddApi
-import member.MemberApi
-import member.MemberGetApi
-import member.NicknameExistsApi
-import member.UpdateNicknameApi
+import kotlinx.coroutines.flow.toList
+import member.*
 import member.application.MemberService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import passport.Passport
 import security.passport.RequestPassport
 
@@ -56,6 +49,16 @@ class MemberController(
     ): ApiResponse<NicknameExistsApi.Response> {
         val exists = memberService.nicknameExists(request.nickname)
         val response = NicknameExistsApi.Response(exists)
+
+        return ApiResponse.Success(response)
+    }
+
+    @GetMapping(MemberListApi.PATH)
+    override suspend fun getList(
+        @RequestParam memberIds: List<Long>
+    ): ApiResponse<MemberListApi.Response> {
+        val member = memberService.findAllByIds(memberIds).toList()
+        val response = MemberListApi.Response(member.toList())
 
         return ApiResponse.Success(response)
     }

@@ -3,12 +3,18 @@ package member.application
 import db.transactional.Transactional
 import error.errorcode.MemberErrorCode
 import error.exception.BusinessException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import member.MemberGetApi
+import member.MemberListApi
 import member.domain.member.Member
 import member.domain.member.MemberRepository
 import member.domain.member.MemberRole
 import org.springframework.stereotype.Service
 import passport.Passport
+import kotlin.collections.map
+import kotlin.collections.toSet
 
 @Service
 class MemberService(
@@ -88,5 +94,17 @@ class MemberService(
 
     suspend fun nicknameExists(nickname: String): Boolean {
         return memberRepository.existsByNickname(nickname)
+    }
+
+    suspend fun findAllByIds(memberIds: List<Long>): Flow<MemberListApi.Response.Member> {
+        return memberRepository.findAllById(memberIds).map { member ->
+            MemberListApi.Response.Member(
+                memberId = member.id,
+                email = member.email,
+                roles = member.roles.map { it.name }.toSet(),
+                nickname = member.nickname,
+                profileImage = member.profileImage
+            )
+        }
     }
 }
