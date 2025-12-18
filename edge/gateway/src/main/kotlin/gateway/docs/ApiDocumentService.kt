@@ -2,6 +2,7 @@ package gateway.docs
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import gateway.config.GatewayProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 class ApiDocumentService(
     private val webClientBuilder: WebClient.Builder,
     private val objectMapper: ObjectMapper,
+    private val props: GatewayProperties
 ) {
     private val logger = LoggerFactory.getLogger(ApiDocumentService::class.java)
 
@@ -136,9 +138,11 @@ class ApiDocumentService(
             }
 
             appendLine("**Social Logins** <br/>")
-            appendLine("☑️ kakao : <a href=\"https://dev-api.pyunpyun.com/oauth2/authorization/kakao\">https://dev-api.pyunpyun.com/oauth2/authorization/kakao</a><br/>")
-            appendLine("☑️ google : <a href=\"https://dev-api.pyunpyun.com/oauth2/authorization/google\">https://dev-api.pyunpyun.com/oauth2/authorization/google</a><br/>")
-            appendLine("☑️ naver : <a href=\"https://dev-api.pyunpyun.com/oauth2/authorization/naver\">https://dev-api.pyunpyun.com/oauth2/authorization/naver</a><br/>")
+            listOf("kakao", "google", "naver").forEach { provider ->
+                val httpScheme = if ("localhost" in props.gatewayHost) "http" else "https"
+                val url = "${httpScheme}://${props.gatewayHost}/oauth2/authorization/${provider}"
+                appendLine("☑️ ${provider} : <a href=\"${url}\">${url}</a><br/>")
+            }
         }
     }
 

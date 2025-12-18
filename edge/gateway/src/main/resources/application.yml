@@ -87,3 +87,4 @@ eureka:
 
 service:
   service-key: ${SERVICE_KEY}
+  gateway-host: ${GATEWAY_HOST}
