@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS review_aspect (
 -- 평가 카테고리별 옵션 테이블 (최고에요/괜찮아요/별로에요)
 CREATE TABLE IF NOT EXISTS review_aspect_option (
     option_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    aspect_id    BIGINT NOT NULL,
+    aspect_id       BIGINT NOT NULL,
     option_text     VARCHAR(255) NOT NULL,
     display_order   INT NOT NULL
 );
@@ -72,3 +72,33 @@ CREATE TABLE IF NOT EXISTS review_img (
     created_at       DATETIME       NOT NULL,
     last_modified_at DATETIME       NOT NULL
 );
+
+-- review.product_id -> product.product_id
+ALTER TABLE review
+    ADD CONSTRAINT fk_review_product
+        FOREIGN KEY (product_id) REFERENCES product(product_id);
+
+-- review_aspect_option.aspect_id -> review_aspect.aspect_id
+ALTER TABLE review_aspect_option
+    ADD CONSTRAINT fk_review_aspect_option_aspect
+        FOREIGN KEY (aspect_id) REFERENCES review_aspect(aspect_id);
+
+-- review_aspect_score.review_id -> review.review_id
+ALTER TABLE review_aspect_score
+    ADD CONSTRAINT fk_review_aspect_score_review
+        FOREIGN KEY (review_id) REFERENCES review(review_id);
+
+-- review_aspect_score.option_id -> review_aspect_option.option_id
+ALTER TABLE review_aspect_score
+    ADD CONSTRAINT fk_review_aspect_score_option
+        FOREIGN KEY (option_id) REFERENCES review_aspect_option(option_id);
+
+-- review_like.review_id -> review.review_id
+ALTER TABLE review_like
+    ADD CONSTRAINT fk_review_like_review
+        FOREIGN KEY (review_id) REFERENCES review(review_id);
+
+-- review_img.review_id -> review.review_id
+ALTER TABLE review_img
+    ADD CONSTRAINT fk_review_img_review
+        FOREIGN KEY (review_id) REFERENCES review(review_id);
