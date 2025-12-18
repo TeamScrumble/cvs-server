@@ -77,4 +77,20 @@ class MemberApiClient(
             .exchangeToApiResponse<NicknameExistsApi.Response>()
             .awaitSingle()
     }
+
+    override suspend fun getList(
+        memberIds: List<Long>
+    ): ApiResponse<MemberListApi.Response> {
+        return webClient.post()
+            .uri { builder ->
+                builder
+                    .scheme(Scheme.HTTP)
+                    .applyHost(host)
+                    .path(MemberListApi.PATH)
+                    .queryParam("memberIds", memberIds)
+                    .build()
+            }
+            .exchangeToApiResponse<MemberListApi.Response>()
+            .awaitSingle()
+    }
 }
