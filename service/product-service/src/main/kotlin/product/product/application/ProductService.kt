@@ -32,6 +32,10 @@ class ProductService(
     suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Long = transactional {
         validateMember(passport)
 
+        if (!passport.isAdmin) {
+            throw BusinessException(ProductErrorCode.P_002)
+        }
+
         results.sumOf { save(it) }
     }
 
