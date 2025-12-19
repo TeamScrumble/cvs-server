@@ -31,6 +31,8 @@ class SevenEleven : CVS() {
         private val URL_LIST = listOf(
             SevenElevenUrl("$BASE/bestdosirakList.asp", "", SELECTOR_FRESH_ITEM),
             SevenElevenUrl("$BASE/presentList.asp", "fncTab('1');", SELECTOR_EVENT_ITEM),
+            SevenElevenUrl("$BASE/presentList.asp", "fncTab('2');", SELECTOR_EVENT_ITEM),
+            SevenElevenUrl("$BASE/presentList.asp", "fncTab('4');", SELECTOR_EVENT_ITEM)
         )
     }
 
