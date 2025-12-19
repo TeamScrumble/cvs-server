@@ -28,8 +28,8 @@ class Emart24 : CVS() {
     }
 
     // ===== 상품 파싱 =====
-    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
-        val items = driver.findElements(By.cssSelector(SELECTOR_ITEM))
+    override suspend fun findProductList(driver: WebDriver, selector: String): List<CrawlerData> {
+        val items = driver.findElements(By.cssSelector(selector))
         if (items.isEmpty()) return emptyList()
 
         return items.map { item ->
@@ -104,7 +104,7 @@ class Emart24 : CVS() {
         var pageNum = 1
 
         while (true) {
-            val productList = findProductList(driver)
+            val productList = findProductList(driver, SELECTOR_ITEM)
 
             if (productList.isEmpty()) {
                 break

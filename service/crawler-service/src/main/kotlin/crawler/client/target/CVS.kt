@@ -38,8 +38,7 @@ abstract class CVS {
 
     fun waitForElement(driver: WebDriver, selector: String, timeoutSec: Long = MAX_TIMEOUT_SEC) {
         WebDriverWait(
-            driver,
-            Duration.ofSeconds(timeoutSec)
+            driver, Duration.ofSeconds(timeoutSec)
         ).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector)))
     }
 
@@ -77,5 +76,5 @@ abstract class CVS {
 
     protected abstract suspend fun crawl(driver: WebDriver): List<CrawlerData>
 
-    protected abstract suspend fun findProductList(driver: WebDriver): List<CrawlerData>
+    protected abstract suspend fun findProductList(driver: WebDriver, selector: String): List<CrawlerData>
 }

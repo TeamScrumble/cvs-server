@@ -21,9 +21,9 @@ class CU : CVS() {
         private const val SELECTOR_MORE_BUTTON = ".prodListBtn .prodListBtn-w a"
     }
     // ===== 상품 수집 =====
-    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
-        waitForElement(driver, SELECTOR_PRODUCT_ITEM)
-        val items = driver.findElements(By.cssSelector(SELECTOR_PRODUCT_ITEM))
+    override suspend fun findProductList(driver: WebDriver, selector: String): List<CrawlerData> {
+        waitForElement(driver, selector)
+        val items = driver.findElements(By.cssSelector(selector))
         if (items.isEmpty()) {
             return emptyList()
         }
@@ -83,6 +83,6 @@ class CU : CVS() {
 
         clickAllPages(driver)
 
-        findProductList(driver)
+        findProductList(driver, SELECTOR_PRODUCT_ITEM)
     }
 }
