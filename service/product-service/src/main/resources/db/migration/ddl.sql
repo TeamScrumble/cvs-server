@@ -16,6 +16,19 @@ CREATE TABLE IF NOT EXISTS product
 ALTER TABLE product
     ADD CONSTRAINT uq_cvs_product UNIQUE (cvs_product_id);
 
+CREATE TABLE IF NOT EXISTS CREATE TABLE product_like (
+    product_like_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id      BIGINT NOT NULL,
+    member_id       BIGINT NOT NULL,
+    created_at      DATETIME NOT NULL,
+
+    CONSTRAINT uq_product_like
+      UNIQUE (product_id, member_id),
+
+    CONSTRAINT fk_product_like_product
+      FOREIGN KEY (product_id) REFERENCES product(product_id)
+)
+
 -- 상품 리뷰 테이블
 CREATE TABLE IF NOT EXISTS review (
     review_id   BIGINT AUTO_INCREMENT PRIMARY KEY,
