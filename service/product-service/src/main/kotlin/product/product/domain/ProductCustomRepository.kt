@@ -20,6 +20,7 @@ class ProductCustomRepository(
                 ${it.price},
                 '${it.event}',
                 ${if (it.isNewProduct) 1 else 0},
+                0
                 NOW(),
                 NOW()
             )"""
@@ -27,7 +28,7 @@ class ProductCustomRepository(
 
         val sql = """
             INSERT INTO product (
-                cvs_product_id, cvs_target, title, img, price, event, is_new,
+                cvs_product_id, cvs_target, title, img, price, event, is_new, like_count,
                 created_at, last_modified_at
             ) VALUES 
                 $values
@@ -37,6 +38,7 @@ class ProductCustomRepository(
                 price = VALUES(price),
                 event = VALUES(event),
                 is_new = VALUES(is_new),
+                likeCount = VALUES(like_count),
                 last_modified_at = NOW()
         """
 

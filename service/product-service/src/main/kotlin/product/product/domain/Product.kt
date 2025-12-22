@@ -31,5 +31,8 @@ data class Product(
     val event: String,
 
     @Column("is_new")
-    val isNewProduct: Boolean
+    val isNewProduct: Boolean,
+
+    @Column("like_count")
+    val likeCount: Int,
 ) : LongIdEntity()

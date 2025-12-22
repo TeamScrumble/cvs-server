@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS product
     price           INT               NOT NULL,
     event           VARCHAR(10)       NOT NULL,
     is_new          TINYINT(1)        NOT NULL DEFAULT 0,
+    like_count      INT               NOT NULL DEFAULT 0;
     created_at       DATETIME         NOT NULL,
     last_modified_at DATETIME         NOT NULL
 );
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS product
 ALTER TABLE product
     ADD CONSTRAINT uq_cvs_product UNIQUE (cvs_product_id);
 
-CREATE TABLE IF NOT EXISTS CREATE TABLE product_like (
+CREATE TABLE IF NOT EXISTS product_like (
     product_like_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id      BIGINT NOT NULL,
     member_id       BIGINT NOT NULL,
