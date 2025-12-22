@@ -18,9 +18,9 @@ class ProductCustomRepository(
                 '${escape(it.title)}',
                 '${escape(it.img)}',
                 ${it.price},
-                '${it.event}',
+                '${escape(it.event)}',
                 ${if (it.isNewProduct) 1 else 0},
-                0
+                0,
                 NOW(),
                 NOW()
             )"""
@@ -38,13 +38,56 @@ class ProductCustomRepository(
                 price = VALUES(price),
                 event = VALUES(event),
                 is_new = VALUES(is_new),
-                likeCount = VALUES(like_count),
                 last_modified_at = NOW()
         """
 
         return client.sql(sql)
             .fetch()
             .rowsUpdated()
+            .awaitSingle()
+    }
+
+    suspend fun incrementLikeCount(productId: Long): Long {
+        val sql = """
+            UPDATE product
+            SET like_count = like_count + 1,
+                last_modified_at = NOW()
+            WHERE product_id = :productId
+        """.trimIndent()
+
+        return client.sql(sql)
+            .bind("productId", productId)
+            .fetch()
+            .rowsUpdated()
+            .awaitSingle()
+    }
+
+    suspend fun decrementLikeCount(productId: Long): Long {
+        val sql = """
+            UPDATE product
+            SET like_count = GREATEST(like_count - 1, 0),
+                last_modified_at = NOW()
+            WHERE product_id = :productId
+        """.trimIndent()
+
+        return client.sql(sql)
+            .bind("productId", productId)
+            .fetch()
+            .rowsUpdated()
+            .awaitSingle()
+    }
+
+    suspend fun getLikeCount(productId: Long): Int {
+        val sql = """
+            SELECT like_count
+            FROM product
+            WHERE product_id = :productId
+        """.trimIndent()
+
+        return client.sql(sql)
+            .bind("productId", productId)
+            .map { row, _ -> (row.get("like_count") as Number).toInt() }
+            .one()
             .awaitSingle()
     }
 
