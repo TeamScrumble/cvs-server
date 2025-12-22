@@ -5,7 +5,7 @@ import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
 import passport.Passport
 
-interface ProductLikeApi {
+interface ProductLikeToggleApi {
     companion object {
         const val PATH = "/api/product/like"
     }
