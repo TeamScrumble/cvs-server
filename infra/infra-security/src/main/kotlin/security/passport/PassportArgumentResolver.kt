@@ -28,7 +28,15 @@ class PassportArgumentResolver(
         exchange: ServerWebExchange
     ): Mono<in Any> {
         val encodedPassport = exchange.request.headers.getFirst(PassportHeader.KEY)
-            ?: return Mono.error(IllegalStateException("no passport found"))
+
+        if (encodedPassport == null) {
+            return if (parameter.isOptional) {
+                Mono.empty()
+            } else {
+                Mono.error(IllegalStateException("no passport found"))
+            }
+        }
+
         val passportJson = Base64.getDecoder().decode(encodedPassport)
         return Mono.just(objectMapper.readValue(passportJson, Passport::class.java))
     }
