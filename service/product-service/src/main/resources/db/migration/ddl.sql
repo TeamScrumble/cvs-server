@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS product_like (
     product_id      BIGINT NOT NULL,
     member_id       BIGINT NOT NULL,
     created_at      DATETIME NOT NULL,
+    last_modified_at DATETIME NOT NULL,
 
     CONSTRAINT uq_product_like
       UNIQUE (product_id, member_id),

@@ -3,7 +3,6 @@ package product
 import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
-import passport.Passport
 
 interface ProductListApi {
     companion object {
@@ -15,9 +14,14 @@ interface ProductListApi {
         description = "상품의 목록 정보를 조회하는 API",
         response = ProductGetApi.Response::class,
     )
-    suspend fun list(request: Request): ApiResponse<List<ProductGetApi.Response>>
+    suspend fun list(request: Request): ApiResponse<Response>
 
     data class Request(
         val cvsTarget: String
+    )
+
+    data class Response(
+        @Schema(description = "상품 정보")
+        val product: List<ProductBaseResponse>
     )
 }

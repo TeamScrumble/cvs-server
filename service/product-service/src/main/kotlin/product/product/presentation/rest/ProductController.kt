@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.ProductAddApi
 import product.ProductApi
+import product.ProductBaseResponse
 import product.ProductCrawlApi
 import product.ProductGetApi
 import product.ProductListApi
+import product.product.application.ProductLikeService
 import product.product.application.ProductService
 import product.product.domain.Product
 import product.product.application.toCrawlerResultDto
@@ -16,7 +18,8 @@ import security.passport.RequestPassport
 
 @RestController
 class ProductController(
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val productLikeService: ProductLikeService,
 ) : ProductApi {
     @PostMapping(ProductCrawlApi.PATH)
     override suspend fun crawl(
@@ -41,25 +44,30 @@ class ProductController(
 
     @GetMapping("${ProductGetApi.PATH}/{id}")
     override suspend fun get(
+        @RequestPassport passport: Passport?,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
+        val isLiked = if (passport != null) {
+            productLikeService.isLiked(id, passport.memberId)
+        } else false
+
         val product = productService.findById(id).toResponse()
 
-        return ApiResponse.Success(product)
+        return ApiResponse.Success(ProductGetApi.Response(product, isLiked))
     }
 
     @GetMapping(ProductListApi.PATH)
     override suspend fun list(
         @RequestBody request: ProductListApi.Request
-    ): ApiResponse<List<ProductGetApi.Response>> {
+    ): ApiResponse<ProductListApi.Response> {
         val product = productService.findAllByCvsTarget(CvsTarget.valueOf(request.cvsTarget)).map {
             it.toResponse()
         }
 
-        return ApiResponse.Success(product)
+        return ApiResponse.Success(ProductListApi.Response(product))
     }
 
-    private fun Product.toResponse() = ProductGetApi.Response(
-        id, cvsTarget.name, title, img, price, event, isNewProduct
+    private fun Product.toResponse() = ProductBaseResponse(
+        id, cvsTarget.name, title, img, price, event, isNewProduct, likeCount
     )
 }

@@ -16,7 +16,8 @@ internal fun CrawlerData.toEntity(target: CvsTarget): Product {
         img = this.imgUrl,
         price = this.price,
         event = this.flag,
-        isNewProduct = this.isNew
+        isNewProduct = this.isNew,
+        likeCount = 0
     )
 }
 
