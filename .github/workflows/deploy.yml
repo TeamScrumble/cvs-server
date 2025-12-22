@@ -236,17 +236,12 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          REVIEW_STATE: ${{ github.event.review.state }}
         run: |
           if [ "$REVIEW_STATE" = "approved" ]; then
-            MESSAGE="**✅ Pull Request가 승인되었습니다!**
-            제목: $PR_TITLE
-
-            링크: $PR_URL
+            MESSAGE="✅ Pull Request가 승인되었습니다!\n제목: $PR_TITLE\n\n링크: $PR_URL"
           else
-            MESSAGE="**💬 Pull Request가 열렸었습니다!**
-            제목: $PR_TITLE
-            
-            링크: $PR_URL
+            MESSAGE="💬 Pull Request가 열렸습니다!\n제목: $PR_TITLE\n\n링크: $PR_URL"
           fi
           
           PAYLOAD=$(jq -n \
