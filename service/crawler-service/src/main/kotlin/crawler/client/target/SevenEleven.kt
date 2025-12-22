@@ -11,16 +11,29 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.stereotype.Component
 import java.time.Duration
 
+private data class SevenElevenUrl(
+    val url: String,
+    val fn: String,
+    val selector: String
+)
+
 @Component
 class SevenEleven : CVS() {
 
     companion object {
-        private const val BASE = "https://www.7-eleven.co.kr"
-        private const val BASE_URL = "$BASE/product/bestdosirakList.asp"
-        private val ID_REGEX = Regex("""fncGoView\('(\d+)'\)""")
+        private const val BASE = "https://www.7-eleven.co.kr/product"
 
-        private const val SELECTOR_PRODUCT_ITEM = "div.dosirak_list ul li"
+        private const val SELECTOR_FRESH_ITEM = "div.dosirak_list ul li"
+        private const val SELECTOR_EVENT_ITEM = "div.img_list ul li"
         private const val SELECTOR_MORE_BUTTON = ".btn_more a"
+
+        private val ID_REGEX = Regex("""fncGoView\('(\d+)'\)""")
+        private val URL_LIST = listOf(
+            SevenElevenUrl("$BASE/bestdosirakList.asp", "", SELECTOR_FRESH_ITEM),
+            SevenElevenUrl("$BASE/presentList.asp", "fncTab('1');", SELECTOR_EVENT_ITEM),
+            SevenElevenUrl("$BASE/presentList.asp", "fncTab('2');", SELECTOR_EVENT_ITEM),
+            SevenElevenUrl("$BASE/presentList.asp", "fncTab('4');", SELECTOR_EVENT_ITEM)
+        )
     }
 
     // ===== 더보기 버튼 전체 클릭 =====
@@ -76,9 +89,9 @@ class SevenEleven : CVS() {
     }
 
     // ===== 상품 리스트 추출 =====
-    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
-        waitForElement(driver, SELECTOR_PRODUCT_ITEM)
-        val items = driver.findElements(By.cssSelector(SELECTOR_PRODUCT_ITEM))
+    override suspend fun findProductList(driver: WebDriver, selector: String): List<CrawlerData> {
+        waitForElement(driver, selector)
+        val items = driver.findElements(By.cssSelector(selector))
         if (items.isEmpty()) {
             return emptyList()
         }
@@ -88,14 +101,20 @@ class SevenEleven : CVS() {
     }
 
     // ===== 전체 크롤링 흐름 =====
-    override suspend fun crawl(driver: WebDriver): List<CrawlerData> {
-        driver.get(BASE_URL)
-        waitForElement(driver, SELECTOR_PRODUCT_ITEM)
+    override suspend fun crawl(driver: WebDriver): List<CrawlerData> = URL_LIST.flatMap { (url, fn, selector) ->
+        driver.get(url)
+
+        waitForElement(driver, selector)
+
+        if (fn.isNotEmpty()) {
+            (driver as JavascriptExecutor).executeScript(fn)
+            waitForElement(driver, selector)
+        }
+
         scrollToBottom(driver)
 
         clickAllPages(driver)
 
-        val productList = findProductList(driver)
-        return productList
+        findProductList(driver, selector)
     }
 }

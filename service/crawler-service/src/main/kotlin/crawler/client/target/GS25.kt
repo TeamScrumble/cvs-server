@@ -68,12 +68,12 @@ class GS25 : CVS() {
     }
 
     // ===== 상품 리스트 수집 =====
-    override suspend fun findProductList(driver: WebDriver): List<CrawlerData> {
-        waitForElement(driver, SELECTOR_ITEM)
+    override suspend fun findProductList(driver: WebDriver, selector: String): List<CrawlerData> {
+        waitForElement(driver, selector)
 
         delay(DELAY_SHORT_MS)
 
-        val items = driver.findElements(By.cssSelector(SELECTOR_ITEM))
+        val items = driver.findElements(By.cssSelector(selector))
         if (items.isEmpty()) {
             return emptyList()
         }
@@ -101,7 +101,7 @@ class GS25 : CVS() {
         for (pageNum in 1..lastPage) {
             moveToPage(driver, pageNum)
 
-            val productList = findProductList(driver)
+            val productList = findProductList(driver, SELECTOR_ITEM)
             if (productList.isEmpty()) break
 
             allProducts += productList
