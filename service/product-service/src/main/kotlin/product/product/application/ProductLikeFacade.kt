@@ -1,6 +1,8 @@
 package product.product.application
 
 import db.transactional.Transactional
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import passport.Passport
 import product.common.valid.MemberValidService
@@ -12,6 +14,13 @@ class ProductLikeFacade(
     private val productService: ProductService,
     private val transactional: Transactional
 ) {
+    suspend fun list(
+        passport: Passport
+    ) = transactional {
+        memberValidService.validateMember(passport)
+
+        productLikeService.list(passport.memberId).map { it.toResponse() }.toList()
+    }
 
     suspend fun toggle(
         passport: Passport,
