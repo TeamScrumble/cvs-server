@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.WebFilterExchange
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
+import passport.MemberRole.Companion.toRoleSet
 import passport.Passport
 import reactor.core.publisher.Mono
 import security.passport.PassportProvider
@@ -33,7 +34,7 @@ class OAuth2SuccessHandler(
                 authProvider = authenticatedUser.provider.name,
                 memberId = authenticatedUser.memberId,
                 email = authenticatedUser.email,
-                roles = authenticatedUser.roles,
+                roles = authenticatedUser.roles.toRoleSet(),
                 nickname = authenticatedUser.nickname,
             )
             val encodedPassport = passportProvider.encodePassport(passport)
