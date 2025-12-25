@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import product.review.domain.entity.Review
 import product.review.domain.repository.review.ReviewRepository
 import review.ReviewAddApi
+import review.ReviewListApi
 import kotlin.math.round
 
 @Service
@@ -29,17 +30,20 @@ class ReviewService(
     }
 
     suspend fun getList(
-        productId: Long,
-        page: Int, size: Int
+        request: ReviewListApi.Request
     ): List<Review> {
+        val page = request.page
+        val size = request.pageSize
         val offset = page * size
 
-        return reviewRepository
-            .findAllByProductIdAndIsDeletedFalse(
-                productId = productId,
-                offset = offset,
-                size = size
-            )
+//        return reviewRepository
+//            .findAllByProductIdAndIsDeletedFalse(
+//                productId = productId,
+//                offset = offset,
+//                size = size
+//            )
+
+        return reviewRepository.findList(request, offset)
     }
 
     suspend fun getReview(reviewId: Long): Review {

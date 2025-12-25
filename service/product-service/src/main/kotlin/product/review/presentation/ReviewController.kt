@@ -34,18 +34,13 @@ class ReviewController(
 
     @GetMapping
     override suspend fun list(
-        @RequestParam productId: Long,
-        @RequestParam page: Int,
-        @RequestParam pageSize: Int,
-        @RequestParam sort: String
+        @Valid @ModelAttribute request: ReviewListApi.Request
     ): ApiResponse<List<ReviewGetApi.Response>> {
         // todo 로그인 회원 꺼내기
         val memberId = 1L
         val result = reviewFacade.getReviewList(
-            productId = productId,
             memberId = memberId,
-            page = page,
-            size = pageSize
+            request = request
         )
 
         return ApiResponse.Success(result)

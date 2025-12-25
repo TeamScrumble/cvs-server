@@ -1,14 +1,5 @@
 package product.review.domain.projection
 
-import java.time.LocalDateTime
-
-data class ReviewSortingStatProjection(
-    val reviewId: Long,
-    val likeCount: Long,
-    val hasMedia: Boolean,
-    val createdAt: LocalDateTime
-)
-
 data class ReviewStatProjection(
     val optionId: Long,
     val count: Long
