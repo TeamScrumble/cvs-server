@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import passport.Passport
+import product.ProductBaseResponse
 import product.common.valid.MemberValidService
 
 @Service
@@ -16,25 +17,27 @@ class ProductLikeFacade(
 ) {
     suspend fun list(
         passport: Passport
-    ) = transactional {
+    ): List<ProductBaseResponse> {
         memberValidService.validateMember(passport)
 
-        productLikeService.list(passport.memberId).map { it.toResponse() }.toList()
+        return productLikeService.list(passport.memberId).map { it.toResponse() }.toList()
     }
 
     suspend fun toggle(
         passport: Passport,
         productId: Long,
-    ): ToggleResult = transactional {
+    ): ToggleResult {
         memberValidService.validateMember(passport)
         productService.validateExists(productId)
 
         val memberId = passport.memberId
 
-        if (productLikeService.isLiked(productId, memberId)) {
-            productLikeService.unlike(productId, memberId)
-        } else {
-            productLikeService.like(productId, memberId)
+        return transactional {
+            if (productLikeService.isLiked(productId, memberId)) {
+                productLikeService.unlike(productId, memberId)
+            } else {
+                productLikeService.like(productId, memberId)
+            }
         }
     }
 
