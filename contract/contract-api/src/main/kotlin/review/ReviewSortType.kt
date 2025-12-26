@@ -1,4 +1,4 @@
-package product.review.application
+package review
 
 enum class ReviewSortType(val description: String) {
     RECOMMENDED("추천순 (도움돼요 > 사진 > 최신)"),

@@ -5,6 +5,7 @@ import docs.Documented
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestParam
 
 interface ReviewListApi {
@@ -15,26 +16,39 @@ interface ReviewListApi {
         response = ReviewGetApi.Response::class
     )
     suspend fun list(
+        @ModelAttribute
+        request: Request
+    ): ApiResponse<List<ReviewGetApi.Response>>
+
+    data class Request(
         @RequestParam
         @Parameter(
             description = "상품 id", example = "1", `in` = ParameterIn.QUERY)
-        productId: Long,
+        val productId: Long,
 
         @RequestParam(defaultValue = "0")
         @Parameter(description = "페이지 번호(0부터 시작)", example = "1", `in` = ParameterIn.QUERY)
-        page: Int = 0,
+        val page: Int = 0,
 
         @RequestParam(name = "size", defaultValue = "10")
         @Parameter(description = "페이지 크기", example = "10", `in` = ParameterIn.QUERY)
-        pageSize: Int = 10,
+        val pageSize: Int = 10,
 
-        @RequestParam(defaultValue = "recommended")
+        @RequestParam(defaultValue = "false")
+        @Parameter(description = "영수증 인증 리뷰만 보기", example = "false", `in` = ParameterIn.QUERY)
+        val receiptOnly: Boolean = false,
+
+        @RequestParam(defaultValue = "false")
+        @Parameter(description = "이미지 리뷰만 보기", example = "false", `in` = ParameterIn.QUERY)
+        val imageOnly: Boolean = false,
+
+        @RequestParam(defaultValue = "RECOMMENDED")
         @Parameter(
             description = "정렬 기준",
-            example = "recommended/latest/rating_high/rating_low/most_helpful",
+            example = "RECOMMENDED/LATEST/RATING_HIGH/RATING_LOW/MOST_HELPFUL",
             `in` = ParameterIn.QUERY
         )
-        sort: String = "recommended"
-    ): ApiResponse<List<ReviewGetApi.Response>>
+        val sort: ReviewSortType = ReviewSortType.RECOMMENDED
+    )
 
 }

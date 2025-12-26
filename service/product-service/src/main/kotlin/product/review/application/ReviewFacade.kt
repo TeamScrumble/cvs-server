@@ -9,10 +9,7 @@ import kotlinx.coroutines.supervisorScope
 import org.springframework.stereotype.Service
 import passport.Passport
 import product.product.application.ProductService
-import review.ReviewAddApi
-import review.ReviewAspectGetApi
-import review.ReviewGetApi
-import review.ReviewSummaryGetApi
+import review.*
 
 @Service
 class ReviewFacade(
@@ -44,13 +41,11 @@ class ReviewFacade(
     }
 
     suspend fun getReviewList(
-        productId: Long,
         memberId: Long,
-        page: Int,
-        size: Int
+        request: ReviewListApi.Request
     ): List<ReviewGetApi.Response> = coroutineScope {
         // 리뷰 목록 가져오기
-        val reviews = reviewService.getList(productId, page, size)
+        val reviews = reviewService.getList(request)
         if (reviews.isEmpty()) return@coroutineScope emptyList()
 
         val reviewIds = reviews.map { it.id }
