@@ -14,6 +14,7 @@ import product.product.application.ProductLikeService
 import product.product.application.ProductService
 import product.product.domain.Product
 import product.product.application.toCrawlerResultDto
+import product.product.application.toResponse
 import security.passport.RequestPassport
 
 @RestController
@@ -66,8 +67,4 @@ class ProductController(
 
         return ApiResponse.Success(ProductListApi.Response(product))
     }
-
-    private fun Product.toResponse() = ProductBaseResponse(
-        id, cvsTarget.name, title, img, price, event, isNewProduct, likeCount
-    )
 }

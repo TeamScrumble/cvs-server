@@ -10,6 +10,9 @@ data class ProductBaseResponse(
     @Schema(description = "상품의 id", example = "10")
     val productId: Long,
 
+    @Schema(description = "각 편의점 상품의 고유 id", example = "10")
+    val cvsProductId: Long,
+
     @Schema(description = "편의점 종류", example = "GS25")
     val cvsTarget: String,
 

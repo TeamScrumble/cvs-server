@@ -23,6 +23,7 @@ class ProductLikeService(
     private val productLikeRepository: ProductLikeRepository,
     private val productCustomRepository: ProductCustomRepository
 ) {
+    suspend fun list(memberId: Long) = productLikeRepository.findLikedProductsByMemberId(memberId)
 
     suspend fun isLiked(productId: Long, memberId: Long): Boolean =
         productLikeRepository.existsByProductIdAndMemberId(productId, memberId)
