@@ -13,30 +13,31 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import passport.Passport
 import passport.isAdmin
+import product.common.valid.MemberValidService
 import product.product.domain.ProductCustomRepository
 import product.product.domain.ProductRepository
 
 @Service
 class ProductService(
-    private val memberApi: MemberApi,
     private val objectMapper: ObjectMapper,
     private val transactional: Transactional,
     private val productRepository: ProductRepository,
+    private val memberValidService: MemberValidService,
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val productCustomRepository: ProductCustomRepository,
 ) {
-    private suspend fun validateMember(passport: Passport) {
-        memberApi.get(passport.memberId).getOrThrow()
-    }
+    suspend fun validateExists(productId: Long) = productRepository.existsById(productId)
 
-    suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Long = transactional {
-        validateMember(passport)
+    suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Long {
+        memberValidService.validateMember(passport)
 
-        if (!passport.isAdmin) {
-            throw BusinessException(ProductErrorCode.P_002)
+        return transactional {
+            if (!passport.isAdmin) {
+                throw BusinessException(ProductErrorCode.P_002)
+            }
+
+            results.sumOf { save(it) }
         }
-
-        results.sumOf { save(it) }
     }
 
     /**
@@ -62,7 +63,7 @@ class ProductService(
         .findAllByCvsTarget(cvsTarget)
 
     suspend fun crawl(passport: Passport, targets: List<CvsTarget>): Boolean {
-        validateMember(passport)
+        memberValidService.validateMember(passport)
 
         if (!passport.isAdmin) {
             throw BusinessException(ProductErrorCode.P_002)
