@@ -4,17 +4,15 @@ import ApiResponse
 import cvs.crawler.CvsTarget
 import org.springframework.web.bind.annotation.*
 import passport.Passport
-import product.ProductAddApi
-import product.ProductApi
-import product.ProductBaseResponse
-import product.ProductCrawlApi
-import product.ProductGetApi
-import product.ProductListApi
-import product.product.application.ProductLikeService
-import product.product.application.ProductService
-import product.product.domain.Product
-import product.product.application.toCrawlerResultDto
-import product.product.application.toResponse
+import product.product.ProductAddApi
+import product.product.ProductApi
+import product.product.ProductCrawlApi
+import product.product.ProductGetApi
+import product.product.ProductListApi
+import product.product.application.service.ProductLikeService
+import product.product.application.service.ProductService
+import product.product.application.utils.toCrawlerResultDto
+import product.product.application.utils.toResponse
 import security.passport.RequestPassport
 
 @RestController

@@ -1,4 +1,4 @@
-package product.product.domain
+package product.product.domain.table
 
 import cvs.crawler.CvsTarget
 import db.base.LongIdEntity

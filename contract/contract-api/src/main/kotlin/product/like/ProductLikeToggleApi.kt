@@ -1,4 +1,4 @@
-package product
+package product.like
 
 import ApiResponse
 import docs.Documented

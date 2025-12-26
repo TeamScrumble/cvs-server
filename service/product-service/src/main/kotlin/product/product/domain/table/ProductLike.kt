@@ -1,10 +1,9 @@
-package product.product.domain
+package product.product.domain.table
 
 import db.base.LongIdEntity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import java.time.LocalDateTime
 
 @Table("product_like")
 data class ProductLike(

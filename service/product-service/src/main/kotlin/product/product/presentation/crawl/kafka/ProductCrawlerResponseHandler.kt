@@ -2,9 +2,8 @@ package product.product.presentation.crawl.kafka
 
 import cvs.crawler.CrawlerFailedEvent
 import cvs.crawler.CrawlerResultEvent
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import product.product.application.ProductService
+import product.product.application.service.ProductService
 
 @Service
 class ProductCrawlerResponseHandler(

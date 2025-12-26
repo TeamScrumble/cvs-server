@@ -1,8 +1,9 @@
-package product.product.domain
+package product.product.domain.repository
 
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
+import product.product.domain.table.Product
 
 @Repository
 class ProductCustomRepository(

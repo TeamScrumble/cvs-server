@@ -1,4 +1,4 @@
-package product
+package product.product
 
 import ApiResponse
 import docs.Documented

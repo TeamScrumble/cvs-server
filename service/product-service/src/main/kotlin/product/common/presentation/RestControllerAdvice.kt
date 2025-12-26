@@ -1,5 +1,6 @@
-package product.product.presentation.rest
+package product.common.presentation
 
+import ApiResponse
 import error.ErrorResponse
 import error.errorcode.BaseErrorCode
 import error.errorcode.ErrorCode
@@ -12,7 +13,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.server.MissingRequestValueException
-import ApiResponse
 
 @RestControllerAdvice
 class RestControllerAdvice {

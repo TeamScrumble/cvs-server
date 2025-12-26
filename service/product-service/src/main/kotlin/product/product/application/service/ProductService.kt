@@ -1,4 +1,4 @@
-package product.product.application
+package product.product.application.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import cvs.crawler.CrawlerRequestEvent
@@ -7,15 +7,14 @@ import cvs.crawler.CvsTarget
 import db.transactional.Transactional
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
-import extension.getOrThrow
-import member.MemberApi
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import passport.Passport
 import passport.isAdmin
 import product.common.valid.MemberValidService
-import product.product.domain.ProductCustomRepository
-import product.product.domain.ProductRepository
+import product.product.application.utils.toEntity
+import product.product.domain.repository.ProductCustomRepository
+import product.product.domain.repository.ProductRepository
 
 @Service
 class ProductService(

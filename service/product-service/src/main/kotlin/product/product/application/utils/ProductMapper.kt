@@ -1,11 +1,11 @@
-package product.product.application
+package product.product.application.utils
 
 import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
 import cvs.crawler.CvsTarget
-import product.ProductAddApi
-import product.ProductBaseResponse
-import product.product.domain.Product
+import product.product.ProductAddApi
+import product.product.ProductBaseResponse
+import product.product.domain.table.Product
 import java.util.zip.CRC32
 
 internal fun Product.toResponse() = ProductBaseResponse(

@@ -1,9 +1,10 @@
-package product
+package product.like
 
 import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
 import passport.Passport
+import product.product.ProductBaseResponse
 
 interface ProductLikeListApi {
     companion object {

@@ -1,4 +1,4 @@
-package product
+package product.like
 
 import io.swagger.v3.oas.annotations.tags.Tag
 

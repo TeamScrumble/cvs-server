@@ -7,8 +7,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.supervisorScope
 import org.springframework.stereotype.Service
-import passport.Passport
-import product.product.application.ProductService
+import product.product.application.service.ProductService
 import review.*
 
 @Service

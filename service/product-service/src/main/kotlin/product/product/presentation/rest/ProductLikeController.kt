@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import passport.Passport
-import product.ProductLikeApi
-import product.ProductLikeListApi
-import product.ProductLikeToggleApi
-import product.product.application.ProductLikeFacade
+import product.like.ProductLikeApi
+import product.like.ProductLikeListApi
+import product.like.ProductLikeToggleApi
+import product.product.application.service.ProductLikeFacade
 import security.passport.RequestPassport
 
 @RestController

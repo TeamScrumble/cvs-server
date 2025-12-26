@@ -1,12 +1,13 @@
-package product.product.application
+package product.product.application.service
 
 import db.transactional.Transactional
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import passport.Passport
-import product.ProductBaseResponse
+import product.product.ProductBaseResponse
 import product.common.valid.MemberValidService
+import product.product.application.utils.toResponse
 
 @Service
 class ProductLikeFacade(
