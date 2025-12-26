@@ -28,14 +28,16 @@ class ProductService(
 ) {
     suspend fun validateExists(productId: Long) = productRepository.existsById(productId)
 
-    suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Long = transactional {
+    suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Long {
         memberValidService.validateMember(passport)
 
-        if (!passport.isAdmin) {
-            throw BusinessException(ProductErrorCode.P_002)
-        }
+        return transactional {
+            if (!passport.isAdmin) {
+                throw BusinessException(ProductErrorCode.P_002)
+            }
 
-        results.sumOf { save(it) }
+            results.sumOf { save(it) }
+        }
     }
 
     /**
