@@ -36,13 +36,6 @@ class ReviewService(
         val size = request.pageSize
         val offset = page * size
 
-//        return reviewRepository
-//            .findAllByProductIdAndIsDeletedFalse(
-//                productId = productId,
-//                offset = offset,
-//                size = size
-//            )
-
         return reviewRepository.findList(request, offset)
     }
 
