@@ -19,7 +19,7 @@ interface ProductGetApi {
 
     data class Response(
         @Schema(description = "상품 정보")
-        val product: ProductBaseResponse,
+        val product: ProductDto,
 
         @Schema(description = "좋아요 여부", example = "true")
         val isLiked: Boolean

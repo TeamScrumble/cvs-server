@@ -4,7 +4,7 @@ import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.media.Schema
 import passport.Passport
-import product.product.ProductBaseResponse
+import product.product.ProductDto
 
 interface ProductLikeListApi {
     companion object {
@@ -20,6 +20,6 @@ interface ProductLikeListApi {
 
     data class Response(
         @Schema(description = "해당 회원에 대한 좋아요 여부", example = "true")
-        val productList: List<ProductBaseResponse>
+        val productList: List<ProductDto>
     )
 }

@@ -4,11 +4,11 @@ import cvs.crawler.CrawlerData
 import cvs.crawler.CrawlerResultEvent
 import cvs.crawler.CvsTarget
 import product.product.ProductAddApi
-import product.product.ProductBaseResponse
+import product.product.ProductDto
 import product.product.domain.table.Product
 import java.util.zip.CRC32
 
-internal fun Product.toResponse() = ProductBaseResponse(
+internal fun Product.toResponse() = ProductDto(
     id, cvsProductId, cvsTarget.name, title, img, price, event, isNewProduct, likeCount
 )
 

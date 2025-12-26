@@ -22,6 +22,6 @@ interface ProductListApi {
 
     data class Response(
         @Schema(description = "상품 정보")
-        val product: List<ProductBaseResponse>
+        val product: List<ProductDto>
     )
 }

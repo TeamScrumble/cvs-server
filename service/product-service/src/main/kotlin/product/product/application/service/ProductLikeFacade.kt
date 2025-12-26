@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
 import passport.Passport
-import product.product.ProductBaseResponse
+import product.product.ProductDto
 import product.common.valid.MemberValidService
 import product.product.application.utils.toResponse
 
@@ -18,7 +18,7 @@ class ProductLikeFacade(
 ) {
     suspend fun list(
         passport: Passport
-    ): List<ProductBaseResponse> {
+    ): List<ProductDto> {
         memberValidService.validateMember(passport)
 
         return productLikeService.list(passport.memberId).map { it.toResponse() }.toList()
