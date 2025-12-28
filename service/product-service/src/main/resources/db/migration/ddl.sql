@@ -117,3 +117,17 @@ ALTER TABLE review_like
 ALTER TABLE review_img
     ADD CONSTRAINT fk_review_img_review
         FOREIGN KEY (review_id) REFERENCES review(review_id);
+
+
+-- 상품 리뷰 신고 테이블
+CREATE TABLE IF NOT EXISTS review_report (
+    review_report_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '리뷰 신고 ID',
+    review_id BIGINT NOT NULL COMMENT '신고 대상 리뷰 ID',
+    member_id BIGINT NOT NULL COMMENT '신고자 회원 ID',
+    reason_code VARCHAR(30) NOT NULL COMMENT '신고 사유 코드',
+    content  VARCHAR(500) COMMENT '신고 내용',
+    status   VARCHAR(30) DEFAULT 'PENDING' COMMENT '신고 처리 상태',
+    processed_at     DATETIME       NOT NULL COMMENT '처리 일시(처리 완료 시점)',
+    created_at       DATETIME       NOT NULL,
+    last_modified_at DATETIME       NOT NULL
+);
