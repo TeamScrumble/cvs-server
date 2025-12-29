@@ -1,6 +1,8 @@
 spring:
   application:
     name: product-service
+  elasticsearch:
+    uris: http://localhost:9200
   profiles:
     include:
       - db
