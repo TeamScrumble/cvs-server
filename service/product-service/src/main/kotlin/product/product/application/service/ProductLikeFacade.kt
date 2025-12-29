@@ -15,42 +15,27 @@ class ProductLikeFacade(
     private val memberValidService: MemberValidService,
     private val productLikeService: ProductLikeService,
     private val productEsService: ProductEsService,
-    private val productService: ProductService,
-    private val transactional: Transactional
+    private val productService: ProductService
 ) {
-    suspend fun list(
-        passport: Passport
-    ): List<ProductDto> {
+    suspend fun list(passport: Passport): List<ProductDto> {
         memberValidService.validateMember(passport)
-
-        return productLikeService.list(passport.memberId).map { it.toResponse() }.toList()
+        return productLikeService.list(passport.memberId)
+            .map { it.toResponse() }
+            .toList()
     }
 
-    suspend fun toggle(
-        passport: Passport,
-        productId: Long,
-    ): ToggleResult {
+    suspend fun toggle(passport: Passport, productId: Long): ProductLikeService.ToggleResult {
         memberValidService.validateMember(passport)
         productService.validateExists(productId)
 
         val memberId = passport.memberId
 
-        val toggleResult = transactional {
-            if (productLikeService.isLiked(productId, memberId)) {
-                productLikeService.unlike(productId, memberId)
-            } else {
-                productLikeService.like(productId, memberId)
-            }
-        }
+        // DB에서 원자적으로 토글 + 최신 likeCount 확보
+        val result = productLikeService.toggle(productId, memberId)
 
-        // Elasticsearch는 같은 트랜잭션에 묶이지 않음
-        productEsService.updateLikeCount(productId, toggleResult.likeCount)
+        // DB 확정 이후 ES 반영 (set 방식)
+        productEsService.updateLikeCount(productId, result.likeCount)
 
-        return toggleResult
+        return result
     }
-
-    data class ToggleResult(
-        val liked: Boolean,
-        val likeCount: Int
-    )
 }

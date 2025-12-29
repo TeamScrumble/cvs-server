@@ -9,11 +9,11 @@ import product.product.elasticsearch.service.ProductEsSyncService
 @Service
 class ProductCrawlerResponseHandler(
     private val productService: ProductService,
-    private val syncService: ProductEsSyncService
+    private val productSyncService: ProductEsSyncService
 ) {
     suspend fun handleSuccess(result: CrawlerResultEvent) {
         val savedProductIds = productService.save(result)
-        syncService.upsertByProductIds(savedProductIds)
+        productSyncService.upsertByProductIds(savedProductIds)
     }
 
     fun handleFail(event: CrawlerFailedEvent) {

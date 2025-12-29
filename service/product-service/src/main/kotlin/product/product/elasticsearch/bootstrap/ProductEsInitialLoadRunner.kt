@@ -11,7 +11,7 @@ import product.product.elasticsearch.service.ProductEsSyncService
 @Profile("local")
 @Component
 class ProductEsInitialLoadRunner(
-    private val syncService: ProductEsSyncService
+    private val productSyncService: ProductEsSyncService
 ) : ApplicationRunner {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -35,7 +35,7 @@ class ProductEsInitialLoadRunner(
         val pageSize = args.getOptionValues("es.page-size")?.firstOrNull()?.toIntOrNull() ?: 2000
 
         // 실제 초기 적재 실행
-        syncService.initialLoad(pageSize = pageSize)
+        productSyncService.initialLoad(pageSize = pageSize)
 
         log.info("[ES Initial Load] done (pageSize={})", pageSize)
     }

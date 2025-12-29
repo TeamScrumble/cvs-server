@@ -27,8 +27,5 @@ interface ProductLikeRepository : CoroutineCrudRepository<ProductLike, Long> {
         memberId: Long
     ): Boolean
 
-    suspend fun deleteByProductIdAndMemberId(
-        productId: Long,
-        memberId: Long
-    )
+    suspend fun deleteByProductIdAndMemberId(productId: Long, memberId: Long): Long
 }
