@@ -4,7 +4,6 @@ import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestParam
 
@@ -13,7 +12,9 @@ interface ReviewListApi {
     @Documented(
         summary = "상품 리뷰 목록 조회 API",
         description = "상품의 리뷰 목록을 조회하는 API",
-        response = ReviewGetApi.Response::class
+        request = Request::class,
+        response = Response::class
+
     )
     suspend fun list(
         @ModelAttribute
@@ -51,4 +52,7 @@ interface ReviewListApi {
         val sort: ReviewSortType = ReviewSortType.RECOMMENDED
     )
 
+    data class Response(
+        val reviews: List<ReviewGetApi.Response>
+    )
 }

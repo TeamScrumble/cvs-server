@@ -12,7 +12,8 @@ interface ProductListApi {
     @Documented(
         summary = "상품 목록 조회 API",
         description = "상품의 목록 정보를 조회하는 API",
-        response = ProductGetApi.Response::class,
+        request = Request::class,
+        response = Response::class,
     )
     suspend fun list(request: Request): ApiResponse<Response>
 
