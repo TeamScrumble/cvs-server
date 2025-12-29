@@ -7,6 +7,7 @@ import cvs.crawler.CvsTarget
 import db.transactional.Transactional
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
+import org.springframework.data.domain.Pageable
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import passport.Passport
@@ -15,11 +16,14 @@ import product.common.valid.MemberValidService
 import product.product.application.utils.toEntity
 import product.product.domain.repository.ProductCustomRepository
 import product.product.domain.repository.ProductRepository
+import product.product.elasticsearch.service.ProductEsService
+import product.product.elasticsearch.util.toDto
 
 @Service
 class ProductService(
     private val objectMapper: ObjectMapper,
     private val transactional: Transactional,
+    private val productEsService: ProductEsService,
     private val productRepository: ProductRepository,
     private val memberValidService: MemberValidService,
     private val kafkaTemplate: KafkaTemplate<String, String>,
@@ -60,6 +64,14 @@ class ProductService(
 
     suspend fun findAllByCvsTarget(cvsTarget: CvsTarget) = productRepository
         .findAllByCvsTarget(cvsTarget)
+
+    suspend fun findAllByKeyword(
+        cvsTarget: CvsTarget,
+        keyword: String,
+        pageable: Pageable
+    ) = productEsService.findAllByKeyword(cvsTarget, keyword, pageable)
+        .map { it.toDto() }
+        .toList()
 
     suspend fun crawl(passport: Passport, targets: List<CvsTarget>): Boolean {
         memberValidService.validateMember(passport)

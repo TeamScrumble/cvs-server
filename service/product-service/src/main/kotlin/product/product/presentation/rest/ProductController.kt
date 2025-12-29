@@ -2,13 +2,10 @@ package product.product.presentation.rest
 
 import ApiResponse
 import cvs.crawler.CvsTarget
+import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import passport.Passport
-import product.product.ProductAddApi
-import product.product.ProductApi
-import product.product.ProductCrawlApi
-import product.product.ProductGetApi
-import product.product.ProductListApi
+import product.product.*
 import product.product.application.service.ProductLikeService
 import product.product.application.service.ProductService
 import product.product.application.utils.toCrawlerResultDto
@@ -64,5 +61,16 @@ class ProductController(
         }
 
         return ApiResponse.Success(ProductListApi.Response(product))
+    }
+
+    @GetMapping(ProductSearchApi.PATH)
+    override suspend fun search(
+        @RequestBody request: ProductSearchApi.Request
+    ): ApiResponse<ProductSearchApi.Response> {
+        val pageable = PageRequest.of(request.page.coerceAtLeast(0), request.size.coerceIn(1, 100))
+
+        return ApiResponse.Success(ProductSearchApi.Response(
+            productService.findAllByKeyword(CvsTarget.valueOf(request.cvsTarget), request.title, pageable)
+        ))
     }
 }
