@@ -2,6 +2,7 @@ package product.product.presentation.rest
 
 import ApiResponse
 import cvs.crawler.CvsTarget
+import jakarta.validation.Valid
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import passport.Passport
@@ -65,7 +66,7 @@ class ProductController(
 
     @GetMapping(ProductSearchApi.PATH)
     override suspend fun search(
-        @RequestBody request: ProductSearchApi.Request
+        @RequestBody @Valid request: ProductSearchApi.Request
     ): ApiResponse<ProductSearchApi.Response> {
         val pageable = PageRequest.of(request.page.coerceAtLeast(0), request.size.coerceIn(1, 100))
 
