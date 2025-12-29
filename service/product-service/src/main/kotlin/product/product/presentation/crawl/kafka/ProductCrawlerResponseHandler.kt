@@ -4,13 +4,16 @@ import cvs.crawler.CrawlerFailedEvent
 import cvs.crawler.CrawlerResultEvent
 import org.springframework.stereotype.Service
 import product.product.application.service.ProductService
+import product.product.elasticsearch.service.ProductEsSyncService
 
 @Service
 class ProductCrawlerResponseHandler(
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val syncService: ProductEsSyncService
 ) {
     suspend fun handleSuccess(result: CrawlerResultEvent) {
-        productService.save(result)
+        val savedProductIds = productService.save(result)
+        syncService.upsertByProductIds(savedProductIds)
     }
 
     fun handleFail(event: CrawlerFailedEvent) {

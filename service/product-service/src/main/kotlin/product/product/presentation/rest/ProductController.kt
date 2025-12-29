@@ -32,7 +32,7 @@ class ProductController(
         @RequestPassport passport: Passport,
         @RequestBody request: List<ProductAddApi.Request>
     ): ApiResponse<ProductAddApi.Response> {
-        val saveCount = productService.saveAll(passport, request.toCrawlerResultDto())
+        val saveCount = productService.saveAll(passport, request.toCrawlerResultDto()).size.toLong()
         val response = ProductAddApi.Response(saveCount)
 
         return ApiResponse.Success(response)
