@@ -8,7 +8,7 @@ import product.product.elasticsearch.util.toDocument
 
 @Service
 class ProductEsSyncService(
-    private val productRepository: ProductRepository, // R2DBC 쪽
+    private val productRepository: ProductRepository,
     private val productEsRepository: ProductEsRepository
 ) {
     suspend fun upsertByProductIds(productIds: List<Long>) {
