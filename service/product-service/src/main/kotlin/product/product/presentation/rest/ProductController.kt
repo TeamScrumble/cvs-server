@@ -45,7 +45,7 @@ class ProductController(
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
         val isLiked = if (passport != null) {
-            productLikeService.isLiked(id, passport.memberId)
+            productLikeService.toggle(id, passport.memberId).liked
         } else false
 
         val product = productService.findById(id).toResponse()
