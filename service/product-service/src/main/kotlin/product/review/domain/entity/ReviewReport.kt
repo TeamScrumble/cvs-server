@@ -26,7 +26,7 @@ data class ReviewReport(
     val content: String,
 
     @Column("status")
-    val status: String = ReviewReportStatus.PENDING.code,
+    val status: String = ReviewReportStatus.PENDING.name,
 
     @Column("processed_at")
     val processedAt: LocalDateTime = LocalDateTime.now()

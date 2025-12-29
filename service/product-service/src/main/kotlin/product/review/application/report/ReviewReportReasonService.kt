@@ -24,7 +24,7 @@ class ReviewReportReasonService() {
         }
 
         return Validated(
-            reasonCode = reason.code,
+            reasonCode = reason.name,
             content = content
         )
     }
