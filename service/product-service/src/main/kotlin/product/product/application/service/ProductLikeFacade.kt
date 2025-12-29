@@ -8,11 +8,13 @@ import passport.Passport
 import product.product.ProductDto
 import product.common.valid.MemberValidService
 import product.product.application.utils.toResponse
+import product.product.elasticsearch.service.ProductEsService
 
 @Service
 class ProductLikeFacade(
     private val memberValidService: MemberValidService,
     private val productLikeService: ProductLikeService,
+    private val productEsService: ProductEsService,
     private val productService: ProductService,
     private val transactional: Transactional
 ) {
@@ -33,13 +35,18 @@ class ProductLikeFacade(
 
         val memberId = passport.memberId
 
-        return transactional {
+        val toggleResult = transactional {
             if (productLikeService.isLiked(productId, memberId)) {
                 productLikeService.unlike(productId, memberId)
             } else {
                 productLikeService.like(productId, memberId)
             }
         }
+
+        // Elasticsearch는 같은 트랜잭션에 묶이지 않음
+        productEsService.updateLikeCount(productId, toggleResult.likeCount)
+
+        return toggleResult
     }
 
     data class ToggleResult(
