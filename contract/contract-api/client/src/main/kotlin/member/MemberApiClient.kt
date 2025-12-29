@@ -93,4 +93,19 @@ class MemberApiClient(
             .exchangeToApiResponse<MemberListApi.Response>()
             .awaitSingle()
     }
+
+    override suspend fun me(
+        passport: Passport
+    ): ApiResponse<MemberMeApi.Response> {
+        return webClient.post()
+            .uri { builder ->
+                builder
+                    .scheme(Scheme.HTTP)
+                    .applyHost(host)
+                    .path(MemberMeApi.PATH)
+                    .build()
+            }
+            .exchangeToApiResponse<MemberMeApi.Response>()
+            .awaitSingle()
+    }
 }
