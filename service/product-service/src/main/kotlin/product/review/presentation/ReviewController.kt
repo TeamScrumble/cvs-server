@@ -19,7 +19,6 @@ class ReviewController(
         @RequestPassport passport: Passport,
         @RequestBody @Valid request: ReviewAddApi.Request
     ): ApiResponse<ReviewAddApi.Response> {
-//        val reviewId = reviewFacade.add(request)
         val reviewId = reviewFacade.add(passport, request)
         val response = ReviewAddApi.Response(reviewId)
 

@@ -6,8 +6,10 @@ import error.exception.BusinessException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.supervisorScope
+import member.MemberListApi
 import org.springframework.stereotype.Service
 import passport.Passport
+import product.common.client.MemberClient
 import product.common.valid.MemberValidService
 import product.product.application.service.ProductService
 import review.*
@@ -16,6 +18,7 @@ import review.*
 class ReviewFacade(
     private val transactional: Transactional,
     private val memberValidService: MemberValidService,
+    private val memberApiClient: MemberClient,
     private val reviewService: ReviewService,
     private val likeService: ReviewLikeService,
     private val scoreService: ReviewScoreService,
@@ -55,6 +58,7 @@ class ReviewFacade(
         if (reviews.isEmpty()) return@coroutineScope emptyList()
 
         val reviewIds = reviews.map { it.id }
+        val memberIds = reviews.map { it.memberId }
 
         val imagesDeferred = async { imgService.getImages(reviewIds) }
         val scoresDeferred = async { scoreService.getScores(reviewIds) }
@@ -67,13 +71,17 @@ class ReviewFacade(
         val scores = scoresDeferred.await()
         val likes = likesDeferred.await()
         val memberLiked = memberLikedDeferred.await()
+        val memberMap: Map<Long, MemberListApi.Response.Member> =
+            memberApiClient.getMemberMap(memberIds)
 
         reviews.map { review ->
+            val member = memberMap[review.memberId]
+
             ReviewGetApi.Response(
                 reviewId = review.id,
                 memberId = review.memberId,
-                nickname = "닉네임",
-                profileImage = "",
+                nickname = member?.nickname ?: "unknown",
+                profileImage = member?.profileImage ?: "",
                 lastModifiedAt = review.lastModifiedAt.toString(),
                 rating = review.rating,
                 content = review.content,
