@@ -93,6 +93,45 @@ class ReviewFacade(
         }
     }
 
+    suspend fun getReview(
+        passport: Passport,
+        reviewId: Long
+    ): ReviewGetApi.Response = coroutineScope {
+        memberValidService.validateMember(passport)
+        val memberId = passport.memberId
+        val review = reviewService.getReview(reviewId)
+
+        val reviewIds = listOf(reviewId)
+        val writerMemberIds = listOf(review.memberId)
+
+        val imagesDeferred = async { imgService.getImages(reviewIds) }
+        val scoresDeferred = async { scoreService.getScores(reviewIds) }
+        val likesDeferred = async { likeService.getReviewCount(reviewIds) }
+        val memberLikedDeferred = async { likeService.countMemberLikedReviews(reviewIds, memberId) }
+
+        val images = imagesDeferred.await()
+        val scores = scoresDeferred.await()
+        val likes = likesDeferred.await()
+        val memberLiked = memberLikedDeferred.await()
+        val memberMap = memberApiClient.getMemberMap(writerMemberIds)
+
+        val member = memberMap[review.memberId]
+
+        ReviewGetApi.Response(
+            reviewId = review.id,
+            memberId = review.memberId,
+            nickname = member?.nickname ?: "unknown",
+            profileImage = member?.profileImage ?: "",
+            lastModifiedAt = review.lastModifiedAt.toString(),
+            rating = review.rating,
+            content = review.content,
+            likeCount = likes[review.id] ?: 0,
+            isLikeByMe = memberLiked.contains(review.id),
+            scores = scores[review.id] ?: emptyList(),
+            imgList = images[review.id] ?: emptyList()
+        )
+    }
+
     suspend fun getSummary(
         productId: Long
     ): ReviewSummaryGetApi.Response = supervisorScope{

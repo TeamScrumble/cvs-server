@@ -27,9 +27,15 @@ class ReviewController(
 
     @GetMapping("/{reviewId}")
     override suspend fun get(
+        @RequestPassport passport: Passport,
         @PathVariable reviewId: Long
     ): ApiResponse<ReviewGetApi.Response> {
-        TODO("Not yet implemented")
+        val result = reviewFacade.getReview(
+            passport = passport,
+            reviewId = reviewId
+        )
+
+        return ApiResponse.Success(result)
     }
 
     @GetMapping
