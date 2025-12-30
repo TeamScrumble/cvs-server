@@ -12,6 +12,7 @@ import passport.Passport
 import product.common.client.MemberClient
 import product.common.valid.MemberValidService
 import product.product.application.service.ProductService
+import product.review.domain.entity.Review
 import review.*
 
 @Service
@@ -58,39 +59,15 @@ class ReviewFacade(
         if (reviews.isEmpty()) return@coroutineScope emptyList()
 
         val reviewIds = reviews.map { it.id }
-        val memberIds = reviews.map { it.memberId }
+        val writerMemberIds = reviews.map { it.memberId }
 
-        val imagesDeferred = async { imgService.getImages(reviewIds) }
-        val scoresDeferred = async { scoreService.getScores(reviewIds) }
-        val likesDeferred  = async { likeService.getReviewCount(reviewIds) }
-        val memberLikedDeferred  = async {
-            likeService.countMemberLikedReviews(reviewIds, memberId)
-        }
+        val data = fetchAssembleData(
+            reviewIds = reviewIds,
+            writerMemberIds = writerMemberIds,
+            memberId = memberId
+        )
 
-        val images = imagesDeferred.await()
-        val scores = scoresDeferred.await()
-        val likes = likesDeferred.await()
-        val memberLiked = memberLikedDeferred.await()
-        val memberMap: Map<Long, MemberListApi.Response.Member> =
-            memberApiClient.getMemberMap(memberIds)
-
-        reviews.map { review ->
-            val member = memberMap[review.memberId]
-
-            ReviewGetApi.Response(
-                reviewId = review.id,
-                memberId = review.memberId,
-                nickname = member?.nickname ?: "unknown",
-                profileImage = member?.profileImage ?: "",
-                lastModifiedAt = review.lastModifiedAt.toString(),
-                rating = review.rating,
-                content = review.content,
-                likeCount = likes[review.id] ?: 0,
-                isLikeByMe = memberLiked.contains(review.id),
-                scores = scores[review.id] ?: emptyList(),
-                imgList = images[review.id] ?: emptyList()
-            )
-        }
+        reviews.map { toResponse(it, data) }
     }
 
     suspend fun getReview(
@@ -104,32 +81,13 @@ class ReviewFacade(
         val reviewIds = listOf(reviewId)
         val writerMemberIds = listOf(review.memberId)
 
-        val imagesDeferred = async { imgService.getImages(reviewIds) }
-        val scoresDeferred = async { scoreService.getScores(reviewIds) }
-        val likesDeferred = async { likeService.getReviewCount(reviewIds) }
-        val memberLikedDeferred = async { likeService.countMemberLikedReviews(reviewIds, memberId) }
-
-        val images = imagesDeferred.await()
-        val scores = scoresDeferred.await()
-        val likes = likesDeferred.await()
-        val memberLiked = memberLikedDeferred.await()
-        val memberMap = memberApiClient.getMemberMap(writerMemberIds)
-
-        val member = memberMap[review.memberId]
-
-        ReviewGetApi.Response(
-            reviewId = review.id,
-            memberId = review.memberId,
-            nickname = member?.nickname ?: "unknown",
-            profileImage = member?.profileImage ?: "",
-            lastModifiedAt = review.lastModifiedAt.toString(),
-            rating = review.rating,
-            content = review.content,
-            likeCount = likes[review.id] ?: 0,
-            isLikeByMe = memberLiked.contains(review.id),
-            scores = scores[review.id] ?: emptyList(),
-            imgList = images[review.id] ?: emptyList()
+        val data = fetchAssembleData(
+            reviewIds = reviewIds,
+            writerMemberIds = writerMemberIds,
+            memberId = memberId
         )
+
+        toResponse(review, data)
     }
 
     suspend fun getSummary(
@@ -152,5 +110,53 @@ class ReviewFacade(
         return aspectService.getAspectInfo()
     }
 
+    private data class ReviewAssembleData(
+        val images: Map<Long, List<String>>,
+        val scores: Map<Long, List<ReviewGetApi.Response.ScoreResponse>>,
+        val likes: Map<Long, Int>,
+        val memberLiked: Set<Long>,
+        val writerMemberMap: Map<Long, MemberListApi.Response.Member>
+    )
+
+    private suspend fun fetchAssembleData(
+        reviewIds: List<Long>,
+        writerMemberIds: List<Long>,
+        memberId: Long
+    ): ReviewAssembleData = coroutineScope {
+        val imagesDeferred = async { imgService.getImages(reviewIds) }
+        val scoresDeferred = async { scoreService.getScores(reviewIds) }
+        val likesDeferred = async { likeService.getReviewCount(reviewIds) }
+        val memberLikedDeferred = async { likeService.countMemberLikedReviews(reviewIds, memberId) }
+        val writerMemberMapDeferred = async { memberApiClient.getMemberMap(writerMemberIds) }
+
+        ReviewAssembleData(
+            images = imagesDeferred.await(),
+            scores = scoresDeferred.await(),
+            likes = likesDeferred.await(),
+            memberLiked = memberLikedDeferred.await(),
+            writerMemberMap = writerMemberMapDeferred.await()
+        )
+    }
+
+    private fun toResponse(
+        review: Review,
+        data: ReviewAssembleData
+    ): ReviewGetApi.Response {
+        val member = data.writerMemberMap[review.memberId]
+
+        return ReviewGetApi.Response(
+            reviewId = review.id,
+            memberId = review.memberId,
+            nickname = member?.nickname ?: "unknown",
+            profileImage = member?.profileImage ?: "",
+            lastModifiedAt = review.lastModifiedAt.toString(),
+            rating = review.rating,
+            content = review.content,
+            likeCount = data.likes[review.id] ?: 0,
+            isLikeByMe = data.memberLiked.contains(review.id),
+            scores = data.scores[review.id] ?: emptyList(),
+            imgList = data.images[review.id] ?: emptyList()
+        )
+    }
 
 }
