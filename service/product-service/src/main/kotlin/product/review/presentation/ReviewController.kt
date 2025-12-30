@@ -35,12 +35,12 @@ class ReviewController(
 
     @GetMapping
     override suspend fun list(
+        @RequestPassport passport: Passport,
         @Valid @ModelAttribute request: ReviewListApi.Request
     ): ApiResponse<List<ReviewGetApi.Response>> {
-        // todo 로그인 회원 꺼내기
-        val memberId = 1L
+
         val result = reviewFacade.getReviewList(
-            memberId = memberId,
+            passport = passport,
             request = request
         )
 

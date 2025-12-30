@@ -44,9 +44,12 @@ class ReviewFacade(
     }
 
     suspend fun getReviewList(
-        memberId: Long,
+        passport: Passport,
         request: ReviewListApi.Request
     ): List<ReviewGetApi.Response> = coroutineScope {
+        memberValidService.validateMember(passport)
+        val memberId = passport.memberId
+
         // 리뷰 목록 가져오기
         val reviews = reviewService.getList(request)
         if (reviews.isEmpty()) return@coroutineScope emptyList()

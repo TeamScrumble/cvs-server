@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestParam
+import passport.Passport
 
 interface ReviewListApi {
 
@@ -17,8 +18,8 @@ interface ReviewListApi {
 
     )
     suspend fun list(
-        @ModelAttribute
-        request: Request
+        passport: Passport,
+        @ModelAttribute request: Request
     ): ApiResponse<List<ReviewGetApi.Response>>
 
     data class Request(
