@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.review.application.ReviewFacade
 import review.*
+import security.passport.RequestPassport
 
 @RestController
 @RequestMapping(ReviewApi.PATH)
@@ -15,11 +16,11 @@ class ReviewController(
 
     @PostMapping
     override suspend fun add(
-//        @RequestPassport passport: Passport,
+        @RequestPassport passport: Passport,
         @RequestBody @Valid request: ReviewAddApi.Request
     ): ApiResponse<ReviewAddApi.Response> {
-//        val reviewId = reviewService.add(passport, request)
-        val reviewId = reviewFacade.add(request)
+//        val reviewId = reviewFacade.add(request)
+        val reviewId = reviewFacade.add(passport, request)
         val response = ReviewAddApi.Response(reviewId)
 
         return ApiResponse.Success(response)

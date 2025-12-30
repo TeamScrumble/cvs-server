@@ -7,12 +7,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.supervisorScope
 import org.springframework.stereotype.Service
+import passport.Passport
+import product.common.valid.MemberValidService
 import product.product.application.service.ProductService
 import review.*
 
 @Service
 class ReviewFacade(
     private val transactional: Transactional,
+    private val memberValidService: MemberValidService,
     private val reviewService: ReviewService,
     private val likeService: ReviewLikeService,
     private val scoreService: ReviewScoreService,
@@ -22,14 +25,15 @@ class ReviewFacade(
 ) {
 
     suspend fun add(
+        passport: Passport,
         request: ReviewAddApi.Request
     ): Long = transactional {
-        // todo 회원 검증
+        memberValidService.validateMember(passport)
         if (!productService.existsById(request.productId)) {
             throw BusinessException(ReviewErrorCode.R_007)
         }
 
-        val memberId = 1L
+        val memberId = passport.memberId
         val reviewId = reviewService.add(request, memberId)
         // 평가 저장
         scoreService.addScores(reviewId, request.scores)
