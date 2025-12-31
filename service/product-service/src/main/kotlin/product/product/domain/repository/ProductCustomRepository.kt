@@ -9,8 +9,8 @@ import product.product.domain.table.Product
 class ProductCustomRepository(
     private val client: DatabaseClient
 ) {
-    suspend fun upsertAll(products: List<Product>): Long {
-        if (products.isEmpty()) return 0
+    suspend fun upsertAll(products: List<Product>): List<Long> {
+        if (products.isEmpty()) return emptyList()
 
         val values = products.joinToString(",") {
             """(
@@ -40,12 +40,43 @@ class ProductCustomRepository(
                 event = VALUES(event),
                 is_new = VALUES(is_new),
                 last_modified_at = NOW()
-        """
+        """.trimIndent()
 
-        return client.sql(sql)
+        // 1) upsert 실행
+        client.sql(sql)
             .fetch()
             .rowsUpdated()
             .awaitSingle()
+
+        // 2) 이번에 처리한 cvs_product_id들로 product_id를 다시 조회해서 반환
+        val cvsIds = products.map { it.cvsProductId }.distinct()
+        return findProductIdsByCvsProductIds(cvsIds)
+    }
+
+    private suspend fun findProductIdsByCvsProductIds(cvsProductIds: List<Long>): List<Long> {
+        if (cvsProductIds.isEmpty()) return emptyList()
+
+        val chunkSize = 1000
+        val result = mutableListOf<Long>()
+
+        for (chunk in cvsProductIds.chunked(chunkSize)) {
+            val inClause = chunk.joinToString(",") { it.toString() } // 숫자라 안전
+            val selectSql = """
+                SELECT product_id
+                FROM product
+                WHERE cvs_product_id IN ($inClause)
+            """.trimIndent()
+
+            val ids = client.sql(selectSql)
+                .map { row, _ -> (row.get("product_id") as Number).toLong() }
+                .all()
+                .collectList()
+                .awaitSingle()
+
+            result.addAll(ids)
+        }
+
+        return result
     }
 
     suspend fun incrementLikeCount(productId: Long): Long {

@@ -2,13 +2,12 @@ package product.product.presentation.rest
 
 import ApiResponse
 import cvs.crawler.CvsTarget
+import error.errorcode.ProductErrorCode
+import error.exception.BusinessException
+import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import passport.Passport
-import product.product.ProductAddApi
-import product.product.ProductApi
-import product.product.ProductCrawlApi
-import product.product.ProductGetApi
-import product.product.ProductListApi
+import product.product.*
 import product.product.application.service.ProductLikeService
 import product.product.application.service.ProductService
 import product.product.application.utils.toCrawlerResultDto
@@ -35,7 +34,7 @@ class ProductController(
         @RequestPassport passport: Passport,
         @RequestBody request: List<ProductAddApi.Request>
     ): ApiResponse<ProductAddApi.Response> {
-        val saveCount = productService.saveAll(passport, request.toCrawlerResultDto())
+        val saveCount = productService.saveAll(passport, request.toCrawlerResultDto()).size.toLong()
         val response = ProductAddApi.Response(saveCount)
 
         return ApiResponse.Success(response)
@@ -47,7 +46,7 @@ class ProductController(
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
         val isLiked = if (passport != null) {
-            productLikeService.isLiked(id, passport.memberId)
+            productLikeService.toggle(id, passport.memberId).liked
         } else false
 
         val product = productService.findById(id).toResponse()
@@ -57,12 +56,37 @@ class ProductController(
 
     @GetMapping(ProductListApi.PATH)
     override suspend fun list(
-        @RequestBody request: ProductListApi.Request
+        @PathVariable cvsTarget: String
     ): ApiResponse<ProductListApi.Response> {
-        val product = productService.findAllByCvsTarget(CvsTarget.valueOf(request.cvsTarget)).map {
+        val product = productService.findAllByCvsTarget(CvsTarget.valueOf(cvsTarget)).map {
             it.toResponse()
         }
 
         return ApiResponse.Success(ProductListApi.Response(product))
+    }
+
+    @GetMapping(ProductSearchApi.PATH)
+    override suspend fun search(
+        @ModelAttribute request: ProductSearchApi.Request
+    ): ApiResponse<ProductSearchApi.Response> {
+        val cvsTarget = CvsTarget(request.cvsTarget)
+        val keyword = request.keyword
+        val rpp = 20
+
+        searchParamValidation(cvsTarget, keyword)
+
+        val pageable = PageRequest.of(request.page.coerceAtLeast(0), rpp)
+
+        return ApiResponse.Success(ProductSearchApi.Response(
+            productService.findAllByKeyword(cvsTarget!!, keyword, pageable)
+        ))
+    }
+
+    private fun searchParamValidation(cvsTarget: CvsTarget?, keyword: String) {
+        cvsTarget ?: throw BusinessException(ProductErrorCode.P_003)
+
+        if (keyword.length < 2) {
+            throw BusinessException(ProductErrorCode.P_004)
+        }
     }
 }

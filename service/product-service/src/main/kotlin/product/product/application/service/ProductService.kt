@@ -7,6 +7,7 @@ import cvs.crawler.CvsTarget
 import db.transactional.Transactional
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
+import org.springframework.data.domain.Pageable
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import passport.Passport
@@ -15,11 +16,14 @@ import product.common.valid.MemberValidService
 import product.product.application.utils.toEntity
 import product.product.domain.repository.ProductCustomRepository
 import product.product.domain.repository.ProductRepository
+import product.product.elasticsearch.service.ProductEsService
+import product.product.elasticsearch.util.toDto
 
 @Service
 class ProductService(
     private val objectMapper: ObjectMapper,
     private val transactional: Transactional,
+    private val productEsService: ProductEsService,
     private val productRepository: ProductRepository,
     private val memberValidService: MemberValidService,
     private val kafkaTemplate: KafkaTemplate<String, String>,
@@ -27,32 +31,28 @@ class ProductService(
 ) {
     suspend fun validateExists(productId: Long) = productRepository.existsById(productId)
 
-    suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): Long {
+    suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): List<Long> {
         memberValidService.validateMember(passport)
 
         return transactional {
-            if (!passport.isAdmin) {
-                throw BusinessException(ProductErrorCode.P_002)
-            }
-
-            results.sumOf { save(it) }
+            if (!passport.isAdmin) throw BusinessException(ProductErrorCode.P_002)
+            results.flatMap { save(it) }.distinct()
         }
     }
 
     /**
      * 단일 save의 경우 스케줄러 카프카 이벤트 및 saveAll을 제외한 곳에서 호출되지 않기 때문에 따로 passport 체크가 없음
      * */
-    suspend fun save(result: CrawlerResultEvent, chunkSize: Int = 1000): Long {
+    suspend fun save(result: CrawlerResultEvent, chunkSize: Int = 1000): List<Long> {
         val products = result.data.map { it.toEntity(result.target) }
 
-        var count = 0L
+        val savedIds = mutableListOf<Long>()
 
-        // 몇 만 건의 데이터를 쌓을 경우, 메모리 폭발 여지가 있어 chunk 방식을 사용해 bulk 업데이트
         products.chunked(chunkSize).forEach { chunk ->
-            count += productCustomRepository.upsertAll(chunk)
+            savedIds += productCustomRepository.upsertAll(chunk) // upsertAll 반환 변경: Long -> List<Long>
         }
 
-        return count
+        return savedIds.distinct()
     }
 
     suspend fun findById(id: Long) = productRepository.findById(id)
@@ -60,6 +60,14 @@ class ProductService(
 
     suspend fun findAllByCvsTarget(cvsTarget: CvsTarget) = productRepository
         .findAllByCvsTarget(cvsTarget)
+
+    suspend fun findAllByKeyword(
+        cvsTarget: CvsTarget,
+        keyword: String,
+        pageable: Pageable
+    ) = productEsService.findAllByKeyword(cvsTarget, keyword, pageable)
+        .map { it.toDto() }
+        .toList()
 
     suspend fun crawl(passport: Passport, targets: List<CvsTarget>): Boolean {
         memberValidService.validateMember(passport)

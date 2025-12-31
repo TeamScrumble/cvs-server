@@ -1,6 +1,8 @@
 spring:
   application:
     name: product-service
+  elasticsearch:
+    uris: ${ES_URL}
   profiles:
     include:
       - db

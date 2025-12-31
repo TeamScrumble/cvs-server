@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "productId": { "type": "long" },
+    "cvsTarget": { "type": "keyword" },
+    "title": {
+      "type": "text",
+      "analyzer": "korean",
+      "fields": {
+        "keyword": { "type": "keyword" }
+      }
+    },
+    "price": { "type": "integer" },
+    "isNew": { "type": "boolean" },
+    "event": { "type": "keyword" },
+    "img": { "type": "keyword", "index": false }
+  }
+}
