@@ -62,4 +62,13 @@ class MemberController(
 
         return ApiResponse.Success(response)
     }
+
+    @GetMapping(MemberMeApi.PATH)
+    override suspend fun me(
+        @RequestPassport passport: Passport
+    ): ApiResponse<MemberMeApi.Response> {
+        val response = memberService.findMe(passport)
+
+        return ApiResponse.Success(response)
+    }
 }

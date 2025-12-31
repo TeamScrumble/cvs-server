@@ -18,7 +18,10 @@ interface ReviewAddApi {
         request = Request::class,
         response = Response::class
     )
-    suspend fun add(request: Request): ApiResponse<Response>
+    suspend fun add(
+        passport: Passport,
+        request: Request
+    ): ApiResponse<Response>
 
     data class Request(
         @Schema(description = "리뷰를 등록할 상품 id", example = "1")

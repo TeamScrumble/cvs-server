@@ -6,6 +6,7 @@ import member.MemberApiClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
+import product.common.client.MemberClient
 
 @Configuration
 class ProductServiceClientConfig(
@@ -25,5 +26,10 @@ class ProductServiceClientConfig(
             host = props.gatewayHost,
             webClient = webClient
         )
+    }
+
+    @Bean
+    fun memberServiceClient(memberApiClient: MemberApiClient): MemberClient {
+        return MemberClient(memberApiClient)
     }
 }

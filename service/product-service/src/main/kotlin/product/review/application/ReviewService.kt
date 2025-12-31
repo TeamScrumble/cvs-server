@@ -62,4 +62,7 @@ class ReviewService(
         return round(avg * 10) / 10.0
     }
 
+    suspend fun existsById(reviewId: Long) =
+        reviewRepository.existsById(reviewId)
+
 }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import member.MemberGetApi
 import member.MemberListApi
+import member.MemberMeApi
 import member.domain.member.Member
 import member.domain.member.MemberRepository
 import passport.MemberRole
@@ -107,5 +108,16 @@ class MemberService(
                 profileImage = member.profileImage
             )
         }
+    }
+
+    suspend fun findMe(passport: Passport): MemberMeApi.Response = transactional {
+        val member = memberRepository.findById(passport.memberId)
+            ?: throw BusinessException(MemberErrorCode.M_001)
+        MemberMeApi.Response(
+            memberId = member.id,
+            email = member.email,
+            nickname = member.nickname,
+            profileImage = member.profileImage
+        )
     }
 }

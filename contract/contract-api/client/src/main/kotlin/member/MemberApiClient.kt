@@ -81,7 +81,7 @@ class MemberApiClient(
     override suspend fun getList(
         memberIds: List<Long>
     ): ApiResponse<MemberListApi.Response> {
-        return webClient.post()
+        return webClient.get()
             .uri { builder ->
                 builder
                     .scheme(Scheme.HTTP)
@@ -91,6 +91,21 @@ class MemberApiClient(
                     .build()
             }
             .exchangeToApiResponse<MemberListApi.Response>()
+            .awaitSingle()
+    }
+
+    override suspend fun me(
+        passport: Passport
+    ): ApiResponse<MemberMeApi.Response> {
+        return webClient.post()
+            .uri { builder ->
+                builder
+                    .scheme(Scheme.HTTP)
+                    .applyHost(host)
+                    .path(MemberMeApi.PATH)
+                    .build()
+            }
+            .exchangeToApiResponse<MemberMeApi.Response>()
             .awaitSingle()
     }
 }
