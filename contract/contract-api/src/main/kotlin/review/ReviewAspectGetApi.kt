@@ -9,9 +9,9 @@ interface ReviewAspectGetApi {
     @Documented(
         summary = "리뷰 평가 질문, 옵션 조회 API",
         description = "리뷰 평가 질문과 질문에 맞는 답변 옵션을 조회 API",
-        response = ReviewAspectGetApi.Response::class
+        response = Response::class
     )
-    suspend fun getAspectInfo(): ApiResponse<List<ReviewAspectGetApi.Response>>
+    suspend fun getAspectInfo(): ApiResponse<List<Response>>
 
     data class Response(
         @Schema(description = "평가 카테고리 id", example = "1")

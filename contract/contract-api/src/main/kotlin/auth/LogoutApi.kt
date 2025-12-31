@@ -12,7 +12,7 @@ interface LogoutApi {
     @Documented(
         summary = "로그아웃 API",
         description = "Access Token을 기반으로 로그아웃 API (프론트에서도 인증 토큰을 지워줘야 함)",
-        response = TokenReissueApi.Response::class,
+        response = Response::class,
     )
     suspend fun logout(passport: Passport): ApiResponse<Response>
 
