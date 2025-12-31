@@ -1,26 +1,22 @@
 package product.review.application
 
-import error.errorcode.ReviewErrorCode
-import error.exception.BusinessException
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.toList
 import org.springframework.stereotype.Service
-import product.review.domain.entity.ReviewAspectOption
 import product.review.domain.entity.ReviewScore
-import product.review.domain.repository.ReviewAspectOptionRepository
-import product.review.domain.repository.ReviewAspectRepository
-import product.review.domain.repository.ReviewScoreRepository
+import product.review.domain.repository.reviewScore.ReviewScoreRepository
 import review.ReviewAddApi.Request.ScoreRequest
+import review.ReviewGetApi.Response.ScoreResponse
+import review.ReviewSummaryGetApi
 
 @Service
 class ReviewScoreService(
     private val scoreRepository: ReviewScoreRepository,
-    private val optionRepository: ReviewAspectOptionRepository,
-    private val aspectRepository: ReviewAspectRepository
+    private val aspectService: ReviewAspectService,
 ) {
 
-    suspend fun addScores(reviewId: Long, scores: List<ScoreRequest>) {
-        validateScores(scores)
+    suspend fun addScores(
+        reviewId: Long,
+        scores: List<ScoreRequest>
+    ) {
 
         scores.forEach { s ->
             scoreRepository.save(
@@ -32,26 +28,51 @@ class ReviewScoreService(
         }
     }
 
-    private suspend fun validateScores(scores: List<ScoreRequest>) {
-//        val aspectIds = scores.map { it.aspectId }.toSet()
-        val optionIds = scores.map { it.optionId }.toSet()
+    suspend fun getScores(
+        reviewIds: List<Long>
+    ): Map<Long, List<ScoreResponse>> {
+        val scores = scoreRepository.findAllByReviewIds(reviewIds)
 
-//        val aspects = aspectRepository.findAllById(aspectIds)
-//            .toList()
-//            .associateBy { it.id }
-        val options = optionRepository.findAllById(optionIds)
-            .toList()
-            .associateBy { it.id }
+        val meta = aspectService.getOptionMeta(
+            scores.map { it.optionId }.toSet()
+        )
 
-        scores.forEach { s ->
-//            val aspect = aspects[s.aspectId]
-//                ?: throw BusinessException(ReviewErrorCode.R_004) // 존재하지 않는 평가 항목
-            val option = options[s.optionId]
-                ?: throw BusinessException(ReviewErrorCode.R_005) // 존재하지 않는 옵션
+        return scores.groupBy { it.reviewId }
+            .mapValues { (_, list) ->
+                list.mapNotNull { meta[it.optionId] }
+            }
+    }
 
-//            if (option.aspectId != aspect.id) {
-//                throw BusinessException(ReviewErrorCode.R_006) // 항목-옵션 불일치
-//            }
+    suspend fun getAspectStatsForSummary(
+        productId: Long
+    ): List<ReviewSummaryGetApi.Response.AspectStat> {
+        val stats = scoreRepository.findStatsByProductId(productId)
+        if (stats.isEmpty()) return emptyList()
+
+        // 옵션별 count
+        val countMap = stats.associate { it.optionId to it.count }
+        val aspects = aspectService.getAspects()
+        if (aspects.isEmpty()) return emptyList()
+
+        val aspectIds = aspects.map { it.id }
+        val options = aspectService.getOptions(aspectIds)
+        val optionsByAspectId = options.groupBy { it.aspectId }
+
+        return aspects.map { aspect ->
+            val optionStats = optionsByAspectId[aspect.id].orEmpty().map { o ->
+                ReviewSummaryGetApi.Response.OptionStat(
+                    optionId = o.id,
+                    optionText = o.optionText,
+                    count = countMap[o.id] ?: 0L
+                )
+            }
+
+            ReviewSummaryGetApi.Response.AspectStat(
+                aspectId = aspect.id,
+                title = aspect.title,
+                question = aspect.question,
+                options = optionStats
+            )
         }
     }
 

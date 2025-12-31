@@ -40,7 +40,7 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
   profiles:
-    active:
+    include:
       - security
       - cache
       - db
@@ -54,6 +54,9 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
 token:
   access-token-expires: 3_600_000
   refresh-token-expires: 604_800_000
@@ -66,3 +69,4 @@ springdoc:
 service:
   gateway-host: ${GATEWAY_HOST}
   db_schema: ${AUTH_DB_SCHEMA}
+  service-key: ${SERVICE_KEY}

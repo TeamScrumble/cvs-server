@@ -3,70 +3,66 @@ package product.review.application
 import error.errorcode.ReviewErrorCode
 import error.exception.BusinessException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import passport.Passport
 import product.review.domain.entity.Review
-import product.review.domain.repository.ReviewRepository
+import product.review.domain.repository.review.ReviewRepository
 import review.ReviewAddApi
+import review.ReviewListApi
+import kotlin.math.round
 
 @Service
 class ReviewService(
-    private val reviewRepository: ReviewRepository,
-    private val reviewScoreService: ReviewScoreService
+    private val reviewRepository: ReviewRepository
 ) {
-    @Transactional
+
     suspend fun add(
-        //passport: Passport,
-        request: ReviewAddApi.Request
+        request: ReviewAddApi.Request,
+        memberId: Long,
     ): Long {
-
-        // 회원 검증
-        //validateMember(passport)
-        // 리뷰 검증
-        validateReview(request)
-
-        val memberId = 1L // TODO: passport.memberId로 변경
-        val review = Review(
+        val review = Review.create(
             productId = request.productId,
             memberId = memberId,
             rating = request.rating,
-            content = request.content
+            content = request.content,
+            isReceipt = request.isReceipt
         )
 
-        // 리뷰 저장
-        val saved = reviewRepository.save(review)
-
-        // 리뷰 평가 점수 저장
-        reviewScoreService.addScores(saved.id, request.scores)
-
-        return saved.id
+        return reviewRepository.save(review).id
     }
 
-    private suspend fun validateMember(passport: Passport) {
-        // 실제 존재하는 회원인지
-        // 권한 체크
+    suspend fun getList(
+        request: ReviewListApi.Request
+    ): List<Review> {
+        val page = request.page
+        val size = request.pageSize
+        val offset = page * size
+
+        return reviewRepository.findList(request, offset)
     }
 
-    private suspend fun validateReview(request: ReviewAddApi.Request) {
-        // TODO: 상품 검증(상품 존재 여부)
-
-        // 리뷰 검증
-        // 만족도 범위 체크
-        if (request.rating !in RATING_MIN..RATING_MAX) {
-            throw BusinessException(ReviewErrorCode.R_002)
-        }
-        // 리뷰 글자수 체크
-        val contentLength = request.content.trim().length
-        if (contentLength !in CONTENT_MIN..CONTENT_MAX) {
-            throw BusinessException(ReviewErrorCode.R_003)
-        }
+    suspend fun getReview(reviewId: Long): Review {
+        return reviewRepository
+            .findById(reviewId)
+            ?: throw BusinessException(ReviewErrorCode.R_001)
     }
 
-    companion object {
-        private const val RATING_MIN = 1
-        private const val RATING_MAX = 5
-        private const val CONTENT_MIN = 10
-        private const val CONTENT_MAX = 500
+    suspend fun getReviewCount(productId: Long): Long {
+        return reviewRepository
+            .countByProductIdAndIsDeletedFalse(productId)
     }
+
+    suspend fun getReceiptCount(productId: Long): Long {
+        return reviewRepository
+            .countByProductIdAndIsReceiptTrueAndIsDeletedFalse(productId)
+    }
+
+    suspend fun getAvgRating(productId: Long): Double {
+        val avg = reviewRepository
+            .findAvgRatingByProductId(productId) ?: return 0.0
+
+        return round(avg * 10) / 10.0
+    }
+
+    suspend fun existsById(reviewId: Long) =
+        reviewRepository.existsById(reviewId)
 
 }

@@ -4,6 +4,7 @@ import db.base.LongIdEntity
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import passport.MemberRole
 
 @Table("member")
 data class Member(
@@ -18,5 +19,8 @@ data class Member(
     val roles: Set<MemberRole>,
 
     @Column("nickname")
-    val nickname: String
+    val nickname: String,
+
+    @Column("profile_image")
+    val profileImage: String
 ) : LongIdEntity()

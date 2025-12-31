@@ -1,28 +1,40 @@
-package product.presentation
+package product.product.presentation.rest
 
 import ApiResponse
 import cvs.crawler.CvsTarget
+import error.errorcode.ProductErrorCode
+import error.exception.BusinessException
+import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import passport.Passport
-import product.ProductAddApi
-import product.ProductApi
-import product.ProductGetApi
-import product.ProductListApi
-import product.product.application.ProductService
-import product.product.domain.Product
-import product.product.application.toCrawlerResultDto
+import product.product.*
+import product.product.application.service.ProductLikeService
+import product.product.application.service.ProductService
+import product.product.application.utils.toCrawlerResultDto
+import product.product.application.utils.toResponse
 import security.passport.RequestPassport
 
 @RestController
 class ProductController(
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val productLikeService: ProductLikeService,
 ) : ProductApi {
+    @PostMapping(ProductCrawlApi.PATH)
+    override suspend fun crawl(
+        @RequestPassport passport: Passport,
+        @RequestBody request: List<ProductCrawlApi.Request>
+    ): ApiResponse<ProductCrawlApi.Response> {
+        val isSuccess = productService.crawl(passport, request.map { CvsTarget.valueOf(it.cvsTarget) })
+
+        return ApiResponse.Success(ProductCrawlApi.Response(isSuccess))
+    }
+
     @PostMapping(ProductAddApi.PATH)
     override suspend fun add(
         @RequestPassport passport: Passport,
         @RequestBody request: List<ProductAddApi.Request>
     ): ApiResponse<ProductAddApi.Response> {
-        val saveCount = productService.saveAll(passport, request.toCrawlerResultDto())
+        val saveCount = productService.saveAll(passport, request.toCrawlerResultDto()).size.toLong()
         val response = ProductAddApi.Response(saveCount)
 
         return ApiResponse.Success(response)
@@ -30,25 +42,51 @@ class ProductController(
 
     @GetMapping("${ProductGetApi.PATH}/{id}")
     override suspend fun get(
+        @RequestPassport passport: Passport?,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
+        val isLiked = if (passport != null) {
+            productLikeService.toggle(id, passport.memberId).liked
+        } else false
+
         val product = productService.findById(id).toResponse()
 
-        return ApiResponse.Success(product)
+        return ApiResponse.Success(ProductGetApi.Response(product, isLiked))
     }
 
     @GetMapping(ProductListApi.PATH)
     override suspend fun list(
-        @RequestBody request: ProductListApi.Request
-    ): ApiResponse<List<ProductGetApi.Response>> {
-        val product = productService.findAllByCvsTarget(CvsTarget.valueOf(request.cvsTarget)).map {
+        @PathVariable cvsTarget: String
+    ): ApiResponse<ProductListApi.Response> {
+        val product = productService.findAllByCvsTarget(CvsTarget.valueOf(cvsTarget)).map {
             it.toResponse()
         }
 
-        return ApiResponse.Success(product)
+        return ApiResponse.Success(ProductListApi.Response(product))
     }
 
-    private fun Product.toResponse() = ProductGetApi.Response(
-        id, cvsTarget.name, title, img, price, event, isNewProduct
-    )
+    @GetMapping(ProductSearchApi.PATH)
+    override suspend fun search(
+        @ModelAttribute request: ProductSearchApi.Request
+    ): ApiResponse<ProductSearchApi.Response> {
+        val cvsTarget = CvsTarget(request.cvsTarget)
+        val keyword = request.keyword
+        val rpp = 20
+
+        searchParamValidation(cvsTarget, keyword)
+
+        val pageable = PageRequest.of(request.page.coerceAtLeast(0), rpp)
+
+        return ApiResponse.Success(ProductSearchApi.Response(
+            productService.findAllByKeyword(cvsTarget!!, keyword, pageable)
+        ))
+    }
+
+    private fun searchParamValidation(cvsTarget: CvsTarget?, keyword: String) {
+        cvsTarget ?: throw BusinessException(ProductErrorCode.P_003)
+
+        if (keyword.length < 2) {
+            throw BusinessException(ProductErrorCode.P_004)
+        }
+    }
 }

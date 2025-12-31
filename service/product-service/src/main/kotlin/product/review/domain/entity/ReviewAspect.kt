@@ -12,6 +12,9 @@ data class ReviewAspect(
     override val id: Long = 0L,
 
     @Column("title")
-    val title: String
+    val title: String,
+
+    @Column("question")
+    val question: String
 
 ) : LongIdEntity()

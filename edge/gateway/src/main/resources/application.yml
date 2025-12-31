@@ -7,32 +7,69 @@ spring:
   application:
     name: gateway
   profiles:
-    active:
+    include:
       - security
       - cache
   cloud:
     gateway:
       routes:
+        # ================== auth-service ==================
+        - id: auth-service-internal
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/internal/**
+          filters:
+            - InternalServiceKey
+
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
+
         - id: auth-oauth2
           uri: lb://auth-service
           predicates:
             - Path=/oauth2/**
+
         - id: auth-login-callback
           uri: lb://auth-service
           predicates:
             - Path=/login/**
+
+        # ================== member-service ==================
+        - id: member-service-internal
+          uri: lb://member-service
+          predicates:
+            - Path=/api/member/internal/**
+          filters:
+            - InternalServiceKey
+
         - id: member-service
           uri: lb://member-service
           predicates:
             - Path=/api/member/**
+
+        # ================== crawler-service ==================
+        - id: crawler-service-internal
+          uri: lb://crawler-service
+          predicates:
+            - Path=/api/crawler/internal/**
+          filters:
+            - InternalServiceKey
+
         - id: crawler-service
           uri: lb://crawler-service
           predicates:
             - Path=/api/crawler/**
+
+        # ================== product-service ==================
+        - id: product-service-internal
+          uri: lb://product-service
+          predicates:
+            - Path=/api/product/internal/**
+          filters:
+            - InternalServiceKey
+
         - id: product-service
           uri: lb://product-service
           predicates:
@@ -47,3 +84,10 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_URL}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+service:
+  service-key: ${SERVICE_KEY}
+  gateway-host: ${GATEWAY_HOST}

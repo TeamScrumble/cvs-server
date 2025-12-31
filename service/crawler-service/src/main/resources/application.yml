@@ -4,7 +4,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
   profiles:
-    active:
+    include:
       - db
       - security
 
@@ -15,13 +15,16 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
 
 springdoc:
   api-docs:
     path: /api/crawler/oas.json
-    writer-with-default-pretty-printer: true
-    defaultZone: ${EUREKA_URL}
+  writer-with-default-pretty-printer: true
 
 service:
   gateway-host: ${GATEWAY_HOST}
   db_schema: ${CRAWLER_DB_SCHEMA}
+  service-key: ${SERVICE_KEY}

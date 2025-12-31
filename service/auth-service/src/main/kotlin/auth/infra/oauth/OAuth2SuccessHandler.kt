@@ -2,13 +2,14 @@ package auth.infra.oauth
 
 import auth.LoginRedirect
 import auth.application.TokenService
-import cache.CacheMemory
+import auth.infra.cache.PassportCacheMemory
 import kotlinx.coroutines.reactor.mono
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.WebFilterExchange
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
+import passport.MemberRole.Companion.toRoleSet
 import passport.Passport
 import reactor.core.publisher.Mono
 import security.passport.PassportProvider
@@ -18,7 +19,7 @@ import java.net.URI
 class OAuth2SuccessHandler(
     private val tokenService: TokenService,
     private val passportProvider: PassportProvider,
-    private val cacheMemory: CacheMemory
+    private val passportCacheMemory: PassportCacheMemory
 ) : ServerAuthenticationSuccessHandler {
 
     override fun onAuthenticationSuccess(
@@ -33,11 +34,11 @@ class OAuth2SuccessHandler(
                 authProvider = authenticatedUser.provider.name,
                 memberId = authenticatedUser.memberId,
                 email = authenticatedUser.email,
-                roles = authenticatedUser.roles,
+                roles = authenticatedUser.roles.toRoleSet(),
                 nickname = authenticatedUser.nickname,
             )
             val encodedPassport = passportProvider.encodePassport(passport)
-            cacheMemory.set("Passport:" + authenticatedUser.memberId, encodedPassport)
+            passportCacheMemory.setPassport(authenticatedUser.memberId, encodedPassport)
 
             val ticket = tokenService.issueTicket(authenticatedUser.memberId)
 

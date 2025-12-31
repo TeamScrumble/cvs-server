@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 interface MemberGetApi {
     companion object {
-        const val PATH = "/api/member"
+        const val PATH = "/api/member/internal"
     }
 
     @Documented(
@@ -25,5 +25,7 @@ interface MemberGetApi {
         val roles: Set<String>,
         @Schema(description = "사용자 닉네임", example = "사악한 펭귄")
         val nickname: String,
+        @Schema(description = "사용자 프로필 이미지", example = "https://i.imgur.com/CHUednA_d.png")
+        val profileImage: String,
     )
 }

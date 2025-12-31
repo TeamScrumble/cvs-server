@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(
-    scanBasePackages = ["crawler", "db", "security"]
+    scanBasePackages = ["crawler", "db", "security", "docs"]
 )
 class CrawlerServerApplication
 

@@ -6,4 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AuthServiceProperties(
     val gatewayHost: String,
     val dbSchema: String,
+    val serviceKey: String
 )

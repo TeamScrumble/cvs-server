@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active:
+    include:
       - security
       - db
   application:
@@ -13,14 +13,17 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
 
 springdoc:
   api-docs:
     path: /api/member/oas.json
-    writer-with-default-pretty-printer: true
-    defaultZone: ${EUREKA_URL}
+  writer-with-default-pretty-printer: true
 
 service:
   gateway-host: ${GATEWAY_HOST}
   db_schema: ${MEMBER_DB_SCHEMA}
+  service-key: ${SERVICE_KEY}

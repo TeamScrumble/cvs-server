@@ -6,6 +6,7 @@ import auth.domain.auth.AuthRepository
 import auth.domain.emailauth.EmailAuth
 import auth.domain.emailauth.EmailAuthRepository
 import auth.infra.cache.EmailVerifyCacheMemory
+import auth.infra.cache.PassportCacheMemory
 import auth.infra.mail.MailContent
 import auth.infra.mail.MailSender
 import db.transactional.Transactional
@@ -16,6 +17,10 @@ import extension.getOrThrow
 import member.MemberAddApi
 import member.MemberApi
 import org.springframework.stereotype.Service
+import passport.MemberRole
+import passport.MemberRole.Companion.toRoleSet
+import passport.Passport
+import security.passport.PassportProvider
 import security.password.PasswordEncoder
 import java.security.SecureRandom
 
@@ -26,6 +31,8 @@ class EmailAuthService(
     private val authRepository: AuthRepository,
     private val mailSender: MailSender,
     private val emailVerifyCacheMemory: EmailVerifyCacheMemory,
+    private val passportCacheMemory: PassportCacheMemory,
+    private val passportProvider: PassportProvider,
     private val memberApi: MemberApi,
     private val passwordEncoder: PasswordEncoder
 ) {
@@ -151,6 +158,19 @@ class EmailAuthService(
             AuthProvider.INTERNAL,
             emailAuth.id.toString()
         ) ?: throw InternalServerException("이메일 로그인 정보는 있지만, 인증 정보가 없습니다. email : ${emailAuth.email}")
+
+        val member = memberApi.get(auth.memberId).getOrThrow()
+
+        val passport = Passport(
+            authId = auth.id,
+            authProvider = auth.provider.name,
+            memberId = member.memberId,
+            email = member.email,
+            roles = member.roles.toRoleSet(),
+            nickname = member.nickname,
+        )
+        val encodedPassport = passportProvider.encodePassport(passport)
+        passportCacheMemory.setPassport(auth.memberId, encodedPassport)
 
         return auth.memberId
     }
