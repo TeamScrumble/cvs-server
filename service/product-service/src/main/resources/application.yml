@@ -14,6 +14,9 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
 
 springdoc:
   api-docs:

@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import passport.Passport
 import product.review.application.report.ReviewReportFacade
 import review.report.ReviewReportAddApi
 import review.report.ReviewReportApi
 import review.report.ReviewReportReasonGetApi
+import security.passport.RequestPassport
 
 @RestController
 class ReviewReportController(
@@ -18,13 +20,13 @@ class ReviewReportController(
 
     @PostMapping(ReviewReportAddApi.PATH)
     override suspend fun reportAdd(
+        @RequestPassport passport: Passport,
         @PathVariable reviewId: Long,
         @RequestBody request: ReviewReportAddApi.Request
     ): ApiResponse<ReviewReportAddApi.Response> {
-        val memberId = 1L
         val saved = reportFacade.addReport(
+            passport = passport,
             reviewId = reviewId,
-            memberId = memberId,
             request = request
         )
 

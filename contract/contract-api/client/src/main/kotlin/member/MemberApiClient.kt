@@ -81,7 +81,7 @@ class MemberApiClient(
     override suspend fun getList(
         memberIds: List<Long>
     ): ApiResponse<MemberListApi.Response> {
-        return webClient.post()
+        return webClient.get()
             .uri { builder ->
                 builder
                     .scheme(Scheme.HTTP)

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Size
+import passport.Passport
 
 interface ReviewReportAddApi {
 
@@ -20,6 +21,7 @@ interface ReviewReportAddApi {
         response = Response::class
     )
     suspend fun reportAdd(
+        passport: Passport,
         @Parameter(description = "신고 대상 리뷰 id", `in` = ParameterIn.PATH)
         reviewId: Long,
         request: Request

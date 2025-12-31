@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.review.application.ReviewFacade
 import review.*
+import security.passport.RequestPassport
 
 @RestController
 @RequestMapping(ReviewApi.PATH)
@@ -15,11 +16,10 @@ class ReviewController(
 
     @PostMapping
     override suspend fun add(
-//        @RequestPassport passport: Passport,
+        @RequestPassport passport: Passport,
         @RequestBody @Valid request: ReviewAddApi.Request
     ): ApiResponse<ReviewAddApi.Response> {
-//        val reviewId = reviewService.add(passport, request)
-        val reviewId = reviewFacade.add(request)
+        val reviewId = reviewFacade.add(passport, request)
         val response = ReviewAddApi.Response(reviewId)
 
         return ApiResponse.Success(response)
@@ -27,19 +27,25 @@ class ReviewController(
 
     @GetMapping("/{reviewId}")
     override suspend fun get(
+        @RequestPassport passport: Passport,
         @PathVariable reviewId: Long
     ): ApiResponse<ReviewGetApi.Response> {
-        TODO("Not yet implemented")
+        val result = reviewFacade.getReview(
+            passport = passport,
+            reviewId = reviewId
+        )
+
+        return ApiResponse.Success(result)
     }
 
     @GetMapping
     override suspend fun list(
+        @RequestPassport passport: Passport,
         @Valid @ModelAttribute request: ReviewListApi.Request
     ): ApiResponse<List<ReviewGetApi.Response>> {
-        // todo 로그인 회원 꺼내기
-        val memberId = 1L
+
         val result = reviewFacade.getReviewList(
-            memberId = memberId,
+            passport = passport,
             request = request
         )
 
