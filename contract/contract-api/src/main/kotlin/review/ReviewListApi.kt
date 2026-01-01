@@ -4,8 +4,7 @@ import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.RequestParam
+import org.springdoc.core.annotations.ParameterObject
 import passport.Passport
 
 interface ReviewListApi {
@@ -19,35 +18,29 @@ interface ReviewListApi {
     )
     suspend fun list(
         passport: Passport,
-        @ModelAttribute request: Request
+        @ParameterObject request: Request
     ): ApiResponse<List<ReviewGetApi.Response>>
 
     data class Request(
-        @RequestParam
-        @Parameter(
+        @field:Parameter(
             description = "상품 id", example = "1", `in` = ParameterIn.QUERY)
         val productId: Long,
 
-        @RequestParam(defaultValue = "0")
-        @Parameter(description = "페이지 번호(0부터 시작)", example = "1", `in` = ParameterIn.QUERY)
+        @field:Parameter(description = "페이지 번호(0부터 시작)", example = "1", `in` = ParameterIn.QUERY)
         val page: Int = 0,
 
-        @RequestParam(name = "size", defaultValue = "10")
-        @Parameter(description = "페이지 크기", example = "10", `in` = ParameterIn.QUERY)
+        @field:Parameter(description = "페이지 크기", example = "10", `in` = ParameterIn.QUERY)
         val pageSize: Int = 10,
 
-        @RequestParam(defaultValue = "false")
-        @Parameter(description = "영수증 인증 리뷰만 보기", example = "false", `in` = ParameterIn.QUERY)
+        @field:Parameter(description = "영수증 인증 리뷰만 보기", example = "false", `in` = ParameterIn.QUERY)
         val receiptOnly: Boolean = false,
 
-        @RequestParam(defaultValue = "false")
-        @Parameter(description = "이미지 리뷰만 보기", example = "false", `in` = ParameterIn.QUERY)
+        @field:Parameter(description = "이미지 리뷰만 보기", example = "false", `in` = ParameterIn.QUERY)
         val imageOnly: Boolean = false,
 
-        @RequestParam(defaultValue = "RECOMMENDED")
-        @Parameter(
+        @field:Parameter(
             description = "정렬 기준",
-            example = "RECOMMENDED/LATEST/RATING_HIGH/RATING_LOW/MOST_HELPFUL",
+            example = "RECOMMENDED",
             `in` = ParameterIn.QUERY
         )
         val sort: ReviewSortType = ReviewSortType.RECOMMENDED
