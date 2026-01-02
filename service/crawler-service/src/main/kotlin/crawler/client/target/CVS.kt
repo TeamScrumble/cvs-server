@@ -21,7 +21,7 @@ abstract class CVS {
         private val PRICE_REGEX = Regex("""\D""")
         const val NOT_EXIST_ID = "NOT_EXIST_ID"
 
-        const val DELAY_SHORT_MS = 500L
+        const val DELAY_SHORT_MS = 600L
         const val DELAY_BASIC_MS = 800L
         const val MAX_TIMEOUT_SEC = 5L
     }
