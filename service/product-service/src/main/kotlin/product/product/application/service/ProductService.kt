@@ -62,7 +62,7 @@ class ProductService(
         .findAllByCvsTarget(cvsTarget)
 
     suspend fun findAllByKeyword(
-        cvsTarget: CvsTarget,
+        cvsTarget: CvsTarget?,
         keyword: String,
         pageable: Pageable
     ) = productEsService.findAllByKeyword(cvsTarget, keyword, pageable)

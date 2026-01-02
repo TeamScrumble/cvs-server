@@ -15,10 +15,14 @@ class ProductEsService(
     private val operations: ElasticsearchOperations
 ) {
     suspend fun findAllByKeyword(
-        cvsTarget: CvsTarget,
+        cvsTarget: CvsTarget?,
         keyword: String,
         pageable: Pageable
-    ) = productEsRepository.search(keyword, cvsTarget.name, pageable)
+    ) = if (cvsTarget == null) {
+        productEsRepository.searchAll(keyword, pageable)
+    } else {
+        productEsRepository.searchByTarget(keyword, cvsTarget.name, pageable)
+    }
 
     fun updateLikeCount(productId: Long, likeCount: Int) {
         val doc = Document.create().apply {

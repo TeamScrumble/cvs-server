@@ -23,7 +23,7 @@ interface ProductSearchApi {
     suspend fun search(request: Request): ApiResponse<Response>
 
     data class Request(
-        @Parameter(description = "편의점 종류", example = "GS25/SEVEN_ELEVEN/CU/EMART_24", `in` = ParameterIn.QUERY)
+        @Parameter(description = "편의점 종류", example = "ALL/GS25/SEVEN_ELEVEN/CU/EMART_24", `in` = ParameterIn.QUERY)
         val cvsTarget: String,
 
         @Parameter(description = "페이지", example = "0", `in` = ParameterIn.QUERY)

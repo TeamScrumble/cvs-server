@@ -69,24 +69,27 @@ class ProductController(
     override suspend fun search(
         @ModelAttribute request: ProductSearchApi.Request
     ): ApiResponse<ProductSearchApi.Response> {
-        val cvsTarget = CvsTarget(request.cvsTarget)
-        val keyword = request.keyword
+        val requestTarget = request.cvsTarget
+        val (cvsTarget, keyword) = searchParamValidation(requestTarget, request.keyword)
         val rpp = 20
-
-        searchParamValidation(cvsTarget, keyword)
 
         val pageable = PageRequest.of(request.page.coerceAtLeast(0), rpp)
 
         return ApiResponse.Success(ProductSearchApi.Response(
-            productService.findAllByKeyword(cvsTarget!!, keyword, pageable)
+            productService.findAllByKeyword(cvsTarget, keyword, pageable)
         ))
     }
 
-    private fun searchParamValidation(cvsTarget: CvsTarget?, keyword: String) {
-        cvsTarget ?: throw BusinessException(ProductErrorCode.P_003)
+    private fun searchParamValidation(requestTarget: String, keyword: String): Pair<CvsTarget?, String> {
+        // ALL이 아닌 경우에만 Validation 체크
+        val cvsTarget = if (requestTarget.uppercase() != "ALL") {
+            CvsTarget(requestTarget) ?: throw BusinessException(ProductErrorCode.P_003)
+        } else null
 
         if (keyword.length < 2) {
             throw BusinessException(ProductErrorCode.P_004)
         }
+
+        return cvsTarget to keyword
     }
 }
