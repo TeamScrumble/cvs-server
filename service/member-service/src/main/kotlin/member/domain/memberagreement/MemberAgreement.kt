@@ -1,6 +1,7 @@
 package member.domain.memberagreement
 
 import db.base.LongIdEntity
+import member.domain.agreement.AgreementType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -21,6 +22,6 @@ data class MemberAgreement(
     @Column("member_id")
     val memberId: Long,
 
-    @Column("agreement_id")
-    val agreementId: Long
+    @Column("agreement_type")
+    val agreementType: AgreementType
 ) : LongIdEntity()

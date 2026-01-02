@@ -38,12 +38,12 @@ CREATE TABLE member_agreement
     agreed              BOOLEAN  NOT NULL,
     agreed_at           DATETIME NOT NULL,
     member_id           BIGINT   NOT NULL,
-    agreement_id        BIGINT   NOT NULL,
+    agreement_type      VARCHAR(100)  NOT NULL,
     created_at          DATETIME NOT NULL,
     last_modified_at    DATETIME NOT NULL,
 
     PRIMARY KEY (member_agreement_id),
-    UNIQUE KEY uk_member_agreement (member_id, agreement_id),
+    UNIQUE KEY uk_member_agreement (member_id, agreement_type),
     INDEX idx_member_agreement_member (member_id),
-    INDEX idx_member_agreement_agreement (agreement_id)
+    INDEX idx_member_agreement_agreement (agreement_type)
 );
