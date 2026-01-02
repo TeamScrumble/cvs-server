@@ -1,12 +1,8 @@
-package product.product.presentation.crawl.scheduler
+package product.product.presentation.scheduler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import cvs.crawler.CrawlerRequestEvent
 import cvs.crawler.CvsTarget
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scheduling.annotation.Scheduled
