@@ -3,4 +3,4 @@ package product.product
 import io.swagger.v3.oas.annotations.tags.Tag
 
 @Tag(name = "Product", description = "상품 API")
-interface ProductApi : ProductAddApi, ProductSearchApi, ProductGetApi, ProductCrawlApi
+interface ProductApi : ProductAddApi, ProductSearchApi, ProductGetApi, ProductEsSyncApi, ProductCrawlApi

@@ -29,6 +29,15 @@ class ProductController(
         return ApiResponse.Success(ProductCrawlApi.Response(isSuccess))
     }
 
+    @PostMapping(ProductEsSyncApi.PATH)
+    override suspend fun crawl(
+        @RequestPassport passport: Passport,
+    ): ApiResponse<ProductEsSyncApi.Response> {
+        val isSuccess = productService.sync(passport)
+
+        return ApiResponse.Success(ProductEsSyncApi.Response(isSuccess))
+    }
+
     @PostMapping(ProductAddApi.PATH)
     override suspend fun add(
         @RequestPassport passport: Passport,

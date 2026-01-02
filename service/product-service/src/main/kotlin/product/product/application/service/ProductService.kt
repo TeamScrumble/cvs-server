@@ -7,6 +7,8 @@ import cvs.crawler.CvsTarget
 import db.transactional.Transactional
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.springframework.data.domain.Pageable
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -17,6 +19,7 @@ import product.product.application.utils.toEntity
 import product.product.domain.repository.ProductCustomRepository
 import product.product.domain.repository.ProductRepository
 import product.product.elasticsearch.service.ProductEsService
+import product.product.elasticsearch.service.ProductEsSyncService
 import product.product.elasticsearch.util.toDto
 
 @Service
@@ -24,12 +27,40 @@ class ProductService(
     private val objectMapper: ObjectMapper,
     private val transactional: Transactional,
     private val productEsService: ProductEsService,
+    private val productEsSyncService: ProductEsSyncService,
     private val productRepository: ProductRepository,
     private val memberValidService: MemberValidService,
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val productCustomRepository: ProductCustomRepository,
 ) {
     suspend fun validateExists(productId: Long) = productRepository.existsById(productId)
+
+    suspend fun sync(passport: Passport): Boolean {
+        memberValidService.validateMember(passport)
+
+        if (!passport.isAdmin) {
+            throw BusinessException(ProductErrorCode.P_005)
+        }
+
+        productEsSyncService.initialLoad(pageSize = 2000)
+
+        return true
+    }
+
+    suspend fun crawl(passport: Passport, targets: List<CvsTarget>): Boolean {
+        memberValidService.validateMember(passport)
+
+        if (!passport.isAdmin) {
+            throw BusinessException(ProductErrorCode.P_002)
+        }
+
+        targets.forEach { target ->
+            val payload = objectMapper.writeValueAsString(CrawlerRequestEvent(target))
+            kafkaTemplate.send("crawl.request", payload)
+        }
+
+        return true
+    }
 
     suspend fun saveAll(passport: Passport, results: List<CrawlerResultEvent>): List<Long> {
         memberValidService.validateMember(passport)
@@ -65,21 +96,6 @@ class ProductService(
     ) = productEsService.findAllByKeyword(cvsTarget, keyword, pageable)
         .map { it.toDto() }
         .toList()
-
-    suspend fun crawl(passport: Passport, targets: List<CvsTarget>): Boolean {
-        memberValidService.validateMember(passport)
-
-        if (!passport.isAdmin) {
-            throw BusinessException(ProductErrorCode.P_002)
-        }
-
-        targets.forEach { target ->
-            val payload = objectMapper.writeValueAsString(CrawlerRequestEvent(target))
-            kafkaTemplate.send("crawl.request", payload)
-        }
-
-        return true
-    }
 
     suspend fun existsById(id: Long): Boolean = productRepository.existsById(id)
 }
