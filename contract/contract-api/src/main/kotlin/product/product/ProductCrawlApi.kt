@@ -7,7 +7,7 @@ import passport.Passport
 
 interface ProductCrawlApi {
     companion object {
-        const val PATH = "/api/product/crawl/internal"
+        const val PATH = "/api/product/internal/crawl"
     }
 
     @Documented(

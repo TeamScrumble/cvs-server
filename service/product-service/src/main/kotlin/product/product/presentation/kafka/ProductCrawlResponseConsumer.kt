@@ -1,4 +1,4 @@
-package product.product.presentation.crawl.kafka
+package product.product.presentation.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import cvs.crawler.CrawlerFailedEvent

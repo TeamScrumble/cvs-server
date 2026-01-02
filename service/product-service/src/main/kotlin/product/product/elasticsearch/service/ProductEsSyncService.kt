@@ -1,6 +1,8 @@
 package product.product.elasticsearch.service
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 import product.product.domain.repository.ProductRepository
 import product.product.elasticsearch.repository.ProductEsRepository
@@ -11,6 +13,8 @@ class ProductEsSyncService(
     private val productRepository: ProductRepository,
     private val productEsRepository: ProductEsRepository
 ) {
+    private suspend fun <T> io(block: () -> T): T = withContext(Dispatchers.IO) { block() }
+
     suspend fun upsertByProductIds(productIds: List<Long>) {
         if (productIds.isEmpty()) return
 
@@ -29,19 +33,21 @@ class ProductEsSyncService(
             if (products.isEmpty()) return@forEach
 
             val docs = products.map { it.toDocument() }
-            productEsRepository.saveAll(docs)
+            io { productEsRepository.saveAll(docs) }
         }
     }
 
     suspend fun initialLoad(pageSize: Int = 2000) {
-        var page = 0L
+        var offset = 0L
+
         while (true) {
-            val products = productRepository.findPageByOffset(page, pageSize).toList() // Flow<Product>
+            val products = productRepository.findPageByOffset(offset, pageSize).toList()
             if (products.isEmpty()) break
 
             val docs = products.map { it.toDocument() }
             productEsRepository.saveAll(docs)
-            page++
+
+            offset += pageSize
         }
     }
 }
