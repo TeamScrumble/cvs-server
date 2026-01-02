@@ -42,7 +42,7 @@ class ReviewService(
 
     suspend fun getReview(reviewId: Long): Review {
         return reviewRepository
-            .findById(reviewId)
+            .findByIdAndIsDeletedFalse(reviewId)
             ?: throw BusinessException(ReviewErrorCode.R_001)
     }
 

@@ -29,6 +29,8 @@ interface ReviewRepository :
         lastModifiedAt: LocalDateTime
     ): Int
 
+    suspend fun findByIdAndIsDeletedFalse(id: Long): Review?
+
     // 상품 총 리뷰 수
     suspend fun countByProductIdAndIsDeletedFalse(
         productId: Long
