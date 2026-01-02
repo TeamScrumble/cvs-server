@@ -7,8 +7,6 @@ import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import product.product.domain.table.Product
 
 interface ProductRepository : CoroutineCrudRepository<Product, Long> {
-    suspend fun findAllByCvsTarget(cvsTarget: CvsTarget): List<Product>
-
     @Query(
         """
         SELECT *

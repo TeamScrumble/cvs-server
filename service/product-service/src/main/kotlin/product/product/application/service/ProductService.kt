@@ -58,11 +58,8 @@ class ProductService(
     suspend fun findById(id: Long) = productRepository.findById(id)
         ?: throw BusinessException(ProductErrorCode.P_001)
 
-    suspend fun findAllByCvsTarget(cvsTarget: CvsTarget) = productRepository
-        .findAllByCvsTarget(cvsTarget)
-
     suspend fun findAllByKeyword(
-        cvsTarget: CvsTarget,
+        cvsTarget: CvsTarget?,
         keyword: String,
         pageable: Pageable
     ) = productEsService.findAllByKeyword(cvsTarget, keyword, pageable)

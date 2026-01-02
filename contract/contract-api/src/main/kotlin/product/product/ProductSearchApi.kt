@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import org.springdoc.core.annotations.ParameterObject
 
 interface ProductSearchApi {
     companion object {
@@ -20,10 +21,10 @@ interface ProductSearchApi {
         request = Request::class,
         response = Response::class,
     )
-    suspend fun search(request: Request): ApiResponse<Response>
+    suspend fun search(@ParameterObject request: Request): ApiResponse<Response>
 
     data class Request(
-        @Parameter(description = "편의점 종류", example = "GS25/SEVEN_ELEVEN/CU/EMART_24", `in` = ParameterIn.QUERY)
+        @Parameter(description = "편의점 종류", example = "ALL/GS25/SEVEN_ELEVEN/CU/EMART_24", `in` = ParameterIn.QUERY)
         val cvsTarget: String,
 
         @Parameter(description = "페이지", example = "0", `in` = ParameterIn.QUERY)
