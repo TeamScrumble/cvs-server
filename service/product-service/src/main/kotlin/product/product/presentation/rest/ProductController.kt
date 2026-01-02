@@ -54,17 +54,6 @@ class ProductController(
         return ApiResponse.Success(ProductGetApi.Response(product, isLiked))
     }
 
-    @GetMapping(ProductListApi.PATH)
-    override suspend fun list(
-        @PathVariable cvsTarget: String
-    ): ApiResponse<ProductListApi.Response> {
-        val product = productService.findAllByCvsTarget(CvsTarget.valueOf(cvsTarget)).map {
-            it.toResponse()
-        }
-
-        return ApiResponse.Success(ProductListApi.Response(product))
-    }
-
     @GetMapping(ProductSearchApi.PATH)
     override suspend fun search(
         @ModelAttribute request: ProductSearchApi.Request
