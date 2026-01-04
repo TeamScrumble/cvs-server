@@ -7,4 +7,6 @@ interface ReviewLikeCustomRepository {
         memberId: Long
     ): Set<Long>
 
+    suspend fun insertIgnore(reviewId: Long, memberId: Long): Boolean
+
 }

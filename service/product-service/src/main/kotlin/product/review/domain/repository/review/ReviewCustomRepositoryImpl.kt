@@ -40,18 +40,13 @@ class ReviewCustomRepositoryImpl(
                 r.content AS content,
                 r.is_receipt AS isReceipt,
                 r.is_deleted AS isDeleted,
+                r.like_count As likeCount,
                 r.created_at AS createdAt,
                 r.last_modified_at AS lastModifiedAt,
-                COALESCE(rlc.like_count, 0) AS likeCount,
                 EXISTS (
                     SELECT 1 FROM review_img ri WHERE ri.review_id = r.review_id
                 ) AS hasMedia
             FROM review r
-            LEFT JOIN (
-                SELECT review_id, COUNT(*) AS like_count
-                FROM review_like
-                GROUP BY review_id
-            ) rlc ON rlc.review_id = r.review_id
             WHERE r.product_id = :productId
               AND r.is_deleted = 0
               AND (:receiptOnly = FALSE OR r.is_receipt = TRUE)
@@ -72,6 +67,36 @@ class ReviewCustomRepositoryImpl(
             .all()
             .collectList()
             .awaitSingleOrNull() ?: emptyList()
+    }
+
+    override suspend fun getLikeCount(reviewId: Long): Long {
+        val sql = """
+            SELECT like_count 
+            FROM review 
+            WHERE review_id = :reviewId
+        """.trimIndent()
+
+        return client.sql(sql)
+            .bind("reviewId", reviewId)
+            .map { row, _ ->
+                (row.get("like_count") as Number).toLong()
+            }
+            .one()
+            .awaitSingle()
+    }
+
+    override suspend fun incrementLikeCount(reviewId: Long) {
+        val sql = """
+            UPDATE review 
+            SET like_count = like_count + 1 
+            WHERE review_id = :reviewId
+        """.trimIndent()
+
+        client.sql(sql)
+            .bind("reviewId", reviewId)
+            .fetch()
+            .rowsUpdated()
+            .awaitSingle()
     }
 
 }

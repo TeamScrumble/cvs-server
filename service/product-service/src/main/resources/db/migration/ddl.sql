@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS review (
     last_modified_at DATETIME       NOT NULL
 );
 ALTER TABLE review
-  ADD COLUMN like_count BIGINT NOT NULL DEFAULT 0;
+  ADD COLUMN like_count BIGINT NOT NULL DEFAULT 0 AFTER is_receipt;
 
 -- 상품 리뷰 평가 카테고리 테이블 (품질/가성비/재구매의사)
 CREATE TABLE IF NOT EXISTS review_aspect (

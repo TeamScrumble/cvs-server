@@ -8,6 +8,14 @@ class ReviewLikeService(
     private val likeRepository: ReviewLikeRepository
 ) {
 
+    suspend fun add(
+        reviewId: Long,
+        memberId: Long
+    ): Boolean {
+        return likeRepository
+            .insertIgnore(reviewId, memberId)
+    }
+
     suspend fun getReviewCount(
         reviewIds: List<Long>
     ): Map<Long, Int> {
@@ -19,9 +27,9 @@ class ReviewLikeService(
 
     suspend fun countMemberLikedReviews(
         reviewIds: List<Long>,
-        memberId: Long?
+        memberId: Long
     ): Set<Long> {
-        if (memberId == null || reviewIds.isEmpty()) {
+        if (reviewIds.isEmpty()) {
             return emptySet()
         }
 
