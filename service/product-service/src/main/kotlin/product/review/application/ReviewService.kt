@@ -73,4 +73,8 @@ class ReviewService(
         reviewRepository.incrementLikeCount(reviewId)
     }
 
+    suspend fun decrementLikeCount(reviewId: Long) {
+        reviewRepository.decrementLikeCount(reviewId)
+    }
+
 }

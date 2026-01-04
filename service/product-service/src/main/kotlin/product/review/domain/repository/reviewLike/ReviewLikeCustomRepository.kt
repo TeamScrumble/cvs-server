@@ -9,4 +9,6 @@ interface ReviewLikeCustomRepository {
 
     suspend fun insertIgnore(reviewId: Long, memberId: Long): Boolean
 
+    suspend fun deleteByReviewIdAndMemberId(reviewId: Long, memberId: Long): Boolean
+
 }

@@ -14,4 +14,6 @@ interface ReviewCustomRepository {
 
     suspend fun incrementLikeCount(reviewId: Long)
 
+    suspend fun decrementLikeCount(reviewId: Long)
+
 }

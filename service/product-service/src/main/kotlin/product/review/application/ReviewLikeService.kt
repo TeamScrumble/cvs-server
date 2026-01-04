@@ -16,6 +16,14 @@ class ReviewLikeService(
             .insertIgnore(reviewId, memberId)
     }
 
+    suspend fun remove(
+        reviewId: Long,
+        memberId: Long
+    ): Boolean {
+        return likeRepository
+            .deleteByReviewIdAndMemberId(reviewId, memberId)
+    }
+
     suspend fun getReviewCount(
         reviewIds: List<Long>
     ): Map<Long, Int> {

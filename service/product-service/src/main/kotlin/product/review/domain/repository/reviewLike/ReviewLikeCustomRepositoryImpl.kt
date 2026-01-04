@@ -84,4 +84,23 @@ class ReviewLikeCustomRepositoryImpl(
         return rows?.toInt() == 1
     }
 
+    override suspend fun deleteByReviewIdAndMemberId(
+        reviewId: Long,
+        memberId: Long
+    ): Boolean {
+        val sql = """
+            DELETE FROM review_like 
+            WHERE review_id = :reviewId AND member_id = :memberId
+        """.trimIndent()
+
+        val rows = databaseClient.sql(sql)
+            .bind("reviewId", reviewId)
+            .bind("memberId", memberId)
+            .fetch()
+            .rowsUpdated()
+            .awaitSingle()
+
+        return rows?.toInt() == 1
+    }
+
 }

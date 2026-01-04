@@ -187,4 +187,30 @@ class ReviewFacade(
         )
     }
 
+    suspend fun removeReviewLike(
+        passport: Passport,
+        reviewId: Long
+    ): ReviewLikeApi.LikeResponse = transactional {
+        // 회원 검증
+        memberValidService.validateMember(passport)
+        val memberId = passport.memberId
+
+        // 리뷰 검증, 본인이 작성한 리뷰는 도움돼요 불가능
+        val review = reviewService.getReview(reviewId)
+        if (review.memberId == memberId) {
+            throw BusinessException(ReviewErrorCode.R_013)
+        }
+
+        val deleted = likeService.remove(reviewId, memberId)
+        if (deleted) {
+            reviewService.decrementLikeCount(reviewId)
+        }
+
+        val likeCount = reviewService.getLikeCount(reviewId)
+        ReviewLikeApi.LikeResponse(
+            liked = false,
+            likeCount = likeCount
+        )
+    }
+
 }

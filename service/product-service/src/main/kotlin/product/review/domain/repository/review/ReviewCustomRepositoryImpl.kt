@@ -99,4 +99,18 @@ class ReviewCustomRepositoryImpl(
             .awaitSingle()
     }
 
+    override suspend fun decrementLikeCount(reviewId: Long) {
+        val sql = """
+            UPDATE review 
+            SET like_count = GREATEST(like_count - 1, 0) 
+            WHERE review_id = :reviewId
+        """.trimIndent()
+
+        client.sql(sql)
+            .bind("reviewId", reviewId)
+            .fetch()
+            .rowsUpdated()
+            .awaitSingle()
+    }
+
 }
