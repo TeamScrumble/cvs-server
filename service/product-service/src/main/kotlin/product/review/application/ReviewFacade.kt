@@ -14,7 +14,6 @@ import product.common.valid.MemberValidService
 import product.product.application.service.ProductService
 import product.review.domain.entity.Review
 import review.*
-import review.like.ReviewLikeAddApi
 import review.like.ReviewLikeApi
 
 @Service
@@ -163,18 +162,10 @@ class ReviewFacade(
         passport: Passport,
         reviewId: Long
     ): ReviewLikeApi.LikeResponse = transactional {
-        // 회원 검증
-        memberValidService.validateMember(passport)
-        val memberId = passport.memberId
-
-        // 리뷰 검증, 본인이 작성한 리뷰는 도움돼요 불가능
-        val review = reviewService.getReview(reviewId)
-        if (review.memberId == memberId) {
-            throw BusinessException(ReviewErrorCode.R_013)
-        }
+        validateLikeAction(passport, reviewId)
 
         // 해당 리뷰에 도움돼요 카운트 증가
-        val inserted = likeService.add(reviewId, memberId)
+        val inserted = likeService.add(reviewId, passport.memberId)
         if (inserted) {
             reviewService.incrementLikeCount(reviewId)
         }
@@ -191,17 +182,10 @@ class ReviewFacade(
         passport: Passport,
         reviewId: Long
     ): ReviewLikeApi.LikeResponse = transactional {
-        // 회원 검증
-        memberValidService.validateMember(passport)
-        val memberId = passport.memberId
+        validateLikeAction(passport, reviewId)
 
-        // 리뷰 검증, 본인이 작성한 리뷰는 도움돼요 불가능
-        val review = reviewService.getReview(reviewId)
-        if (review.memberId == memberId) {
-            throw BusinessException(ReviewErrorCode.R_013)
-        }
-
-        val deleted = likeService.remove(reviewId, memberId)
+        // 해당 리뷰에 도움돼요 카운트 감소
+        val deleted = likeService.remove(reviewId, passport.memberId)
         if (deleted) {
             reviewService.decrementLikeCount(reviewId)
         }
@@ -211,6 +195,21 @@ class ReviewFacade(
             liked = false,
             likeCount = likeCount
         )
+    }
+
+    private suspend fun validateLikeAction(
+        passport: Passport,
+        reviewId: Long
+    ) {
+        // 회원 검증
+        memberValidService.validateMember(passport)
+        val memberId = passport.memberId
+
+        // 리뷰 검증, 본인이 작성한 리뷰는 도움돼요 불가능
+        val review = reviewService.getReview(reviewId)
+        if (review.memberId == memberId) {
+            throw BusinessException(ReviewErrorCode.R_013)
+        }
     }
 
 }
