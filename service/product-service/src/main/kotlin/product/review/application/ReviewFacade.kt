@@ -154,6 +154,7 @@ class ReviewFacade(
             content = review.content,
             likeCount = data.likes[review.id] ?: 0,
             isLikeByMe = data.memberLiked.contains(review.id),
+            isReceipt = review.isReceipt,
             scores = data.scores[review.id] ?: emptyList(),
             imgList = data.images[review.id] ?: emptyList()
         )
