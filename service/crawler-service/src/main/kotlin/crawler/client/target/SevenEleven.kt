@@ -21,7 +21,8 @@ private data class SevenElevenUrl(
 class SevenEleven : CVS() {
 
     companion object {
-        private const val BASE = "https://www.7-eleven.co.kr/product"
+        private const val BASE = "https://www.7-eleven.co.kr"
+        private const val PRODUCT_BASE = "$BASE/product"
 
         private const val SELECTOR_FRESH_ITEM = "div.dosirak_list ul li"
         private const val SELECTOR_EVENT_ITEM = "div.img_list ul li"
@@ -29,10 +30,10 @@ class SevenEleven : CVS() {
 
         private val ID_REGEX = Regex("""fncGoView\('(\d+)'\)""")
         private val URL_LIST = listOf(
-            SevenElevenUrl("$BASE/bestdosirakList.asp", "", SELECTOR_FRESH_ITEM),
-            SevenElevenUrl("$BASE/presentList.asp", "fncTab('1');", SELECTOR_EVENT_ITEM),
-            SevenElevenUrl("$BASE/presentList.asp", "fncTab('2');", SELECTOR_EVENT_ITEM),
-            SevenElevenUrl("$BASE/presentList.asp", "fncTab('4');", SELECTOR_EVENT_ITEM)
+            SevenElevenUrl("$PRODUCT_BASE/bestdosirakList.asp", "", SELECTOR_FRESH_ITEM),
+            SevenElevenUrl("$PRODUCT_BASE/presentList.asp", "fncTab('1');", SELECTOR_EVENT_ITEM),
+            SevenElevenUrl("$PRODUCT_BASE/presentList.asp", "fncTab('2');", SELECTOR_EVENT_ITEM),
+            SevenElevenUrl("$PRODUCT_BASE/presentList.asp", "fncTab('4');", SELECTOR_EVENT_ITEM)
         )
     }
 
