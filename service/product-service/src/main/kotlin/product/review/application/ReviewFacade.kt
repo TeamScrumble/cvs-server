@@ -208,7 +208,7 @@ class ReviewFacade(
         // 리뷰 검증, 본인이 작성한 리뷰는 도움돼요 불가능
         val review = reviewService.getReview(reviewId)
         if (review.memberId == memberId) {
-            throw BusinessException(ReviewErrorCode.R_013)
+            throw BusinessException(ReviewErrorCode.R_014)
         }
     }
 
