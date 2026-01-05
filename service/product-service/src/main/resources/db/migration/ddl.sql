@@ -14,6 +14,40 @@ CREATE TABLE IF NOT EXISTS product
     last_modified_at DATETIME         NOT NULL
 );
 
+-- ES 동기화 작업 상태/진행률 저장 테이블
+CREATE TABLE IF NOT EXISTS sync_job (
+    job_id           BIGINT UNSIGNED   NOT NULL AUTO_INCREMENT COMMENT '작업 ID',
+    `type`           VARCHAR(50)       NOT NULL COMMENT '작업 타입 (SyncJobType)',
+    status           VARCHAR(20)       NOT NULL COMMENT '작업 상태 (SyncJobStatus)',
+
+    requested_by     BIGINT UNSIGNED   NOT NULL COMMENT '요청한 회원 ID',
+    page_size        INT               NOT NULL COMMENT '페이지 사이즈',
+
+    `offset`         BIGINT UNSIGNED   NOT NULL DEFAULT 0 COMMENT '현재 오프셋(OFFSET 기반 페이징 진행률)',
+    processed_count  BIGINT UNSIGNED   NOT NULL DEFAULT 0 COMMENT '처리 완료 건수',
+
+    started_at       DATETIME(3)       NULL COMMENT '작업 시작 시각',
+    finished_at      DATETIME(3)       NULL COMMENT '작업 종료 시각',
+    error_message    VARCHAR(1000)     NULL COMMENT '실패 시 에러 메시지',
+
+    created_at       DATETIME(3)       NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '생성 시각',
+    last_modified_at DATETIME(3)       NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+    ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '수정 시각',
+
+    PRIMARY KEY (job_id),
+
+    INDEX idx_sync_job_type_status (`type`, status),
+    INDEX idx_sync_job_status (status),
+    INDEX idx_sync_job_requested_by (requested_by),
+    INDEX idx_sync_job_created_at (created_at),
+
+    CONSTRAINT chk_sync_job_status
+    CHECK (status IN ('QUEUED', 'RUNNING', 'SUCCEEDED', 'FAILED')),
+
+    CONSTRAINT chk_sync_job_type
+    CHECK (`type` IN ('PRODUCT_ES_INITIAL_LOAD'))
+);
+
 ALTER TABLE product
     ADD CONSTRAINT uq_cvs_product UNIQUE (cvs_product_id);
 
