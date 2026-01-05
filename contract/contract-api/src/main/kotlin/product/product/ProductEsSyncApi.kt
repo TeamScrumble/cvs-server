@@ -18,7 +18,7 @@ interface ProductEsSyncApi {
     suspend fun crawl(passport: Passport): ApiResponse<Response>
 
     data class Response(
-        @Schema(description = "요청 성공 여부 / 실패 시 에러 응답이 온다.", example = "true")
-        val isSuccess: Boolean
+        @Schema(description = "요청 성공 시 동기화를 담당하는 jobId 반환", example = "1")
+        val jobId: Long
     )
 }
