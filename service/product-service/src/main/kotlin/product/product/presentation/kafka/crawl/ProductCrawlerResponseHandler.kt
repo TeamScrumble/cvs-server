@@ -1,4 +1,4 @@
-package product.product.presentation.kafka
+package product.product.presentation.kafka.crawl
 
 import cvs.crawler.CrawlerFailedEvent
 import cvs.crawler.CrawlerResultEvent
