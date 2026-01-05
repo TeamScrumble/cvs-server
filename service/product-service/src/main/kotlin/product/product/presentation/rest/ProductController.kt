@@ -33,9 +33,9 @@ class ProductController(
     override suspend fun crawl(
         @RequestPassport passport: Passport,
     ): ApiResponse<ProductEsSyncApi.Response> {
-        val isSuccess = productService.sync(passport)
+        val jobId = productService.sync(passport)
 
-        return ApiResponse.Success(ProductEsSyncApi.Response(isSuccess))
+        return ApiResponse.Success(ProductEsSyncApi.Response(jobId))
     }
 
     @PostMapping(ProductAddApi.PATH)
