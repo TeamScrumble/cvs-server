@@ -3,10 +3,12 @@ package product.product.domain.repository
 import cvs.crawler.CvsTarget
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
 import product.product.domain.table.Product
+import kotlin.text.get
 
 @Repository
 class ProductRepositoryCustomImpl(
@@ -85,6 +87,20 @@ class ProductRepositoryCustomImpl(
         }
 
         return result
+    }
+
+    override suspend fun getLikeCount(productId: Long): Int {
+        val sql = """
+            SELECT like_count
+            FROM product
+            WHERE product_id = :productId
+        """.trimIndent()
+
+        return client.sql(sql)
+            .bind("productId", productId)
+            .map { row, _ -> (row.get("like_count") as Number).toInt() }
+            .one()
+            .awaitSingle()
     }
 
     override suspend fun incrementLikeCount(productId: Long): Long {
