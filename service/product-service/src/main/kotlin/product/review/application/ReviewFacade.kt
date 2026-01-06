@@ -14,6 +14,7 @@ import product.common.valid.MemberValidService
 import product.product.application.service.ProductService
 import product.review.domain.entity.Review
 import review.*
+import review.like.ReviewLikeApi
 
 @Service
 class ReviewFacade(
@@ -129,7 +130,6 @@ class ReviewFacade(
     private data class ReviewAssembleData(
         val images: Map<Long, List<String>>,
         val scores: Map<Long, List<ReviewGetApi.Response.ScoreResponse>>,
-        val likes: Map<Long, Int>,
         val memberLiked: Set<Long>,
         val writerMemberMap: Map<Long, MemberListApi.Response.Member>
     )
@@ -141,14 +141,12 @@ class ReviewFacade(
     ): ReviewAssembleData = coroutineScope {
         val imagesDeferred = async { imgService.getImages(reviewIds) }
         val scoresDeferred = async { scoreService.getScores(reviewIds) }
-        val likesDeferred = async { likeService.getReviewCount(reviewIds) }
         val memberLikedDeferred = async { likeService.countMemberLikedReviews(reviewIds, memberId) }
         val writerMemberMapDeferred = async { memberApiClient.getMemberMap(writerMemberIds) }
 
         ReviewAssembleData(
             images = imagesDeferred.await(),
             scores = scoresDeferred.await(),
-            likes = likesDeferred.await(),
             memberLiked = memberLikedDeferred.await(),
             writerMemberMap = writerMemberMapDeferred.await()
         )
@@ -168,12 +166,66 @@ class ReviewFacade(
             lastModifiedAt = review.lastModifiedAt.toString(),
             rating = review.rating,
             content = review.content,
-            likeCount = data.likes[review.id] ?: 0,
+            likeCount = review.likeCount,
             isLikeByMe = data.memberLiked.contains(review.id),
             isReceipt = review.isReceipt,
             scores = data.scores[review.id] ?: emptyList(),
             imgList = data.images[review.id] ?: emptyList()
         )
+    }
+
+    suspend fun addReviewLike(
+        passport: Passport,
+        reviewId: Long
+    ): ReviewLikeApi.LikeResponse = transactional {
+        validateLikeAction(passport, reviewId)
+
+        // 해당 리뷰에 도움돼요 카운트 증가
+        val inserted = likeService.add(reviewId, passport.memberId)
+        if (inserted) {
+            reviewService.incrementLikeCount(reviewId)
+        }
+        // 도움돼요 수
+        val likeCount = reviewService.getLikeCount(reviewId)
+
+        ReviewLikeApi.LikeResponse(
+            liked = true,
+            likeCount = likeCount
+        )
+    }
+
+    suspend fun removeReviewLike(
+        passport: Passport,
+        reviewId: Long
+    ): ReviewLikeApi.LikeResponse = transactional {
+        validateLikeAction(passport, reviewId)
+
+        // 해당 리뷰에 도움돼요 카운트 감소
+        val deleted = likeService.remove(reviewId, passport.memberId)
+        if (deleted) {
+            reviewService.decrementLikeCount(reviewId)
+        }
+
+        val likeCount = reviewService.getLikeCount(reviewId)
+        ReviewLikeApi.LikeResponse(
+            liked = false,
+            likeCount = likeCount
+        )
+    }
+
+    private suspend fun validateLikeAction(
+        passport: Passport,
+        reviewId: Long
+    ) {
+        // 회원 검증
+        memberValidService.validateMember(passport)
+        val memberId = passport.memberId
+
+        // 리뷰 검증, 본인이 작성한 리뷰는 도움돼요 불가능
+        val review = reviewService.getReview(reviewId)
+        if (review.memberId == memberId) {
+            throw BusinessException(ReviewErrorCode.R_014)
+        }
     }
 
 }

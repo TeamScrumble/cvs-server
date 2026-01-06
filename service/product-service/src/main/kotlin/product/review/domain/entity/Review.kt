@@ -29,7 +29,10 @@ data class Review (
     val isDeleted: Boolean = false,
 
     @Column("is_receipt") // 영수증 인증 여부
-    val isReceipt: Boolean
+    val isReceipt: Boolean,
+
+    @Column("like_count")
+    val likeCount: Long = 0L
 
 ) : LongIdEntity() {
 

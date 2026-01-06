@@ -44,7 +44,7 @@ interface ReviewGetApi {
         val content: String,
 
         @Schema(description = "도움돼요 수", example = "8")
-        val likeCount: Int,
+        val likeCount: Long,
 
         @Schema(description = "현재 사용자가 해당 리뷰에 도움돼요를 눌렀는지 여부", example = "false")
         val isLikeByMe: Boolean,

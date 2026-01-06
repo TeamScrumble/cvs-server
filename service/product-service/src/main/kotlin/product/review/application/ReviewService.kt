@@ -80,4 +80,16 @@ class ReviewService(
     suspend fun existsById(reviewId: Long) =
         reviewRepository.existsById(reviewId)
 
+    suspend fun getLikeCount(reviewId: Long): Long {
+        return reviewRepository.getLikeCount(reviewId)
+    }
+
+    suspend fun incrementLikeCount(reviewId: Long) {
+        reviewRepository.incrementLikeCount(reviewId)
+    }
+
+    suspend fun decrementLikeCount(reviewId: Long) {
+        reviewRepository.decrementLikeCount(reviewId)
+    }
+
 }
