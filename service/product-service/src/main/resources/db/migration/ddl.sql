@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS product
     is_deleted      TINYINT(1)        NOT NULL DEFAULT 0,
     crawl_run_id    VARCHAR(36)       NOT NULL,
     created_at       DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_modified_at DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-    );
+    last_modified_at DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
 ALTER TABLE product
     ADD UNIQUE KEY uk_product_target_cvs (cvs_target, cvs_product_id);
