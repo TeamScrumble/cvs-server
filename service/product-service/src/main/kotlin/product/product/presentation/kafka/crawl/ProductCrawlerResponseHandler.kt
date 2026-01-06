@@ -13,17 +13,23 @@ class ProductCrawlerResponseHandler(
     private val productSyncService: ProductEsSyncService
 ) {
     suspend fun handleSuccess(result: CrawlerResultEvent) {
+        if (result.data.isEmpty()) return
+
         val runId = UUID.randomUUID().toString()
+
+        val isFirstInit = productService.countAllByCvsTarget(result.target) == 0L
 
         val savedProductIds = productService.save(result, crawlRunId = runId)
         productSyncService.upsertByProductIds(savedProductIds)
 
-        val deletedProductIds = productService.softDeleteNotInRun(
-            target = result.target,
-            crawlRunId = runId
-        )
+        if (!isFirstInit) {
+            val deletedProductIds = productService.softDeleteNotInRun(
+                target = result.target,
+                crawlRunId = runId
+            )
 
-        productSyncService.upsertByProductIds(deletedProductIds)
+            productSyncService.upsertByProductIds(deletedProductIds)
+        }
     }
 
     fun handleFail(event: CrawlerFailedEvent) {

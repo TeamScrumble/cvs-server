@@ -131,6 +131,8 @@ class ProductService(
     suspend fun findById(id: Long) = productRepository.findById(id)
         ?: throw BusinessException(ProductErrorCode.P_001)
 
+    suspend fun countAllByCvsTarget(cvsTarget: CvsTarget) = productRepository.countAllByCvsTarget(cvsTarget)
+
     suspend fun findAllByKeyword(
         cvsTarget: CvsTarget?,
         keyword: String,

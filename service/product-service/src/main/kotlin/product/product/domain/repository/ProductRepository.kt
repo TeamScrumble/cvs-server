@@ -1,5 +1,6 @@
 package product.product.domain.repository
 
+import cvs.crawler.CvsTarget
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -18,4 +19,6 @@ interface ProductRepository : CoroutineCrudRepository<Product, Long>, ProductRep
         offset: Long,
         limit: Int
     ): Flow<Product>
+
+    suspend fun countAllByCvsTarget(cvsTarget: CvsTarget): Long
 }
