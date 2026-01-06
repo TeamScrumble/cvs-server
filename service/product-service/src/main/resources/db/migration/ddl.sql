@@ -53,9 +53,6 @@ CREATE TABLE IF NOT EXISTS sync_job (
     CHECK (`type` IN ('PRODUCT_ES_INITIAL_LOAD'))
 );
 
-ALTER TABLE product
-    ADD CONSTRAINT uq_cvs_product UNIQUE (cvs_product_id);
-
 CREATE TABLE IF NOT EXISTS product_like (
     product_like_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id      BIGINT NOT NULL,
