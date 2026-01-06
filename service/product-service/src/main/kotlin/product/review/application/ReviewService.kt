@@ -7,6 +7,7 @@ import product.review.domain.entity.Review
 import product.review.domain.repository.review.ReviewRepository
 import review.ReviewAddApi
 import review.ReviewListApi
+import java.time.LocalDateTime
 import kotlin.math.round
 
 @Service
@@ -41,8 +42,22 @@ class ReviewService(
 
     suspend fun getReview(reviewId: Long): Review {
         return reviewRepository
-            .findById(reviewId)
+            .findByIdAndIsDeletedFalse(reviewId)
             ?: throw BusinessException(ReviewErrorCode.R_001)
+    }
+
+    suspend fun deleteReview(reviewId: Long): Long {
+        val now = LocalDateTime.now()
+        val updatedRows = reviewRepository.softDeleteActiveReview(
+            reviewId = reviewId,
+            lastModifiedAt = now
+        )
+
+        if (updatedRows == 0) {
+            throw BusinessException(ReviewErrorCode.R_001)
+        }
+
+        return reviewId
     }
 
     suspend fun getReviewCount(productId: Long): Long {

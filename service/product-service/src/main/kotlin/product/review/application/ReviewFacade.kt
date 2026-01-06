@@ -91,6 +91,22 @@ class ReviewFacade(
         toResponse(review, data)
     }
 
+    suspend fun delete(
+        passport: Passport,
+        reviewId: Long
+    ): Long = transactional {
+        memberValidService.validateMember(passport)
+
+        val review = reviewService.getReview(reviewId)
+        if (review.memberId != passport.memberId) {
+            throw BusinessException(ReviewErrorCode.R_013)
+        }
+
+        reviewService.deleteReview(reviewId)
+
+        reviewId
+    }
+
     suspend fun getSummary(
         productId: Long
     ): ReviewSummaryGetApi.Response = supervisorScope{
