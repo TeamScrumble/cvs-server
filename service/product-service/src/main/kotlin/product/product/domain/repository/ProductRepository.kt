@@ -1,12 +1,11 @@
 package product.product.domain.repository
 
-import cvs.crawler.CvsTarget
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import product.product.domain.table.Product
 
-interface ProductRepository : CoroutineCrudRepository<Product, Long> {
+interface ProductRepository : CoroutineCrudRepository<Product, Long>, ProductRepositoryCustom {
     @Query(
         """
         SELECT *

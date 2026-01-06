@@ -5,6 +5,7 @@ import cvs.crawler.CrawlerResultEvent
 import org.springframework.stereotype.Service
 import product.product.application.service.ProductService
 import product.product.elasticsearch.service.ProductEsSyncService
+import java.util.*
 
 @Service
 class ProductCrawlerResponseHandler(
@@ -12,8 +13,17 @@ class ProductCrawlerResponseHandler(
     private val productSyncService: ProductEsSyncService
 ) {
     suspend fun handleSuccess(result: CrawlerResultEvent) {
-        val savedProductIds = productService.save(result)
+        val runId = UUID.randomUUID().toString()
+
+        val savedProductIds = productService.save(result, crawlRunId = runId)
         productSyncService.upsertByProductIds(savedProductIds)
+
+        val deletedProductIds = productService.softDeleteNotInRun(
+            target = result.target,
+            crawlRunId = runId
+        )
+
+        productSyncService.upsertByProductIds(deletedProductIds)
     }
 
     fun handleFail(event: CrawlerFailedEvent) {
