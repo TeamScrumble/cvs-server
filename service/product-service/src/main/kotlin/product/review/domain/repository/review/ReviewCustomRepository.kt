@@ -6,6 +6,7 @@ import review.ReviewListApi
 interface ReviewCustomRepository {
 
     suspend fun findList(
+        productId: Long,
         request: ReviewListApi.Request,
         offset: Int
     ): List<Review>

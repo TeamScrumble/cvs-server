@@ -31,15 +31,16 @@ class ReviewFacade(
 
     suspend fun add(
         passport: Passport,
-        request: ReviewAddApi.Request
+        request: ReviewAddApi.Request,
+        productId: Long
     ): Long = transactional {
         memberValidService.validateMember(passport)
-        if (!productService.existsById(request.productId)) {
+        if (!productService.existsById(productId)) {
             throw BusinessException(ReviewErrorCode.R_007)
         }
 
         val memberId = passport.memberId
-        val reviewId = reviewService.add(request, memberId)
+        val reviewId = reviewService.add(request, memberId, productId)
         // 평가 저장
         scoreService.addScores(reviewId, request.scores)
         // 이미지 저장
@@ -50,13 +51,14 @@ class ReviewFacade(
 
     suspend fun getReviewList(
         passport: Passport,
-        request: ReviewListApi.Request
+        request: ReviewListApi.Request,
+        productId: Long
     ): List<ReviewGetApi.Response> = coroutineScope {
         memberValidService.validateMember(passport)
         val memberId = passport.memberId
 
         // 리뷰 목록 가져오기
-        val reviews = reviewService.getList(request)
+        val reviews = reviewService.getList(productId, request)
         if (reviews.isEmpty()) return@coroutineScope emptyList()
 
         val reviewIds = reviews.map { it.id }

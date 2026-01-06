@@ -9,10 +9,6 @@ interface ReviewLikeApi :
     ReviewLikeDeleteApi
 {
 
-    companion object {
-        const val PATH = "/api/product/review/{reviewId}/like"
-    }
-
     data class LikeResponse(
         @Schema(description = "내가 도움돼요를 눌렀는지 여부", example = "true")
         val liked: Boolean,

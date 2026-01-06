@@ -2,6 +2,8 @@ package review
 
 import ApiResponse
 import docs.Documented
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
@@ -20,14 +22,12 @@ interface ReviewAddApi {
     )
     suspend fun add(
         passport: Passport,
-        request: Request
+        request: Request,
+        @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.PATH)
+        productId: Long
     ): ApiResponse<Response>
 
     data class Request(
-        @Schema(description = "리뷰를 등록할 상품 id", example = "1")
-        @field:Positive
-        val productId: Long,
-
         @Schema(description = "상품 만족도 별점(1~5)", example = "5")
         @field:Min(1)
         @field:Max(5)

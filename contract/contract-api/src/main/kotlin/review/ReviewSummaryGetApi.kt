@@ -14,7 +14,7 @@ interface ReviewSummaryGetApi {
         response = Response::class
     )
     suspend fun getSummary(
-        @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.QUERY)
+        @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.PATH)
         productId: Long
     ): ApiResponse<Response>
 

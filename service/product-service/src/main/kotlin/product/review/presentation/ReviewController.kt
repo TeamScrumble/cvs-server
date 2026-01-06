@@ -9,23 +9,23 @@ import review.*
 import security.passport.RequestPassport
 
 @RestController
-@RequestMapping(ReviewApi.PATH)
 class ReviewController(
     private val reviewFacade: ReviewFacade
 ) : ReviewApi {
 
-    @PostMapping
+    @PostMapping(ReviewPaths.PRODUCT_BASE)
     override suspend fun add(
         @RequestPassport passport: Passport,
-        @RequestBody @Valid request: ReviewAddApi.Request
+        @RequestBody @Valid request: ReviewAddApi.Request,
+        @PathVariable productId: Long
     ): ApiResponse<ReviewAddApi.Response> {
-        val reviewId = reviewFacade.add(passport, request)
+        val reviewId = reviewFacade.add(passport, request, productId)
         val response = ReviewAddApi.Response(reviewId)
 
         return ApiResponse.Success(response)
     }
 
-    @GetMapping("/{reviewId}")
+    @GetMapping(ReviewPaths.REVIEW)
     override suspend fun get(
         @RequestPassport passport: Passport,
         @PathVariable reviewId: Long
@@ -38,21 +38,23 @@ class ReviewController(
         return ApiResponse.Success(result)
     }
 
-    @GetMapping
+    @GetMapping(ReviewPaths.PRODUCT_BASE)
     override suspend fun list(
         @RequestPassport passport: Passport,
-        @Valid @ModelAttribute request: ReviewListApi.Request
+        @Valid @ModelAttribute request: ReviewListApi.Request,
+        @PathVariable productId: Long
     ): ApiResponse<List<ReviewGetApi.Response>> {
 
         val result = reviewFacade.getReviewList(
             passport = passport,
-            request = request
+            request = request,
+            productId = productId
         )
 
         return ApiResponse.Success(result)
     }
 
-    @DeleteMapping("/{reviewId}")
+    @DeleteMapping(ReviewPaths.REVIEW)
     override suspend fun delete(
         @RequestPassport passport: Passport,
         @PathVariable reviewId: Long
@@ -66,16 +68,16 @@ class ReviewController(
         return ApiResponse.Success(result)
     }
 
-    @GetMapping("/summary")
+    @GetMapping(ReviewPaths.REVIEW_SUMMARY)
     override suspend fun getSummary(
-        @RequestParam productId: Long
+        @PathVariable productId: Long
     ): ApiResponse<ReviewSummaryGetApi.Response> {
         val result = reviewFacade.getSummary(productId)
 
         return ApiResponse.Success(result)
     }
 
-    @GetMapping("/aspectInfo")
+    @GetMapping(ReviewPaths.ASPECT_INFO)
     override suspend fun getAspectInfo():
             ApiResponse<List<ReviewAspectGetApi.Response>> {
         val result = reviewFacade.getAspectInfo()
