@@ -6,7 +6,9 @@ import kotlinx.coroutines.delay
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 @Component
 class Emart24 : CVS() {
@@ -17,8 +19,6 @@ class Emart24 : CVS() {
         private const val SELECTOR_DOUBLE_NEXT = ".pageNationWrap .doubleNext"
         private const val SELECTOR_NEXT_BTN = ".nextButtons .next"
         private const val SELECTOR_PAGE_FOCUS = ".pageNationWrap .pIndex.focus span"
-
-        private val PRODUCT_IMG_URL_REGEX = Regex(""".*/([0-9]+)\.[A-Za-z0-9]+$""")
 
         private val EVENT_MAPPING = mapOf(
             "onepl" to "1+1",
@@ -43,31 +43,10 @@ class Emart24 : CVS() {
                 EVENT_MAPPING.entries.firstOrNull { className.contains(it.key) }?.value
             }.orEmpty()
 
-            val productImgId = PRODUCT_IMG_URL_REGEX.find(imgUrl)?.groupValues?.get(1) ?: NOT_EXIST_ID
-
             val id = generateId("${CvsTarget.EMART_24.name}|$title")
 
             CrawlerData(id, title, price.toPrice(), imgUrl, eventText, false)
         }
-    }
-
-    // ===== 마지막 페이지 탐색 =====
-    private suspend fun findLastPageNumber(driver: WebDriver): Int {
-        waitForElement(driver, SELECTOR_DOUBLE_NEXT)
-
-        while (true) {
-            val doubleNext = driver.findElement(By.cssSelector(SELECTOR_DOUBLE_NEXT))
-            val opacity = doubleNext.getCssValue("opacity").toDoubleOrNull() ?: 1.0
-
-            if (opacity <= 0.3) break
-
-            (driver as JavascriptExecutor).executeScript("arguments[0].click();", doubleNext)
-            waitForElement(driver, SELECTOR_PAGE_FOCUS)
-            delay(DELAY_BASIC_MS)
-        }
-
-        val lastPage = driver.findElement(By.cssSelector(SELECTOR_PAGE_FOCUS)).text.trim().toInt()
-        return lastPage
     }
 
     // ===== 페이지 이동 처리 =====
@@ -83,19 +62,33 @@ class Emart24 : CVS() {
             scrollToBottom(driver)
             true
         }
+
+
     } catch (e: Exception) {
         false
     }
 
+    private fun waitUntilProductsReady(driver: WebDriver) {
+        // 1) 최소 1개 itemWrap 존재
+        WebDriverWait(driver, Duration.ofSeconds(10)).until {
+            driver.findElements(By.cssSelector(SELECTOR_ITEM)).isNotEmpty()
+        }
+
+        // 2) 첫 상품의 title/price 텍스트가 비어있지 않음
+        val firstItem = driver.findElements(By.cssSelector(SELECTOR_ITEM)).first()
+        WebDriverWait(driver, Duration.ofSeconds(10)).until {
+            val title = runCatching {
+                firstItem.findElement(By.cssSelector(".itemTxtWrap .itemtitle p a")).text.trim()
+            }.getOrDefault("")
+            val price = runCatching {
+                firstItem.findElement(By.cssSelector(".itemTxtWrap .price")).text.trim()
+            }.getOrDefault("")
+            title.isNotBlank() && price.isNotBlank()
+        }
+    }
+
     // ===== 전체 크롤링 흐름 =====
     override suspend fun crawl(driver: WebDriver): List<CrawlerData> {
-        driver.get(BASE_URL)
-        waitForElement(driver, SELECTOR_ITEM)
-        scrollToBottom(driver)
-
-        val lastPage = findLastPageNumber(driver)
-
-        // 첫 페이지로 복귀
         driver.get(BASE_URL)
         waitForElement(driver, SELECTOR_ITEM)
         scrollToBottom(driver)
@@ -113,7 +106,7 @@ class Emart24 : CVS() {
             allProducts += productList
 
             if (!goToNextPage(driver)) break
-            delay(500L)
+            waitUntilProductsReady(driver)
 
             pageNum++
         }
