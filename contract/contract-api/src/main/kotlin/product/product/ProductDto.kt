@@ -25,8 +25,11 @@ data class ProductDto(
     val event: String,
 
     @Schema(description = "신상품 여부", example = "true")
-    val isNew: Boolean,
+    val isNewProduct: Boolean,
 
     @Schema(description = "좋아요 수", example = "10")
     val likeCount: Int,
+
+    @Schema(description = "삭제 여부", example = "false")
+    val isDeleted: Boolean,
 )

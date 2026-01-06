@@ -14,6 +14,7 @@ fun Product.toDocument() = ProductDocument(
     event = event,
     isNewProduct = isNewProduct,
     likeCount = likeCount,
+    isDeleted = isDeleted
 )
 
 fun ProductDocument.toDto() = ProductDto(
@@ -24,6 +25,6 @@ fun ProductDocument.toDto() = ProductDto(
     img = img,
     price = price,
     event = event,
-    isNew = isNewProduct,
+    isNewProduct = isNewProduct,
     likeCount = likeCount,
 )

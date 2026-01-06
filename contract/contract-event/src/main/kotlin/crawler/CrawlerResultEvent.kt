@@ -16,5 +16,5 @@ data class CrawlerData(
     val price: Int,
     val imgUrl: String,
     val flag: String,
-    val isNew: Boolean
+    val isNewProduct: Boolean
 )

@@ -18,7 +18,6 @@ class ProductCrawlResponseConsumer(
     private val objectMapper: ObjectMapper,
     private val responseHandler: ProductCrawlerResponseHandler
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, ex ->
@@ -37,7 +36,7 @@ class ProductCrawlResponseConsumer(
             semaphore.withPermit {
                 try {
                     val event = objectMapper.readValue(message, CrawlerResultEvent::class.java)
-                    logger.info("크롤링 성공 응답 수신: ${event.target}")
+                    logger.info("크롤링 성공 응답 수신: ${event.target} / 크롤링 데이터 : ${event.data.size}")
 
                     responseHandler.handleSuccess(event)
                 } catch (ex: Exception) {

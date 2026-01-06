@@ -7,7 +7,7 @@ import product.product.domain.table.Product
 import java.util.zip.CRC32
 
 internal fun Product.toResponse() = ProductDto(
-    id, cvsProductId, cvsTarget.name, title, img, price, event, isNewProduct, likeCount
+    id, cvsProductId, cvsTarget.name, title, img, price, event, isNewProduct, likeCount, isDeleted
 )
 
 internal fun CrawlerData.toEntity(target: CvsTarget, crawlRunId: String, isDeleted: Boolean): Product {
