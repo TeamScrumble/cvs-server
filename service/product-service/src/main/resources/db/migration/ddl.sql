@@ -10,9 +10,14 @@ CREATE TABLE IF NOT EXISTS product
     event           VARCHAR(10)       NOT NULL,
     is_new          TINYINT(1)        NOT NULL DEFAULT 0,
     like_count      INT               NOT NULL DEFAULT 0,
-    created_at       DATETIME         NOT NULL,
-    last_modified_at DATETIME         NOT NULL
-);
+    is_deleted      TINYINT(1)        NOT NULL DEFAULT 0,
+    crawl_run_id    VARCHAR(36)       NOT NULL,
+    created_at       DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_modified_at DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+    );
+
+ALTER TABLE product
+    ADD UNIQUE KEY uk_product_target_cvs (cvs_target, cvs_product_id);
 
 -- ES 동기화 작업 상태/진행률 저장 테이블
 CREATE TABLE IF NOT EXISTS sync_job (
