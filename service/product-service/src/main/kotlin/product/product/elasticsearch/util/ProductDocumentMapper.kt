@@ -27,4 +27,5 @@ fun ProductDocument.toDto() = ProductDto(
     event = event,
     isNewProduct = isNewProduct,
     likeCount = likeCount,
+    isDeleted = isDeleted
 )
