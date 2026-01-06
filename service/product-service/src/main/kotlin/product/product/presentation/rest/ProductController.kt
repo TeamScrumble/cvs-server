@@ -10,7 +10,6 @@ import passport.Passport
 import product.product.*
 import product.product.application.service.ProductLikeService
 import product.product.application.service.ProductService
-import product.product.application.utils.toCrawlerResultDto
 import product.product.application.utils.toResponse
 import security.passport.RequestPassport
 
@@ -36,17 +35,6 @@ class ProductController(
         val jobId = productService.sync(passport)
 
         return ApiResponse.Success(ProductEsSyncApi.Response(jobId))
-    }
-
-    @PostMapping(ProductAddApi.PATH)
-    override suspend fun add(
-        @RequestPassport passport: Passport,
-        @RequestBody request: List<ProductAddApi.Request>
-    ): ApiResponse<ProductAddApi.Response> {
-        val saveCount = productService.saveAll(passport, request.toCrawlerResultDto()).size.toLong()
-        val response = ProductAddApi.Response(saveCount)
-
-        return ApiResponse.Success(response)
     }
 
     @GetMapping("${ProductGetApi.PATH}/{id}")
