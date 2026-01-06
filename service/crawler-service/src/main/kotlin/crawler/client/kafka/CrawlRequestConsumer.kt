@@ -21,6 +21,10 @@ class CrawlRequestConsumer(
     private val objectMapper: ObjectMapper,
     private val crawlerService: CrawlerService
 ) {
+    companion object {
+        private const val CHUNK_SIZE = 800
+    }
+
     private val exceptionHandler = CoroutineExceptionHandler { _, ex ->
         logger.error("워크 스레드에서 처리되지 않은 예외 발생: ${ex.message}", ex)
     }
@@ -40,10 +44,15 @@ class CrawlRequestConsumer(
                 logger.info("크롤 요청 수신: ${target.name}")
 
                 try {
-                    val crawled = crawlerService.crawl(target)
+                    val crawled = crawlerService.crawl(target).chunked(CHUNK_SIZE)
 
-                    val result = CrawlerResultEvent(target, crawled)
-                    kafkaTemplate.send("crawl.response", objectMapper.writeValueAsString(result))
+                    crawled.forEachIndexed { chunkSeq, data ->
+                        logger.info("크롤 요청 송신: [$chunkSeq] -> ${data.size}")
+
+                        val result = CrawlerResultEvent(target, data)
+
+                        kafkaTemplate.send("crawl.response", objectMapper.writeValueAsString(result))
+                    }
                 } catch (ex: Exception) {
                     val fail = CrawlerFailedEvent(target, ex.message ?: "fail")
                     kafkaTemplate.send("crawl.response.fail", objectMapper.writeValueAsString(fail))
