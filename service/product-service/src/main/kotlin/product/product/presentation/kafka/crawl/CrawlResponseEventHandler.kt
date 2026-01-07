@@ -1,18 +1,18 @@
 package product.product.presentation.kafka.crawl
 
-import cvs.crawler.CrawlerFailedEvent
-import cvs.crawler.CrawlerResultEvent
+import cvs.crawler.CrawlResponseFailEvent
+import cvs.crawler.CrawlResponseSuccessEvent
 import org.springframework.stereotype.Service
 import product.product.application.service.ProductService
 import product.product.elasticsearch.service.ProductEsSyncService
 import java.util.*
 
 @Service
-class ProductCrawlerResponseHandler(
+class CrawlResponseEventHandler(
     private val productService: ProductService,
     private val productSyncService: ProductEsSyncService
 ) {
-    suspend fun handleSuccess(result: CrawlerResultEvent) {
+    suspend fun handleSuccess(result: CrawlResponseSuccessEvent.Payload) {
         if (result.data.isEmpty()) return
 
         val runId = UUID.randomUUID().toString()
@@ -32,7 +32,7 @@ class ProductCrawlerResponseHandler(
         }
     }
 
-    fun handleFail(event: CrawlerFailedEvent) {
+    fun handleFail(event: CrawlResponseFailEvent.Payload) {
         // TODO: 알람 발송
         // TODO: 장애 처리 로직
         // TODO: 재시도 정책 고려

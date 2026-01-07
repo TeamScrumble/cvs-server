@@ -1,10 +1,12 @@
 package product.product.presentation.kafka.sync
 
-object ProductEsSyncTopics {
-    const val REQUEST = "product.es.sync.request"
-}
+import cvs.event.Event
 
-data class ProductEsSyncRequestedEvent(
-    val jobId: Long,
-    val pageSize: Int
-)
+object ProductEsSyncEvent {
+    const val TOPIC = "product.es.sync.request"
+
+    data class Payload(
+        val jobId: Long,
+        val pageSize: Int
+    ) : Event
+}
