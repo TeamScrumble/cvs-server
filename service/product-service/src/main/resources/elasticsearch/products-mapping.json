@@ -1,9 +1,7 @@
 {
   "properties": {
     "productId": { "type": "long" },
-    "cvsProductId": { "type": "long" },
     "cvsTarget": { "type": "keyword" },
-
     "title": {
       "type": "text",
       "analyzer": "korean",
@@ -11,14 +9,9 @@
         "keyword": { "type": "keyword" }
       }
     },
-
     "price": { "type": "integer" },
-    "isNewProduct": { "type": "boolean" },
     "event": { "type": "keyword" },
-
-    "likeCount": { "type": "integer" },
-    "isDeleted": { "type": "boolean" },
-
-    "img": { "type": "keyword", "index": false }
+    "isNewProduct": { "type": "boolean" },
+    "isDeleted": { "type": "boolean" }
   }
 }
