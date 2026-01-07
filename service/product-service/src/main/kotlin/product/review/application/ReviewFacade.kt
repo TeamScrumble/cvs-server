@@ -41,6 +41,13 @@ class ReviewFacade(
         }
 
         val memberId = passport.memberId
+
+        // 리뷰 작성 가능 여부 재검증(1개월 이후부터 작성 가능)
+        val eligibility = reviewWritePolicyService.getEligibility(productId, memberId)
+        if (!eligibility.canWrite) {
+            throw BusinessException(ReviewErrorCode.R_015)
+        }
+
         val reviewId = reviewService.add(request, memberId, productId)
         // 평가 저장
         scoreService.addScores(reviewId, request.scores)
