@@ -26,7 +26,8 @@ class ReviewFacade(
     private val scoreService: ReviewScoreService,
     private val imgService: ReviewImgService,
     private val productService: ProductService,
-    private val aspectService: ReviewAspectService
+    private val aspectService: ReviewAspectService,
+    private val reviewWritePolicyService: ReviewWritePolicyService
 ) {
 
     suspend fun add(
@@ -122,6 +123,26 @@ class ReviewFacade(
             receiptCount = receiptCount.await(),
             averageRating = avgRating.await(),
             aspects = aspects.await()
+        )
+    }
+
+    suspend fun getSummaryMe(
+        passport: Passport,
+        productId: Long
+    ): ReviewSummaryGetApi.MeResponse = supervisorScope {
+        memberValidService.validateMember(passport)
+        val memberId = passport.memberId
+
+        val summaryDeferred = async { getSummary(productId) }
+        val eligibilityDeferred = async { reviewWritePolicyService.getEligibility(productId, memberId) }
+
+        val summary = summaryDeferred.await()
+        val eligibility = eligibilityDeferred.await()
+
+        ReviewSummaryGetApi.MeResponse(
+            summary = summary,
+            canWriteReview = eligibility.canWrite,
+            nextWritableDate = eligibility.nextWritableDate.toString()
         )
     }
 
