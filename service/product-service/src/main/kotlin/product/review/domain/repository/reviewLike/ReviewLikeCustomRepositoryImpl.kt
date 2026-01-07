@@ -2,6 +2,7 @@ package product.review.domain.repository.reviewLike
 
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.r2dbc.core.DatabaseClient
+import org.springframework.r2dbc.core.bind
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -62,6 +63,44 @@ class ReviewLikeCustomRepositoryImpl(
             .collectList()
             .awaitSingle()
             .toSet()
+    }
+
+    override suspend fun insertIgnore(
+        reviewId: Long,
+        memberId: Long
+    ): Boolean {
+        val sql = """
+            INSERT IGNORE INTO review_like (review_id, member_id) 
+            VALUES (:reviewId, :memberId)
+        """.trimIndent()
+
+        val rows = databaseClient.sql(sql)
+            .bind("reviewId", reviewId)
+            .bind("memberId", memberId)
+            .fetch()
+            .rowsUpdated()
+            .awaitSingle()
+
+        return rows?.toInt() == 1
+    }
+
+    override suspend fun deleteByReviewIdAndMemberId(
+        reviewId: Long,
+        memberId: Long
+    ): Boolean {
+        val sql = """
+            DELETE FROM review_like 
+            WHERE review_id = :reviewId AND member_id = :memberId
+        """.trimIndent()
+
+        val rows = databaseClient.sql(sql)
+            .bind("reviewId", reviewId)
+            .bind("memberId", memberId)
+            .fetch()
+            .rowsUpdated()
+            .awaitSingle()
+
+        return rows?.toInt() == 1
     }
 
 }

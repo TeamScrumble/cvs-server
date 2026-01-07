@@ -7,6 +7,7 @@ interface ReviewApi :
     ReviewAddApi,
     ReviewGetApi,
     ReviewListApi,
+    ReviewDeleteApi,
     ReviewSummaryGetApi,
     ReviewAspectGetApi
 {

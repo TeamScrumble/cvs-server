@@ -44,10 +44,13 @@ interface ReviewGetApi {
         val content: String,
 
         @Schema(description = "도움돼요 수", example = "8")
-        val likeCount: Int,
+        val likeCount: Long,
 
         @Schema(description = "현재 사용자가 해당 리뷰에 도움돼요를 눌렀는지 여부", example = "false")
         val isLikeByMe: Boolean,
+
+        @Schema(description = "영수증 인증 여부", example = "false")
+        val isReceipt: Boolean,
 
         @Schema(description = "평가", example = "품질/가성비/재구매의사")
         val scores: List<ScoreResponse> = emptyList(),

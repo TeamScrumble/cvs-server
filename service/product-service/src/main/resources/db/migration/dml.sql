@@ -20,3 +20,11 @@ VALUES
     (3, '완전 있어요', 1),
     (3, '모르겠어요', 2),
     (3, '전혀 없어요', 3);
+
+-- review 테이블에 like_count 컬럼 추가
+UPDATE review r
+SET like_count = (
+  SELECT COUNT(*)
+  FROM review_like rl
+  WHERE rl.review_id = r.review_id
+);

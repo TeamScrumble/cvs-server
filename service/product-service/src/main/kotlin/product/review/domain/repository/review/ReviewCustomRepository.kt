@@ -10,4 +10,10 @@ interface ReviewCustomRepository {
         offset: Int
     ): List<Review>
 
+    suspend fun getLikeCount(reviewId: Long): Long
+
+    suspend fun incrementLikeCount(reviewId: Long)
+
+    suspend fun decrementLikeCount(reviewId: Long)
+
 }

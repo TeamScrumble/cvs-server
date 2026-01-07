@@ -52,6 +52,20 @@ class ReviewController(
         return ApiResponse.Success(result)
     }
 
+    @DeleteMapping("/{reviewId}")
+    override suspend fun delete(
+        @RequestPassport passport: Passport,
+        @PathVariable reviewId: Long
+    ): ApiResponse<ReviewDeleteApi.Response> {
+        val deleted = reviewFacade.delete(
+            passport = passport,
+            reviewId = reviewId
+        )
+        val result = ReviewDeleteApi.Response(deleted)
+
+        return ApiResponse.Success(result)
+    }
+
     @GetMapping("/summary")
     override suspend fun getSummary(
         @RequestParam productId: Long
