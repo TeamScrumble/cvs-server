@@ -16,6 +16,8 @@ class ProductLikeService(
     suspend fun list(memberId: Long) =
         productLikeRepository.findLikedProductsByMemberId(memberId)
 
+    suspend fun existByProductIdAndMemberId(productId: Long, memberId: Long) = productLikeRepository.existsByProductIdAndMemberId(productId, memberId)
+
     suspend fun toggle(productId: Long, memberId: Long): ToggleResult = transactional {
         // 1) 먼저 삭제 시도
         val deleted = productLikeRepository.deleteByProductIdAndMemberId(productId, memberId)

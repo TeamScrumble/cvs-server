@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.product.*
+import product.product.application.service.ProductFacade
 import product.product.application.service.ProductLikeService
 import product.product.application.service.ProductService
 import product.product.application.utils.toResponse
@@ -15,6 +16,7 @@ import security.passport.RequestPassport
 
 @RestController
 class ProductController(
+    private val productFacade: ProductFacade,
     private val productService: ProductService,
     private val productLikeService: ProductLikeService,
 ) : ProductApi {
@@ -42,11 +44,8 @@ class ProductController(
         @RequestPassport passport: Passport?,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
-        val isLiked = if (passport != null) {
-            productLikeService.toggle(id, passport.memberId).liked
-        } else false
-
-        val product = productService.findById(id).toResponse()
+        productFacade.findProduct(passport, id)
+        val (product, isLiked) = productFacade.findProduct(passport, id)
 
         return ApiResponse.Success(ProductGetApi.Response(product, isLiked))
     }
