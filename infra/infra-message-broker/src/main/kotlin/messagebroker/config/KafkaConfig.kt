@@ -46,8 +46,8 @@ class KafkaConfig{
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to props.url,
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.GROUP_ID_CONFIG to "cvs",
-            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+            ConsumerConfig.GROUP_ID_CONFIG to "cvs-service",
+            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
         )
 
     @Bean

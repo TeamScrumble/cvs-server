@@ -29,7 +29,7 @@ class ProductController(
     }
 
     @PostMapping(ProductEsSyncApi.PATH)
-    override suspend fun crawl(
+    override suspend fun sync(
         @RequestPassport passport: Passport,
     ): ApiResponse<ProductEsSyncApi.Response> {
         val jobId = productService.sync(passport)

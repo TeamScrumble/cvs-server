@@ -1,15 +1,14 @@
 package product.product.application.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import cvs.crawler.CrawlerRequestEvent
-import cvs.crawler.CrawlerResultEvent
+import cvs.crawler.CrawlRequestEvent
+import cvs.crawler.CrawlResponseSuccessEvent
 import cvs.crawler.CvsTarget
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
+import messagebroker.publisher.EventPublisher
 import org.springframework.data.domain.Pageable
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import passport.Passport
 import passport.isAdmin
@@ -22,17 +21,15 @@ import product.product.domain.table.SyncJobStatus
 import product.product.domain.table.SyncJobType
 import product.product.elasticsearch.service.ProductEsService
 import product.product.elasticsearch.util.toDto
-import product.product.presentation.kafka.sync.ProductEsSyncRequestedEvent
-import product.product.presentation.kafka.sync.ProductEsSyncTopics
+import product.product.presentation.kafka.sync.ProductEsSyncEvent
 
 @Service
 class ProductService(
-    private val objectMapper: ObjectMapper,
+    private val eventPublisher: EventPublisher,
     private val productEsService: ProductEsService,
     private val syncJobRepository: SyncJobRepository,
     private val productRepository: ProductRepository,
     private val memberValidService: MemberValidService,
-    private val kafkaTemplate: KafkaTemplate<String, String>,
 ) {
     suspend fun validateExists(productId: Long) = productRepository.existsById(productId)
 
@@ -54,12 +51,10 @@ class ProductService(
         val active = syncJobRepository
             .findLatestActiveJob(SyncJobType.PRODUCT_ES_INITIAL_LOAD.name)
             .firstOrNull()
-
         // 이미 진행 중인 작업이 있으면 그 jobId를 반환
         if (active != null) {
             return active.id
         }
-
         val job = syncJobRepository.save(
             SyncJob(
                 type = SyncJobType.PRODUCT_ES_INITIAL_LOAD,
@@ -68,17 +63,7 @@ class ProductService(
                 pageSize = 2000
             )
         )
-
-        val event = ProductEsSyncRequestedEvent(
-            jobId = job.id,
-            pageSize = job.pageSize
-        )
-
-        kafkaTemplate.send(
-            ProductEsSyncTopics.REQUEST,
-            job.id.toString(),
-            objectMapper.writeValueAsString(event)
-        )
+        eventPublisher.publish(ProductEsSyncEvent.Payload(job.id, job.pageSize))
 
         return job.id
     }
@@ -91,8 +76,7 @@ class ProductService(
         }
 
         targets.forEach { target ->
-            val payload = objectMapper.writeValueAsString(CrawlerRequestEvent(target))
-            kafkaTemplate.send("crawl.request", payload)
+            eventPublisher.publish(CrawlRequestEvent.Payload(target))
         }
 
         return true
@@ -102,7 +86,7 @@ class ProductService(
      * 단일 save의 경우 스케줄러 카프카 이벤트 및 saveAll을 제외한 곳에서 호출되지 않기 때문에 따로 passport 체크가 없음
      * */
     suspend fun save(
-        result: CrawlerResultEvent,
+        result: CrawlResponseSuccessEvent.Payload,
         crawlRunId: String,
         chunkSize: Int = 1000
     ): List<Long> {
