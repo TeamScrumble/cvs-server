@@ -35,4 +35,10 @@ data class Product(
 
     @Column("like_count")
     val likeCount: Int,
+
+    @Column("is_deleted")
+    val isDeleted: Boolean = false,
+
+    @Column("crawl_run_id")
+    val crawlRunId: String,
 ) : LongIdEntity()

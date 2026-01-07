@@ -15,7 +15,7 @@ interface ProductEsSyncApi {
         description = "Source of truth <=> ElasticSearch 동기화 API",
         response = Response::class,
     )
-    suspend fun crawl(passport: Passport): ApiResponse<Response>
+    suspend fun sync(passport: Passport): ApiResponse<Response>
 
     data class Response(
         @Schema(description = "요청 성공 시 동기화를 담당하는 jobId 반환", example = "1")

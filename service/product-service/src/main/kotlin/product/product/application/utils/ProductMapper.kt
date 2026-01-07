@@ -1,18 +1,16 @@
 package product.product.application.utils
 
 import cvs.crawler.CrawlerData
-import cvs.crawler.CrawlerResultEvent
 import cvs.crawler.CvsTarget
-import product.product.ProductAddApi
 import product.product.ProductDto
 import product.product.domain.table.Product
 import java.util.zip.CRC32
 
 internal fun Product.toResponse() = ProductDto(
-    id, cvsProductId, cvsTarget.name, title, img, price, event, isNewProduct, likeCount
+    id, cvsProductId, cvsTarget.name, title, img, price, event, isNewProduct, likeCount, isDeleted
 )
 
-internal fun CrawlerData.toEntity(target: CvsTarget): Product {
+internal fun CrawlerData.toEntity(target: CvsTarget, crawlRunId: String, isDeleted: Boolean): Product {
     return Product(
         id = 0L,
         cvsProductId = this.id.toLong(),
@@ -21,24 +19,11 @@ internal fun CrawlerData.toEntity(target: CvsTarget): Product {
         img = this.imgUrl,
         price = this.price,
         event = this.flag,
-        isNewProduct = this.isNew,
+        isNewProduct = this.isNewProduct,
+        isDeleted = isDeleted,
+        crawlRunId = crawlRunId,
         likeCount = 0
     )
-}
-
-internal fun List<ProductAddApi.Request>.toCrawlerResultDto() = groupBy {
-    CvsTarget.valueOf(it.cvsTarget)
-}.map { (key, value) ->
-    CrawlerResultEvent(key, value.map { v ->
-        CrawlerData(
-            generateId("${key}|${v.title}"),
-            v.title,
-            v.price,
-            v.img,
-            v.event,
-            v.isNew
-        )
-    })
 }
 
 private fun generateId(input: String): String {

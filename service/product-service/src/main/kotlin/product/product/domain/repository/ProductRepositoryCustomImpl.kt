@@ -1,16 +1,23 @@
 package product.product.domain.repository
 
+import cvs.crawler.CvsTarget
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
 import product.product.domain.table.Product
+import kotlin.text.get
 
 @Repository
-class ProductCustomRepository(
+class ProductRepositoryCustomImpl(
     private val client: DatabaseClient
-) {
-    suspend fun upsertAll(products: List<Product>): List<Long> {
+) : ProductRepositoryCustom {
+    override suspend fun upsertAll(products: List<Product>, crawlRunId: String): List<Long> {
         if (products.isEmpty()) return emptyList()
+
+        val runIdEscaped = escape(crawlRunId)
 
         val values = products.joinToString(",") {
             """(
@@ -22,6 +29,8 @@ class ProductCustomRepository(
                 '${escape(it.event)}',
                 ${if (it.isNewProduct) 1 else 0},
                 0,
+                0,
+                '$runIdEscaped',
                 NOW(),
                 NOW()
             )"""
@@ -30,6 +39,7 @@ class ProductCustomRepository(
         val sql = """
             INSERT INTO product (
                 cvs_product_id, cvs_target, title, img, price, event, is_new, like_count,
+                is_deleted, crawl_run_id,
                 created_at, last_modified_at
             ) VALUES 
                 $values
@@ -39,16 +49,16 @@ class ProductCustomRepository(
                 price = VALUES(price),
                 event = VALUES(event),
                 is_new = VALUES(is_new),
+                is_deleted = 0,
+                crawl_run_id = VALUES(crawl_run_id),
                 last_modified_at = NOW()
         """.trimIndent()
 
-        // 1) upsert 실행
         client.sql(sql)
             .fetch()
             .rowsUpdated()
             .awaitSingle()
 
-        // 2) 이번에 처리한 cvs_product_id들로 product_id를 다시 조회해서 반환
         val cvsIds = products.map { it.cvsProductId }.distinct()
         return findProductIdsByCvsProductIds(cvsIds)
     }
@@ -79,7 +89,21 @@ class ProductCustomRepository(
         return result
     }
 
-    suspend fun incrementLikeCount(productId: Long): Long {
+    override suspend fun getLikeCount(productId: Long): Int {
+        val sql = """
+            SELECT like_count
+            FROM product
+            WHERE product_id = :productId
+        """.trimIndent()
+
+        return client.sql(sql)
+            .bind("productId", productId)
+            .map { row, _ -> (row.get("like_count") as Number).toInt() }
+            .one()
+            .awaitSingle()
+    }
+
+    override suspend fun incrementLikeCount(productId: Long): Long {
         val sql = """
             UPDATE product
             SET like_count = like_count + 1,
@@ -94,7 +118,7 @@ class ProductCustomRepository(
             .awaitSingle()
     }
 
-    suspend fun decrementLikeCount(productId: Long): Long {
+    override suspend fun decrementLikeCount(productId: Long): Long {
         val sql = """
             UPDATE product
             SET like_count = GREATEST(like_count - 1, 0),
@@ -109,18 +133,48 @@ class ProductCustomRepository(
             .awaitSingle()
     }
 
-    suspend fun getLikeCount(productId: Long): Int {
+    override fun findIdsToSoftDelete(target: CvsTarget, crawlRunId: String): Flow<Long> {
         val sql = """
-            SELECT like_count
+            SELECT product_id
             FROM product
-            WHERE product_id = :productId
+            WHERE cvs_target = :target
+              AND is_deleted = 0
+              AND (crawl_run_id IS NULL OR crawl_run_id <> :runId)
         """.trimIndent()
 
         return client.sql(sql)
-            .bind("productId", productId)
-            .map { row, _ -> (row.get("like_count") as Number).toInt() }
-            .one()
-            .awaitSingle()
+            .bind("target", target.name)
+            .bind("runId", crawlRunId)
+            .map { row, _ -> (row.get("product_id") as Number).toLong() }
+            .all()
+            .asFlow()
+    }
+
+    override suspend fun softDeleteByIds(ids: List<Long>): Long {
+        if (ids.isEmpty()) return 0
+
+        val (inClause, bindNames) = buildInClause("id", ids.size)
+
+        val sql = """
+            UPDATE product
+            SET is_deleted = 1,
+                last_modified_at = NOW()
+            WHERE is_deleted = 0
+              AND product_id IN ($inClause)
+        """.trimIndent()
+
+        var spec = client.sql(sql)
+        bindNames.forEachIndexed { idx, name ->
+            spec = spec.bind(name, ids[idx])
+        }
+
+        return spec.fetch().rowsUpdated().awaitSingle()
+    }
+
+    private fun buildInClause(prefix: String, size: Int): Pair<String, List<String>> {
+        val names = (0 until size).map { "$prefix$it" }
+        val clause = names.joinToString(",") { ":$it" }
+        return clause to names
     }
 
     private fun escape(value: String): String =
