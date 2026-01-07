@@ -16,6 +16,7 @@ object CrawlResponseSuccessEvent {
 
     data class Payload(
         val target: CvsTarget,
+        val runId: String,
         val data: List<CrawlerData>
     ) : Event
 }
