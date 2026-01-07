@@ -1,19 +1,17 @@
 package product.product.application.service
 
 import db.transactional.Transactional
-import error.errorcode.ProductErrorCode
-import error.exception.BusinessException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
-import product.product.domain.repository.ProductCustomRepository
-import product.product.domain.table.ProductLike
 import product.product.domain.repository.ProductLikeRepository
+import product.product.domain.repository.ProductRepository
+import product.product.domain.table.ProductLike
 
 @Service
 class ProductLikeService(
     private val transactional: Transactional,
     private val productLikeRepository: ProductLikeRepository,
-    private val productCustomRepository: ProductCustomRepository
+    private val productRepository: ProductRepository
 ) {
     suspend fun list(memberId: Long) =
         productLikeRepository.findLikedProductsByMemberId(memberId)
@@ -24,8 +22,8 @@ class ProductLikeService(
 
         // 1-1) 삭제된 row가 존재할 경우
         if (deleted > 0) {
-            productCustomRepository.decrementLikeCount(productId)
-            val likeCount = productCustomRepository.getLikeCount(productId)
+            productRepository.decrementLikeCount(productId)
+            val likeCount = productRepository.getLikeCount(productId)
 
             return@transactional ToggleResult(liked = false, likeCount = likeCount)
         }
@@ -45,10 +43,10 @@ class ProductLikeService(
 
         // insert가 실제로 성공했을 때만 count 증가 (중복이면 증가 금지)
         if (inserted) {
-            productCustomRepository.incrementLikeCount(productId)
+            productRepository.incrementLikeCount(productId)
         }
 
-        val likeCount = productCustomRepository.getLikeCount(productId)
+        val likeCount = productRepository.getLikeCount(productId)
         ToggleResult(liked = true, likeCount = likeCount)
     }
 

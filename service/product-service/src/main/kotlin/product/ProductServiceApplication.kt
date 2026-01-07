@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(
-    scanBasePackages = ["product", "security", "db", "docs"]
+    scanBasePackages = ["product", "security", "db", "docs", "messagebroker"]
 )
 class ProductServiceApplication
 

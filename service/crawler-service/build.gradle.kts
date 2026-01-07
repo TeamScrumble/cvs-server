@@ -54,4 +54,5 @@ dependencies {
     implementation(project(":contract:contract-error"))
     implementation(project(":infra:infra-db"))
     implementation(project(":infra:infra-security"))
+    implementation(project(":infra:infra-message-broker"))
 }

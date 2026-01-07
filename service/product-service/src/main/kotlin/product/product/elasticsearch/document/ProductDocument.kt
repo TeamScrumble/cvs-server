@@ -18,5 +18,6 @@ data class ProductDocument(
     val price: Int,
     val event: String,
     val isNewProduct: Boolean,
-    val likeCount: Int
+    val likeCount: Int,
+    val isDeleted: Boolean
 )
