@@ -136,7 +136,7 @@ class ReviewFacade(
     suspend fun getSummaryMe(
         passport: Passport,
         productId: Long
-    ): ReviewSummaryGetApi.MeResponse = supervisorScope {
+    ): ReviewSummaryGetApi.MeResponse = coroutineScope {
         memberValidService.validateMember(passport)
         val memberId = passport.memberId
 
