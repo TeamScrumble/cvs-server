@@ -44,7 +44,7 @@ interface ProductEsRepository : ElasticsearchRepository<ProductDocument, Long> {
               { "match": { "title": { "query": "?0", "zero_terms_query": "all" } } }
             ],
             "filter": [
-              { "term": { "cvsTarget": "?1" } },
+              { "term": { "cvsTarget": "?1" } }
             ]
           }
         }

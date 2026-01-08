@@ -13,14 +13,15 @@ import org.springframework.stereotype.Service
 import passport.Passport
 import passport.isAdmin
 import product.common.valid.MemberValidService
+import product.product.ProductDto
 import product.product.application.utils.toEntity
+import product.product.application.utils.toResponse
 import product.product.domain.repository.ProductRepository
 import product.product.domain.repository.SyncJobRepository
 import product.product.domain.table.SyncJob
 import product.product.domain.table.SyncJobStatus
 import product.product.domain.table.SyncJobType
 import product.product.elasticsearch.service.ProductEsService
-import product.product.elasticsearch.util.toDto
 import product.product.presentation.kafka.sync.ProductEsSyncEvent
 
 @Service
@@ -121,9 +122,22 @@ class ProductService(
         cvsTarget: CvsTarget?,
         keyword: String,
         pageable: Pageable
-    ) = productEsService.findAllByKeyword(cvsTarget, keyword, pageable)
-        .map { it.toDto() }
-        .toList()
+    ): List<ProductDto> {
+        val ids = productEsService.findAllByKeyword(cvsTarget, keyword, pageable)
+            .map { it.productId }
+
+        if (ids.isEmpty) return emptyList()
+
+        val rows = productRepository.findAllById(ids).toList()
+
+        if (rows.isEmpty()) return emptyList()
+
+        // id -> dto 맵 (중복 id가 없다는 가정)
+        val dtoById = rows.associateBy({ it.id }, { it.toResponse() })
+
+        // ES 순서를 그대로 유지
+        return ids.mapNotNull { dtoById[it] }
+    }
 
     suspend fun existsById(id: Long): Boolean = productRepository.existsById(id)
 }

@@ -11,7 +11,6 @@ import product.product.*
 import product.product.application.service.ProductFacade
 import product.product.application.service.ProductLikeService
 import product.product.application.service.ProductService
-import product.product.application.utils.toResponse
 import security.passport.RequestPassport
 
 @RestController

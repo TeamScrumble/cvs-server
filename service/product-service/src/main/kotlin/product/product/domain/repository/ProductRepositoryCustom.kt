@@ -2,7 +2,6 @@ package product.product.domain.repository
 
 import cvs.crawler.CvsTarget
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitSingle
 import product.product.domain.table.Product
 
 interface ProductRepositoryCustom {
