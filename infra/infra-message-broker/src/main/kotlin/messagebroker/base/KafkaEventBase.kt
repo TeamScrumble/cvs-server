@@ -9,7 +9,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.sync.Semaphore
 import org.slf4j.LoggerFactory
 
-open class KafkaEventBase {
+open class KafkaEventBase(max: Int = 4) {
     companion object {
         const val CHUNK_SIZE = 800
     }
@@ -22,7 +22,7 @@ open class KafkaEventBase {
 
     protected val workerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + exceptionHandler)
 
-    protected val semaphore = Semaphore(4)
+    protected val semaphore = Semaphore(max)
 
     @PreDestroy
     fun shutdown() {

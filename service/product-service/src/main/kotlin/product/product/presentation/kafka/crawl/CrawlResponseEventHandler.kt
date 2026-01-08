@@ -15,7 +15,7 @@ class CrawlResponseEventHandler(
     suspend fun handleSuccess(result: CrawlResponseSuccessEvent.Payload) {
         if (result.data.isEmpty()) return
 
-        val runId = UUID.randomUUID().toString()
+        val runId = result.runId
 
         val isFirstInit = productService.countAllByCvsTarget(result.target) == 0L
 
