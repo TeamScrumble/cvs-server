@@ -12,7 +12,6 @@ import product.product.elasticsearch.repository.ProductEsRepository
 @Service
 class ProductEsService(
     private val productEsRepository: ProductEsRepository,
-    private val operations: ElasticsearchOperations
 ) {
     suspend fun findAllByKeyword(
         cvsTarget: CvsTarget?,
@@ -22,17 +21,5 @@ class ProductEsService(
         productEsRepository.searchAll(keyword, pageable)
     } else {
         productEsRepository.searchByTarget(keyword, cvsTarget.name, pageable)
-    }
-
-    fun updateLikeCount(productId: Long, likeCount: Int) {
-        val doc = Document.create().apply {
-            put("likeCount", likeCount)
-        }
-
-        val query = UpdateQuery.builder(productId.toString())
-            .withDocument(doc)
-            .build()
-
-        operations.update(query, operations.indexOps(ProductDocument::class.java).indexCoordinates)
     }
 }

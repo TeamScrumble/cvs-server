@@ -42,20 +42,6 @@ class ProductEsSyncService(
         }
     }
 
-    suspend fun initialLoad(pageSize: Int = 2000) {
-        var offset = 0L
-
-        while (true) {
-            val products = productRepository.findPageByOffset(offset, pageSize).toList()
-            if (products.isEmpty()) break
-
-            val docs = products.map { it.toDocument() }
-            productEsRepository.saveAll(docs)
-
-            offset += pageSize
-        }
-    }
-
     suspend fun initialLoad(jobId: Long, pageSize: Int = 2000) {
         val job = syncJobRepository.findById(jobId)
             ?: throw IllegalStateException("sync job not found: $jobId")
