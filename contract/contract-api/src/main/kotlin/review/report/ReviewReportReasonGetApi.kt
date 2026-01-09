@@ -6,10 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 interface ReviewReportReasonGetApi {
 
-    companion object {
-        const val PATH = "/api/product/review/report/reason"
-    }
-
     @Documented(
         summary = "상품 리뷰 신고 사유 목록 조회 API",
         description = "신고 화면에 표시할 신고 사유 목록을 조회하는 API",

@@ -10,10 +10,3 @@ interface ReviewApi :
     ReviewDeleteApi,
     ReviewSummaryGetApi,
     ReviewAspectGetApi
-{
-
-    companion object {
-        const val PATH = "/api/product/review"
-    }
-
-}

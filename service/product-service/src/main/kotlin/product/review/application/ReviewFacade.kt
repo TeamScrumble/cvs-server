@@ -26,20 +26,29 @@ class ReviewFacade(
     private val scoreService: ReviewScoreService,
     private val imgService: ReviewImgService,
     private val productService: ProductService,
-    private val aspectService: ReviewAspectService
+    private val aspectService: ReviewAspectService,
+    private val reviewWritePolicyService: ReviewWritePolicyService
 ) {
 
     suspend fun add(
         passport: Passport,
-        request: ReviewAddApi.Request
+        request: ReviewAddApi.Request,
+        productId: Long
     ): Long = transactional {
         memberValidService.validateMember(passport)
-        if (!productService.existsById(request.productId)) {
+        if (!productService.existsById(productId)) {
             throw BusinessException(ReviewErrorCode.R_007)
         }
 
         val memberId = passport.memberId
-        val reviewId = reviewService.add(request, memberId)
+
+        // 리뷰 작성 가능 여부 재검증(1개월 이후부터 작성 가능)
+        val eligibility = reviewWritePolicyService.getEligibility(productId, memberId)
+        if (!eligibility.canWrite) {
+            throw BusinessException(ReviewErrorCode.R_015)
+        }
+
+        val reviewId = reviewService.add(request, memberId, productId)
         // 평가 저장
         scoreService.addScores(reviewId, request.scores)
         // 이미지 저장
@@ -50,13 +59,14 @@ class ReviewFacade(
 
     suspend fun getReviewList(
         passport: Passport,
-        request: ReviewListApi.Request
+        request: ReviewListApi.Request,
+        productId: Long
     ): List<ReviewGetApi.Response> = coroutineScope {
         memberValidService.validateMember(passport)
         val memberId = passport.memberId
 
         // 리뷰 목록 가져오기
-        val reviews = reviewService.getList(request)
+        val reviews = reviewService.getList(productId, request)
         if (reviews.isEmpty()) return@coroutineScope emptyList()
 
         val reviewIds = reviews.map { it.id }
@@ -120,6 +130,26 @@ class ReviewFacade(
             receiptCount = receiptCount.await(),
             averageRating = avgRating.await(),
             aspects = aspects.await()
+        )
+    }
+
+    suspend fun getSummaryMe(
+        passport: Passport,
+        productId: Long
+    ): ReviewSummaryGetApi.MeResponse = coroutineScope {
+        memberValidService.validateMember(passport)
+        val memberId = passport.memberId
+
+        val summaryDeferred = async { getSummary(productId) }
+        val eligibilityDeferred = async { reviewWritePolicyService.getEligibility(productId, memberId) }
+
+        val summary = summaryDeferred.await()
+        val eligibility = eligibilityDeferred.await()
+
+        ReviewSummaryGetApi.MeResponse(
+            summary = summary,
+            canWriteReview = eligibility.canWrite,
+            nextWritableDate = eligibility.nextWritableDate.toString()
         )
     }
 

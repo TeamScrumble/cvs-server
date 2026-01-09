@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import passport.Passport
 import product.review.application.report.ReviewReportFacade
+import review.ReviewPaths
 import review.report.ReviewReportAddApi
 import review.report.ReviewReportApi
 import review.report.ReviewReportReasonGetApi
@@ -18,7 +19,7 @@ class ReviewReportController(
     private val reportFacade: ReviewReportFacade
 ) : ReviewReportApi {
 
-    @PostMapping(ReviewReportAddApi.PATH)
+    @PostMapping(ReviewPaths.REPORT)
     override suspend fun reportAdd(
         @RequestPassport passport: Passport,
         @PathVariable reviewId: Long,
@@ -33,7 +34,7 @@ class ReviewReportController(
         return ApiResponse.Success(ReviewReportAddApi.Response(saved))
     }
 
-    @GetMapping(ReviewReportReasonGetApi.PATH)
+    @GetMapping(ReviewPaths.REPORT_REASONS)
     override suspend fun getReasons():
             ApiResponse<List<ReviewReportReasonGetApi.Response>> {
         val reasonList = reportFacade.getReasons()

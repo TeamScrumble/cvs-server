@@ -50,4 +50,18 @@ interface ReviewRepository :
         """
     )
     suspend fun findAvgRatingByProductId(productId: Long): Double?
+
+    @Query(
+        """
+        SELECT MAX(created_at) 
+        FROM review 
+        WHERE product_id = :productId 
+            AND member_id = :memberId
+            AND is_deleted = 0
+        """
+    )
+    suspend fun findLastCreatedAt(
+        productId: Long,
+        memberId: Long
+    ): LocalDateTime?
 }

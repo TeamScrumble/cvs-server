@@ -10,10 +10,6 @@ import passport.Passport
 
 interface ReviewReportAddApi {
 
-    companion object {
-        const val PATH = "/api/product/review/{reviewId}/report"
-    }
-
     @Documented(
         summary = "상품 리뷰 신고 등록 API",
         description = "상품 리뷰 신고를 등록하는 API",
