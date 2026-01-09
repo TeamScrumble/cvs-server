@@ -12,10 +12,10 @@ class ReviewWritePolicyService(
     private val clock: Clock = Clock.system(ZoneId.of("Asia/Seoul"))
 ) {
 
-    data class Eligibility(
-        val canWrite: Boolean,
-        val nextWritableDate: LocalDate
-    )
+    data class Eligibility(val lastDate: LocalDate?, val today: LocalDate) {
+        val nextWritableDate: LocalDate = lastDate?.plusMonths(1) ?: today
+        val canWrite: Boolean = !nextWritableDate.isAfter(today)
+    }
 
     suspend fun getEligibility(
         productId: Long,
@@ -25,18 +25,16 @@ class ReviewWritePolicyService(
         // 마지막 작성 시각이 없으면 최초 작성
         val lastCreatedAt = reviewRepository.findLastCreatedAt(productId, memberId)
             ?: return Eligibility(
-                canWrite = true,
-                nextWritableDate = today
+                lastDate = null,
+                today = today
             )
 
         // 마지막 작성 날짜만 고려
         val lastDate = lastCreatedAt.toLocalDate()
-        // 마지막 작성일로부터 1개월 후 작성 가능
-        val nextWritableAt = lastDate.plusMonths(1)
 
         return Eligibility(
-            canWrite = !nextWritableAt.isAfter(today),
-            nextWritableDate = nextWritableAt
+            lastDate = lastDate,
+            today = today
         )
     }
 
