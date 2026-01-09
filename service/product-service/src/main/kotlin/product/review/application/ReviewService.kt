@@ -18,9 +18,10 @@ class ReviewService(
     suspend fun add(
         request: ReviewAddApi.Request,
         memberId: Long,
+        productId: Long
     ): Long {
         val review = Review.create(
-            productId = request.productId,
+            productId = productId,
             memberId = memberId,
             rating = request.rating,
             content = request.content,
@@ -31,13 +32,14 @@ class ReviewService(
     }
 
     suspend fun getList(
+        productId: Long,
         request: ReviewListApi.Request
     ): List<Review> {
         val page = request.page
         val size = request.pageSize
         val offset = page * size
 
-        return reviewRepository.findList(request, offset)
+        return reviewRepository.findList(productId, request, offset)
     }
 
     suspend fun getReview(reviewId: Long): Review {

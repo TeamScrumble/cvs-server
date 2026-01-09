@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import passport.Passport
 import product.review.application.ReviewFacade
+import review.ReviewPaths
 import review.like.ReviewLikeApi
 import security.passport.RequestPassport
 
 @RestController
-@RequestMapping(ReviewLikeApi.PATH)
 class ReviewLikeController(
     private val reviewFacade: ReviewFacade
 ) : ReviewLikeApi {
 
-    @PostMapping
+    @PostMapping(ReviewPaths.LIKE)
     override suspend fun likeAdd(
         @RequestPassport passport: Passport,
         @PathVariable reviewId: Long
@@ -30,7 +30,7 @@ class ReviewLikeController(
         return ApiResponse.Success(result)
     }
 
-    @DeleteMapping
+    @DeleteMapping(ReviewPaths.LIKE)
     override suspend fun likeRemove(
         @RequestPassport passport: Passport,
         @PathVariable reviewId: Long

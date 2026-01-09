@@ -14,6 +14,7 @@ class ReviewCustomRepositoryImpl(
 ) : ReviewCustomRepository {
 
     override suspend fun findList(
+        productId: Long,
         request: ReviewListApi.Request,
         offset: Int
     ): List<Review> {
@@ -58,7 +59,7 @@ class ReviewCustomRepositoryImpl(
         """.trimIndent()
 
         return client.sql(sql)
-            .bind("productId", request.productId)
+            .bind("productId", productId)
             .bind("receiptOnly", request.receiptOnly)
             .bind("imageOnly", request.imageOnly)
             .bind("size", request.pageSize)

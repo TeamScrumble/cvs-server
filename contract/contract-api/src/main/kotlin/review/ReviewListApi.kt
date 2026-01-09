@@ -18,14 +18,13 @@ interface ReviewListApi {
     )
     suspend fun list(
         passport: Passport,
-        @ParameterObject request: Request
+        @ParameterObject
+        request: Request,
+        @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.PATH)
+        productId: Long
     ): ApiResponse<List<ReviewGetApi.Response>>
 
     data class Request(
-        @field:Parameter(
-            description = "상품 id", example = "1", `in` = ParameterIn.QUERY)
-        val productId: Long,
-
         @field:Parameter(description = "페이지 번호(0부터 시작)", example = "1", `in` = ParameterIn.QUERY)
         val page: Int = 0,
 
