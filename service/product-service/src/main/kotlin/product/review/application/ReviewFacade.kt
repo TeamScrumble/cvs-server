@@ -249,13 +249,8 @@ class ReviewFacade(
     ) {
         // 회원 검증
         memberValidService.validateMember(passport)
-        val memberId = passport.memberId
-
-        // 리뷰 검증, 본인이 작성한 리뷰는 도움돼요 불가능
-        val review = reviewService.getReview(reviewId)
-        if (review.memberId == memberId) {
-            throw BusinessException(ReviewErrorCode.R_014)
-        }
+        // 리뷰 검증, 본인이 작성한 리뷰도 도움돼요 가능
+        reviewService.getReview(reviewId)
     }
 
 }
