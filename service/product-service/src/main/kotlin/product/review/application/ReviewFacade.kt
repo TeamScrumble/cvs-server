@@ -119,13 +119,13 @@ class ReviewFacade(
 
     suspend fun getSummary(
         productId: Long
-    ): ReviewSummaryGetApi.Response = supervisorScope{
+    ): ReviewSummaryGetApi.Summary = coroutineScope{
         val totalCount = async { reviewService.getReviewCount(productId) }
         val receiptCount = async { reviewService.getReceiptCount(productId) }
         val avgRating = async { reviewService.getAvgRating(productId) }
         val aspects = async { scoreService.getAspectStatsForSummary(productId) }
 
-        ReviewSummaryGetApi.Response(
+        ReviewSummaryGetApi.Summary(
             totalCount = totalCount.await(),
             receiptCount = receiptCount.await(),
             averageRating = avgRating.await(),
@@ -133,23 +133,28 @@ class ReviewFacade(
         )
     }
 
-    suspend fun getSummaryMe(
-        passport: Passport,
+    suspend fun getSummaryUnified(
+        passport: Passport?,
         productId: Long
-    ): ReviewSummaryGetApi.MeResponse = coroutineScope {
-        memberValidService.validateMember(passport)
-        val memberId = passport.memberId
-
+    ): ReviewSummaryGetApi.Response = coroutineScope {
         val summaryDeferred = async { getSummary(productId) }
-        val eligibilityDeferred = async { reviewWritePolicyService.getEligibility(productId, memberId) }
+
+        val eligibilityDeferred = if (passport != null) {
+            async {
+                memberValidService.validateMember(passport)
+                reviewWritePolicyService.getEligibility(productId, passport.memberId)
+            }
+        } else {
+            null
+        }
 
         val summary = summaryDeferred.await()
-        val eligibility = eligibilityDeferred.await()
+        val eligibility = eligibilityDeferred?.await()
 
-        ReviewSummaryGetApi.MeResponse(
-            summary = summary,
-            canWriteReview = eligibility.canWrite,
-            nextWritableDate = eligibility.nextWritableDate.toString()
+        ReviewSummaryGetApi.Response(
+            canWriteReview = eligibility?.canWrite,
+            nextWritableDate = eligibility?.nextWritableDate.toString(),
+            summary = summary
         )
     }
 

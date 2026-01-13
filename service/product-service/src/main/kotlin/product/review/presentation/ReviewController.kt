@@ -70,19 +70,10 @@ class ReviewController(
 
     @GetMapping(ReviewPaths.REVIEW_SUMMARY)
     override suspend fun getSummary(
+        @RequestPassport passport: Passport?,
         @PathVariable productId: Long
     ): ApiResponse<ReviewSummaryGetApi.Response> {
-        val result = reviewFacade.getSummary(productId)
-
-        return ApiResponse.Success(result)
-    }
-
-    @GetMapping(ReviewPaths.REVIEW_SUMMARY_ME)
-    override suspend fun getSummaryMe(
-        @RequestPassport passport: Passport,
-        @PathVariable productId: Long
-    ): ApiResponse<ReviewSummaryGetApi.MeResponse> {
-        val result = reviewFacade.getSummaryMe(passport, productId)
+        val result = reviewFacade.getSummaryUnified(passport, productId)
 
         return ApiResponse.Success(result)
     }
