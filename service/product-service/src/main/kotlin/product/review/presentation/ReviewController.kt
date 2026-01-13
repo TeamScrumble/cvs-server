@@ -29,7 +29,7 @@ class ReviewController(
     override suspend fun get(
         @RequestPassport passport: Passport,
         @PathVariable reviewId: Long
-    ): ApiResponse<ReviewGetApi.Response> {
+    ): ApiResponse<ReviewDto> {
         val result = reviewFacade.getReview(
             passport = passport,
             reviewId = reviewId
@@ -43,7 +43,7 @@ class ReviewController(
         @RequestPassport passport: Passport,
         @Valid @ModelAttribute request: ReviewListApi.Request,
         @PathVariable productId: Long
-    ): ApiResponse<List<ReviewGetApi.Response>> {
+    ): ApiResponse<ReviewListApi.Response> {
 
         val result = reviewFacade.getReviewList(
             passport = passport,

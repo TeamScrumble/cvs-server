@@ -5,7 +5,6 @@ import error.errorcode.ReviewErrorCode
 import error.exception.BusinessException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.supervisorScope
 import member.MemberListApi
 import org.springframework.stereotype.Service
 import passport.Passport
@@ -61,13 +60,17 @@ class ReviewFacade(
         passport: Passport,
         request: ReviewListApi.Request,
         productId: Long
-    ): List<ReviewGetApi.Response> = coroutineScope {
+    ): ReviewListApi.Response = coroutineScope {
         memberValidService.validateMember(passport)
         val memberId = passport.memberId
 
         // 리뷰 목록 가져오기
         val reviews = reviewService.getList(productId, request)
-        if (reviews.isEmpty()) return@coroutineScope emptyList()
+        if (reviews.isEmpty()) {
+            return@coroutineScope ReviewListApi.Response(
+                reviews = emptyList()
+            )
+        }
 
         val reviewIds = reviews.map { it.id }
         val writerMemberIds = reviews.map { it.memberId }
@@ -78,13 +81,17 @@ class ReviewFacade(
             memberId = memberId
         )
 
-        reviews.map { toResponse(it, data) }
+        val response = reviews.map { toResponse(it, data) }
+
+        ReviewListApi.Response(
+            reviews = response
+        )
     }
 
     suspend fun getReview(
         passport: Passport,
         reviewId: Long
-    ): ReviewGetApi.Response = coroutineScope {
+    ): ReviewDto = coroutineScope {
         memberValidService.validateMember(passport)
         val memberId = passport.memberId
         val review = reviewService.getReview(reviewId)
@@ -164,7 +171,7 @@ class ReviewFacade(
 
     private data class ReviewAssembleData(
         val images: Map<Long, List<String>>,
-        val scores: Map<Long, List<ReviewGetApi.Response.ScoreResponse>>,
+        val scores: Map<Long, List<ReviewDto.ScoreResponse>>,
         val memberLiked: Set<Long>,
         val writerMemberMap: Map<Long, MemberListApi.Response.Member>
     )
@@ -190,15 +197,15 @@ class ReviewFacade(
     private fun toResponse(
         review: Review,
         data: ReviewAssembleData
-    ): ReviewGetApi.Response {
+    ): ReviewDto {
         val member = data.writerMemberMap[review.memberId]
 
-        return ReviewGetApi.Response(
+        return ReviewDto(
             reviewId = review.id,
             memberId = review.memberId,
             nickname = member?.nickname ?: "unknown",
             profileImage = member?.profileImage ?: "",
-            lastModifiedAt = review.lastModifiedAt.toString(),
+            createdAt = review.createdAt.toString(),
             rating = review.rating,
             content = review.content,
             likeCount = review.likeCount,

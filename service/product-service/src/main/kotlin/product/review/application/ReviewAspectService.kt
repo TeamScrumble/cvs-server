@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 import product.review.domain.repository.reviewAspect.ReviewAspectOptionRepository
 import product.review.domain.repository.reviewAspect.ReviewAspectRepository
 import review.ReviewAspectGetApi
-import review.ReviewGetApi.Response.ScoreResponse
+import review.ReviewDto.ScoreResponse
 
 @Service
 class ReviewAspectService(

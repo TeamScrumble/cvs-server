@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import product.review.domain.entity.ReviewScore
 import product.review.domain.repository.reviewScore.ReviewScoreRepository
 import review.ReviewAddApi.Request.ScoreRequest
-import review.ReviewGetApi.Response.ScoreResponse
+import review.ReviewDto.ScoreResponse
 import review.ReviewSummaryGetApi
 
 @Service
