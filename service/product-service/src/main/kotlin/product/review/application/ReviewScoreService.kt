@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import product.review.domain.entity.ReviewScore
 import product.review.domain.repository.reviewScore.ReviewScoreRepository
 import review.ReviewAddApi.Request.ScoreRequest
-import review.ReviewGetApi.Response.ScoreResponse
+import review.ReviewDto.ScoreResponse
 import review.ReviewSummaryGetApi
 
 @Service
@@ -45,7 +45,7 @@ class ReviewScoreService(
 
     suspend fun getAspectStatsForSummary(
         productId: Long
-    ): List<ReviewSummaryGetApi.Response.AspectStat> {
+    ): List<ReviewSummaryGetApi.Summary.AspectStat> {
         val stats = scoreRepository.findStatsByProductId(productId)
         if (stats.isEmpty()) return emptyList()
 
@@ -60,14 +60,14 @@ class ReviewScoreService(
 
         return aspects.map { aspect ->
             val optionStats = optionsByAspectId[aspect.id].orEmpty().map { o ->
-                ReviewSummaryGetApi.Response.OptionStat(
+                ReviewSummaryGetApi.Summary.OptionStat(
                     optionId = o.id,
                     optionText = o.optionText,
                     count = countMap[o.id] ?: 0L
                 )
             }
 
-            ReviewSummaryGetApi.Response.AspectStat(
+            ReviewSummaryGetApi.Summary.AspectStat(
                 aspectId = aspect.id,
                 title = aspect.title,
                 question = aspect.question,

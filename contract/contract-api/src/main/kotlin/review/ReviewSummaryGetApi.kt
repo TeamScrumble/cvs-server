@@ -10,38 +10,28 @@ import passport.Passport
 interface ReviewSummaryGetApi {
 
     @Documented(
-        summary = "(공용) 상품 리뷰 요약 조회 API",
-        description = "(공용) 상품 리뷰에 대한 정보를 조회하는 API",
+        summary = "상품 리뷰 요약 조회 API",
+        description = "리뷰 요약 + 로그인 시 리뷰 작성 가능 여부(비로그인 시 null)",
         response = Response::class
     )
     suspend fun getSummary(
+        passport: Passport?,
         @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.PATH)
         productId: Long
     ): ApiResponse<Response>
 
-    @Documented(
-        summary = "(로그인) 상품 리뷰 요약 조회 API",
-        description = "(로그인) 공용 요약 + 리뷰 작성 가능 여부를 포함한 API",
-        response = MeResponse::class
-    )
-    suspend fun getSummaryMe(
-        passport: Passport,
-        @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.PATH)
-        productId: Long
-    ): ApiResponse<MeResponse>
-
-    data class MeResponse(
-        @Schema(description = "로그인한 사용자의 해당 상품 리뷰 작성 가능 여부", example = "false")
-        val canWriteReview: Boolean,
-
-        @Schema(description = "다음 작성 가능 날짜", example = "2026-01-07")
-        val nextWritableDate: String,
-
-        @Schema(description = "공용 리뷰 요약")
-        val summary: Response
-    )
-
     data class Response(
+        @Schema(description = "로그인한 사용자의 해당 상품 리뷰 작성 가능 여부(비로그인 시 null)", example = "false")
+        val canWriteReview: Boolean?,
+
+        @Schema(description = "다음 작성 가능 날짜(비로그인 시 null)", example = "2026-01-07")
+        val nextWritableDate: String?,
+
+        @Schema(description = "리뷰 요약")
+        val summary: Summary
+    )
+
+    data class Summary(
         @Schema(description = "전체 리뷰 개수", example = "347")
         val totalCount: Long,
 
