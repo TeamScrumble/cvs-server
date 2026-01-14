@@ -4,6 +4,8 @@ import ApiResponse
 import docs.Documented
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.annotations.media.ArraySchema
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springdoc.core.annotations.ParameterObject
 import passport.Passport
 
@@ -22,7 +24,7 @@ interface ReviewListApi {
         request: Request,
         @Parameter(description = "상품 id", example = "1", `in` = ParameterIn.PATH)
         productId: Long
-    ): ApiResponse<List<ReviewGetApi.Response>>
+    ): ApiResponse<Response>
 
     data class Request(
         @field:Parameter(description = "페이지 번호(0부터 시작)", example = "1", `in` = ParameterIn.QUERY)
@@ -46,6 +48,7 @@ interface ReviewListApi {
     )
 
     data class Response(
-        val reviews: List<ReviewGetApi.Response>
+        val reviews: List<ReviewDto>
     )
+
 }
