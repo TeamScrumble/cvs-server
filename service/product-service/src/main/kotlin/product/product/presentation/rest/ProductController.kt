@@ -10,6 +10,7 @@ import passport.Passport
 import product.product.*
 import product.product.application.service.ProductFacade
 import product.product.application.service.ProductLikeService
+import product.product.application.service.ProductSearchHistoryService
 import product.product.application.service.ProductService
 import security.passport.RequestPassport
 
@@ -18,6 +19,7 @@ class ProductController(
     private val productFacade: ProductFacade,
     private val productService: ProductService,
     private val productLikeService: ProductLikeService,
+    private val productSearchHistoryService: ProductSearchHistoryService,
 ) : ProductApi {
     @PostMapping(ProductCrawlApi.PATH)
     override suspend fun crawl(
@@ -43,7 +45,6 @@ class ProductController(
         @RequestPassport passport: Passport?,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
-        productFacade.findProduct(passport, id)
         val (product, isLiked) = productFacade.findProduct(passport, id)
 
         return ApiResponse.Success(ProductGetApi.Response(product, isLiked))
@@ -75,5 +76,12 @@ class ProductController(
         }
 
         return cvsTarget to keyword
+    }
+
+    @GetMapping(ProductPopularSearchApi.PATH)
+    override suspend fun getPopularSearches(): ApiResponse<ProductPopularSearchApi.Response> {
+        val popularSearches = productSearchHistoryService.findPopularSearchesWithRanking()
+
+        return ApiResponse.Success(ProductPopularSearchApi.Response(popularSearches))
     }
 }
