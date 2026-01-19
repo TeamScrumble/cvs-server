@@ -13,10 +13,6 @@ extra["springCloudVersion"] = "2023.0.3"
 allprojects {
     group = ""
     version = "0.0.1"
-
-    repositories {
-        mavenCentral()
-    }
 }
 
 subprojects {
