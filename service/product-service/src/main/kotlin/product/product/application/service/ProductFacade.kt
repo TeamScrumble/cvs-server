@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import passport.Passport
 import product.common.valid.MemberValidService
-import product.common.valid.ProfanityFilterService
+import product.profanity.valid.ProfanityFilterService
 import product.product.ProductDto
 import product.product.application.utils.toResponse
 

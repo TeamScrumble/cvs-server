@@ -1,4 +1,4 @@
-package product.common.valid
+package product.profanity.valid
 
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException

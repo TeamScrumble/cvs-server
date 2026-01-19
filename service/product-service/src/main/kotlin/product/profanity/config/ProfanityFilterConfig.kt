@@ -1,4 +1,4 @@
-package product.common.config
+package product.profanity.config
 
 import io.github.jwhyee.profanity.helper.ProfanityTrie
 import io.github.jwhyee.profanity.validator.ProfanityValidator
@@ -13,7 +13,7 @@ class ProfanityFilterConfig {
             customWords = emptyList(),
             excludeWords = emptyList()
         )
-        
+
         return ProfanityValidator(trie, emptySet())
     }
 }
