@@ -44,7 +44,7 @@ class ProductService(
         memberValidService.validateMember(passport)
 
         if (!passport.isAdmin) {
-            throw BusinessException(ProductErrorCode.P_005)
+            throw BusinessException(ProductErrorCode.P_090)
         }
 
         return sync(passport.memberId)

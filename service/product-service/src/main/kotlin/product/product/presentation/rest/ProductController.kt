@@ -59,7 +59,7 @@ class ProductController(
         val pageable = PageRequest.of(request.page.coerceAtLeast(0), rpp)
 
         return ApiResponse.Success(ProductSearchApi.Response(
-            productService.findAllByKeyword(cvsTarget, keyword, pageable)
+            productFacade.findAllByKeyword(cvsTarget, keyword, pageable)
         ))
     }
 
@@ -70,7 +70,7 @@ class ProductController(
         } else null
 
         if (keyword.isEmpty()) {
-            throw BusinessException(ProductErrorCode.P_004)
+            throw BusinessException(ProductErrorCode.P_010)
         }
 
         return cvsTarget to keyword
