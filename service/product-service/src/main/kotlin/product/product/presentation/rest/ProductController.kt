@@ -11,12 +11,15 @@ import product.product.*
 import product.product.application.service.ProductFacade
 import product.product.application.service.ProductSearchHistoryService
 import product.product.application.service.ProductService
+import product.product.application.utils.toResponse
+import product.product.elasticsearch.service.ProductEsService
 import security.passport.RequestPassport
 
 @RestController
 class ProductController(
     private val productFacade: ProductFacade,
     private val productService: ProductService,
+    private val productEsService: ProductEsService,
     private val productSearchHistoryService: ProductSearchHistoryService,
 ) : ProductApi {
     @PostMapping(ProductCrawlApi.PATH)
@@ -46,6 +49,23 @@ class ProductController(
         val (product, isLiked) = productFacade.findProduct(passport, id)
 
         return ApiResponse.Success(ProductGetApi.Response(product, isLiked))
+    }
+
+    @GetMapping(ProductSearchRecommendApi.PATH)
+    override suspend fun searchRecommend(
+        @RequestParam cvsTarget: String,
+        @RequestParam keyword: String
+    ): ApiResponse<ProductSearchRecommendApi.Response> {
+        val cvs = CvsTarget(cvsTarget)
+        val pageable = PageRequest.of(0, 20)
+
+        val productList = productEsService.findAllByKeyword(cvs, keyword, pageable)
+            .map { it.toResponse() }
+            .toList()
+
+        return ApiResponse.Success(
+            ProductSearchRecommendApi.Response(productList)
+        )
     }
 
     @GetMapping(ProductSearchApi.PATH)
