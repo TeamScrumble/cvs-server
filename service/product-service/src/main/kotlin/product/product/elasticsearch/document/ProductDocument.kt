@@ -5,7 +5,7 @@ import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Mapping
 import org.springframework.data.elasticsearch.annotations.Setting
 
-@Document(indexName = "products_v2", createIndex = true)
+@Document(indexName = "product_v1", createIndex = true)
 @Setting(settingPath = "elasticsearch/products-settings.json")
 @Mapping(mappingPath = "elasticsearch/products-mapping.json")
 data class ProductDocument(

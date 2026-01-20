@@ -2,12 +2,18 @@ package product.product.application.utils
 
 import cvs.crawler.CrawlerData
 import cvs.crawler.CvsTarget
+import product.product.ProductDocumentDto
 import product.product.ProductDto
 import product.product.domain.table.Product
+import product.product.elasticsearch.document.ProductDocument
 import java.util.zip.CRC32
 
 internal fun Product.toResponse() = ProductDto(
     id, cvsProductId, cvsTarget.name, title, img, price, event, isNewProduct, likeCount, isDeleted
+)
+
+internal fun ProductDocument.toResponse() = ProductDocumentDto(
+    productId, cvsTarget, title, price, event, isNewProduct, isDeleted
 )
 
 internal fun CrawlerData.toEntity(target: CvsTarget, crawlRunId: String, isDeleted: Boolean): Product {
