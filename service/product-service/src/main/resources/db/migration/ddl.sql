@@ -19,6 +19,16 @@ CREATE TABLE IF NOT EXISTS product
 ALTER TABLE product
     ADD UNIQUE KEY uk_product_target_cvs (cvs_target, cvs_product_id);
 
+-- 상품 검색 이력 테이블
+CREATE TABLE product_search_history (
+    product_search_history_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    keyword                      VARCHAR(255) NOT NULL,
+    created_at                   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_modified_at             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_created_at (created_at),
+    INDEX idx_keyword (keyword)
+);
+
 -- ES 동기화 작업 상태/진행률 저장 테이블
 CREATE TABLE IF NOT EXISTS sync_job (
     job_id           BIGINT UNSIGNED   NOT NULL AUTO_INCREMENT COMMENT '작업 ID',

@@ -87,7 +87,7 @@ jobs:
         echo "현재 러너 IP: $CURRENT_IP"
         
         if [ "$CURRENT_IP" = "${{ secrets.RYEO_HOME_IP }}" ]; then
-          echo "host=${{ secrets.DOCKER_REGISTRY_HOST_SK }}" >> $GITHUB_OUTPUT
+          echo "host=${{ secrets.DOCKER_REGISTRY_HOST }}" >> $GITHUB_OUTPUT
           echo "username=${{ secrets.DOCKER_REGISTRY_USERNAME }}" >> $GITHUB_OUTPUT
           echo "password=${{ secrets.DOCKER_REGISTRY_PASSWORD }}" >> $GITHUB_OUTPUT
           echo "내부 레지스트리 사용 (ryeo-home)"

@@ -9,15 +9,18 @@ import org.springframework.web.bind.annotation.*
 import passport.Passport
 import product.product.*
 import product.product.application.service.ProductFacade
-import product.product.application.service.ProductLikeService
+import product.product.application.service.ProductSearchHistoryService
 import product.product.application.service.ProductService
+import product.product.application.utils.toResponse
+import product.product.elasticsearch.service.ProductEsService
 import security.passport.RequestPassport
 
 @RestController
 class ProductController(
     private val productFacade: ProductFacade,
     private val productService: ProductService,
-    private val productLikeService: ProductLikeService,
+    private val productEsService: ProductEsService,
+    private val productSearchHistoryService: ProductSearchHistoryService,
 ) : ProductApi {
     @PostMapping(ProductCrawlApi.PATH)
     override suspend fun crawl(
@@ -43,10 +46,26 @@ class ProductController(
         @RequestPassport passport: Passport?,
         @PathVariable id: Long
     ): ApiResponse<ProductGetApi.Response> {
-        productFacade.findProduct(passport, id)
         val (product, isLiked) = productFacade.findProduct(passport, id)
 
         return ApiResponse.Success(ProductGetApi.Response(product, isLiked))
+    }
+
+    @GetMapping(ProductSearchRecommendApi.PATH)
+    override suspend fun searchRecommend(
+        @RequestParam cvsTarget: String,
+        @RequestParam keyword: String
+    ): ApiResponse<ProductSearchRecommendApi.Response> {
+        val cvs = CvsTarget(cvsTarget)
+        val pageable = PageRequest.of(0, 20)
+
+        val productList = productEsService.findAllByKeyword(cvs, keyword, pageable)
+            .map { it.toResponse() }
+            .toList()
+
+        return ApiResponse.Success(
+            ProductSearchRecommendApi.Response(productList)
+        )
     }
 
     @GetMapping(ProductSearchApi.PATH)
@@ -60,7 +79,7 @@ class ProductController(
         val pageable = PageRequest.of(request.page.coerceAtLeast(0), rpp)
 
         return ApiResponse.Success(ProductSearchApi.Response(
-            productService.findAllByKeyword(cvsTarget, keyword, pageable)
+            productFacade.findAllByKeyword(cvsTarget, keyword, pageable)
         ))
     }
 
@@ -70,10 +89,17 @@ class ProductController(
             CvsTarget(requestTarget) ?: throw BusinessException(ProductErrorCode.P_003)
         } else null
 
-        if (keyword.length < 2) {
-            throw BusinessException(ProductErrorCode.P_004)
+        if (keyword.isEmpty()) {
+            throw BusinessException(ProductErrorCode.P_010)
         }
 
         return cvsTarget to keyword
+    }
+
+    @GetMapping(ProductPopularSearchApi.PATH)
+    override suspend fun getPopularSearches(): ApiResponse<ProductPopularSearchApi.Response> {
+        val popularSearches = productSearchHistoryService.findPopularSearchesWithRanking()
+
+        return ApiResponse.Success(ProductPopularSearchApi.Response(popularSearches))
     }
 }
