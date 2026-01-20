@@ -18,11 +18,12 @@ class ProfanityFilterService(
         profanityValidator.validate(keyword)
         ProfanityResult()
     }.getOrElse { e ->
-        if (e is ProfanityDetectedException) {
-            ProfanityResult(true, e.detected)
-        } else {
-            logger.warn("[ProfanityValidator] exception = {}", e.message)
-            throw BusinessException(ProductErrorCode.P_012)
+        when (e) {
+            is ProfanityDetectedException -> ProfanityResult(true, e.detected)
+            else -> {
+                logger.warn("[ProfanityValidator] exception during profanity validation", e)
+                throw BusinessException(ProductErrorCode.P_012)
+            }
         }
     }
 }
