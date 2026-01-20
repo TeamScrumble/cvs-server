@@ -6,7 +6,11 @@
       "type": "text",
       "analyzer": "korean",
       "fields": {
-        "keyword": { "type": "keyword" }
+        "keyword": { "type": "keyword" },
+        "ngram": {
+          "type": "text",
+          "analyzer": "ngram_analyzer"
+        }
       }
     },
     "price": { "type": "integer" },

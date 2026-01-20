@@ -3,7 +3,24 @@
     "analyzer": {
       "korean": {
         "type": "custom",
-        "tokenizer": "nori_tokenizer"
+        "tokenizer": "nori_user_tokenizer"
+      },
+      "ngram_analyzer": {
+        "type": "custom",
+        "tokenizer": "ngram_tokenizer"
+      }
+    },
+    "tokenizer": {
+      "nori_user_tokenizer": {
+        "type": "nori_tokenizer",
+        "decompound_mode": "mixed",
+        "discard_punctuation": true
+      },
+      "ngram_tokenizer": {
+        "type": "ngram",
+        "min_gram": 2,
+        "max_gram": 3,
+        "token_chars": ["letter", "digit"]
       }
     }
   }
