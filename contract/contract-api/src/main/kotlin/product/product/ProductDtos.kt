@@ -33,3 +33,26 @@ data class ProductDto(
     @Schema(description = "삭제 여부", example = "false")
     val isDeleted: Boolean,
 )
+
+data class ProductDocumentDto(
+    @Schema(description = "상품의 id", example = "10")
+    val productId: Long,
+
+    @Schema(description = "편의점 종류", example = "GS25")
+    val cvsTarget: String,
+
+    @Schema(description = "상품명", example = "불닭마요 삼각김밥")
+    val title: String,
+
+    @Schema(description = "가격", example = "1500")
+    val price: Int,
+
+    @Schema(description = "행사 정보", example = "1+1")
+    val event: String,
+
+    @Schema(description = "신상품 여부", example = "true")
+    val isNewProduct: Boolean,
+
+    @Schema(description = "삭제 여부", example = "false")
+    val isDeleted: Boolean,
+)

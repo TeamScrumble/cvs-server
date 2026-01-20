@@ -20,22 +20,15 @@ interface ProductEsRepository : ElasticsearchRepository<ProductDocument, Long> {
                 }
               }
             ],
+            "filter": [
+              { "term": { "isDeleted": false } }
+            ],
             "should": [
               {
-                "match_phrase": {
-                  "title": {
-                    "query": "?0",
-                    "boost": 100
-                  }
-                }
+                "match_phrase": { "title": { "query": "?0", "boost": 100 } }
               },
               {
-                "term": {
-                  "title.keyword": {
-                    "value": "?0",
-                    "boost": 200
-                  }
-                }
+                "term": { "title.keyword": { "value": "?0", "boost": 200 } }
               }
             ]
           }
@@ -58,24 +51,15 @@ interface ProductEsRepository : ElasticsearchRepository<ProductDocument, Long> {
               }
             ],
             "filter": [
-              { "term": { "cvsTarget": "?1" } }
+              { "term": { "cvsTarget": "?1" } },
+              { "term": { "isDeleted": false } }
             ],
             "should": [
               {
-                "match_phrase": {
-                  "title": {
-                    "query": "?0",
-                    "boost": 100
-                  }
-                }
+                "match_phrase": { "title": { "query": "?0", "boost": 100 } }
               },
               {
-                "term": {
-                  "title.keyword": {
-                    "value": "?0",
-                    "boost": 200
-                  }
-                }
+                "term": { "title.keyword": { "value": "?0", "boost": 200 } }
               }
             ]
           }
