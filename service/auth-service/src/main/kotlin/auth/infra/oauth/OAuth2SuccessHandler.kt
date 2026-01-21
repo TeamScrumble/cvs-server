@@ -1,6 +1,8 @@
 package auth.infra.oauth
 
 import auth.LoginRedirect
+import auth.application.AuthMember
+import auth.application.PassportService
 import auth.application.TokenService
 import auth.infra.cache.PassportCacheMemory
 import kotlinx.coroutines.reactor.mono
@@ -18,8 +20,7 @@ import java.net.URI
 @Component
 class OAuth2SuccessHandler(
     private val tokenService: TokenService,
-    private val passportProvider: PassportProvider,
-    private val passportCacheMemory: PassportCacheMemory
+    private val passportService: PassportService
 ) : ServerAuthenticationSuccessHandler {
 
     override fun onAuthenticationSuccess(
@@ -29,18 +30,18 @@ class OAuth2SuccessHandler(
         return mono {
             val authenticatedUser = authentication.principal as Oauth2AuthenticatedUser
 
-            val passport = Passport(
+            val authMember = AuthMember(
                 authId = authenticatedUser.authId,
-                authProvider = authenticatedUser.provider.name,
+                provider = authenticatedUser.provider,
+                providerId = authenticatedUser.providerId,
                 memberId = authenticatedUser.memberId,
                 email = authenticatedUser.email,
-                roles = authenticatedUser.roles.toRoleSet(),
+                roles = authenticatedUser.roles,
                 nickname = authenticatedUser.nickname,
             )
-            val encodedPassport = passportProvider.encodePassport(passport)
-            passportCacheMemory.setPassport(authenticatedUser.memberId, encodedPassport)
 
-            val ticket = tokenService.issueTicket(authenticatedUser.memberId)
+            passportService.setPassport(authMember)
+            val ticket = tokenService.issueTicket(authenticatedUser.memberId, authenticatedUser.roles)
 
             LoginRedirect.withTicket(ticket)
         }.flatMap { redirectUrl ->

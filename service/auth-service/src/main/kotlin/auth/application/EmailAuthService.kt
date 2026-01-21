@@ -112,7 +112,16 @@ class EmailAuthService(
         )
         authRepository.save(auth)
 
-        member.memberId
+        val newMember = memberApi.get(member.memberId).getOrThrow()
+        AuthMember(
+            authId = auth.id,
+            provider = auth.provider,
+            providerId = auth.providerId,
+            memberId = newMember.memberId,
+            roles = newMember.roles,
+            email = newMember.email,
+            nickname = newMember.nickname,
+        )
     }
 
     private fun validateEmail(email: String) {
@@ -146,7 +155,7 @@ class EmailAuthService(
     suspend fun login(
         email: String,
         rawPassword: String
-    ): Long {
+    ): AuthMember {
         val emailAuth = emailAuthRepository.findByEmail(email)
             ?: throw BusinessException(AuthErrorCode.A_011)
 
@@ -161,17 +170,16 @@ class EmailAuthService(
 
         val member = memberApi.get(auth.memberId).getOrThrow()
 
-        val passport = Passport(
+        val authMember = AuthMember(
             authId = auth.id,
-            authProvider = auth.provider.name,
+            provider = auth.provider,
+            providerId = auth.providerId,
             memberId = member.memberId,
+            roles = member.roles,
             email = member.email,
-            roles = member.roles.toRoleSet(),
             nickname = member.nickname,
         )
-        val encodedPassport = passportProvider.encodePassport(passport)
-        passportCacheMemory.setPassport(auth.memberId, encodedPassport)
 
-        return auth.memberId
+        return authMember
     }
 }
