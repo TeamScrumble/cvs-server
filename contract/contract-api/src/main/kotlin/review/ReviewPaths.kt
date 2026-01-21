@@ -5,7 +5,6 @@ object ReviewPaths {
     const val PRODUCT_BASE = "/api/product/{productId}/review"
 
     const val REVIEW_SUMMARY = "$PRODUCT_BASE/summary"
-    const val REVIEW_SUMMARY_ME = "$PRODUCT_BASE/summary/me"
 
     const val REVIEW = "$REVIEW_BASE/{reviewId}"
     const val LIKE = "$REVIEW_BASE/{reviewId}/like"

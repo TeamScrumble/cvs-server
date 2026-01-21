@@ -22,7 +22,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-    // -- discovery
+    // -- Validation
+    implementation("com.github.Jwhyee:profanity-filter:1.0.2")
+
+    // -- Discovery
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
     // --- Kafka

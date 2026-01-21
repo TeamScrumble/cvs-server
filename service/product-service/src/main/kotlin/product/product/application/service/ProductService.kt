@@ -5,8 +5,11 @@ import cvs.crawler.CrawlResponseSuccessEvent
 import cvs.crawler.CvsTarget
 import error.errorcode.ProductErrorCode
 import error.exception.BusinessException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import messagebroker.publisher.EventPublisher
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -31,14 +34,17 @@ class ProductService(
     private val syncJobRepository: SyncJobRepository,
     private val productRepository: ProductRepository,
     private val memberValidService: MemberValidService,
+    private val productSearchHistoryService: ProductSearchHistoryService
 ) {
+    private val searchHistoryScope = CoroutineScope(SupervisorJob())
+
     suspend fun validateExists(productId: Long) = productRepository.existsById(productId)
 
     suspend fun sync(passport: Passport): Long {
         memberValidService.validateMember(passport)
 
         if (!passport.isAdmin) {
-            throw BusinessException(ProductErrorCode.P_005)
+            throw BusinessException(ProductErrorCode.P_090)
         }
 
         return sync(passport.memberId)
@@ -136,7 +142,15 @@ class ProductService(
         val dtoById = rows.associateBy({ it.id }, { it.toResponse() })
 
         // ES 순서를 그대로 유지
-        return ids.mapNotNull { dtoById[it] }
+        val productList = ids.mapNotNull { dtoById[it] }
+
+        if (productList.isNotEmpty() && productList.any { it.title.contains(keyword, true) }) {
+            searchHistoryScope.launch {
+                productSearchHistoryService.saveSearchHistory(keyword)
+            }
+        }
+
+        return productList
     }
 
     suspend fun existsById(id: Long): Boolean = productRepository.existsById(id)

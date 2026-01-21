@@ -12,23 +12,24 @@ interface ProductEsRepository : ElasticsearchRepository<ProductDocument, Long> {
         {
           "bool": {
             "must": [
-              { "match": { "title": { "query": "?0", "zero_terms_query": "all" } } }
+              {
+                "multi_match": {
+                  "query": "?0",
+                  "fields": ["title", "title.ngram"],
+                  "operator": "and"
+                }
+              }
             ],
             "filter": [
               { "term": { "isDeleted": false } }
-            ]
-          }
-        }
-        """
-    )
-    fun searchAllExcludeDeletedProduct(q: String, pageable: Pageable): Page<ProductDocument>
-
-    @Query(
-        """
-        {
-          "bool": {
-            "must": [
-              { "match": { "title": { "query": "?0", "zero_terms_query": "all" } } }
+            ],
+            "should": [
+              {
+                "match_phrase": { "title": { "query": "?0", "boost": 100 } }
+              },
+              {
+                "term": { "title.keyword": { "value": "?0", "boost": 200 } }
+              }
             ]
           }
         }
@@ -41,31 +42,29 @@ interface ProductEsRepository : ElasticsearchRepository<ProductDocument, Long> {
         {
           "bool": {
             "must": [
-              { "match": { "title": { "query": "?0", "zero_terms_query": "all" } } }
+              {
+                "multi_match": {
+                  "query": "?0",
+                  "fields": ["title", "title.ngram"],
+                  "operator": "and"
+                }
+              }
             ],
             "filter": [
-              { "term": { "cvsTarget": "?1" } }
+              { "term": { "cvsTarget": "?1" } },
+              { "term": { "isDeleted": false } }
+            ],
+            "should": [
+              {
+                "match_phrase": { "title": { "query": "?0", "boost": 100 } }
+              },
+              {
+                "term": { "title.keyword": { "value": "?0", "boost": 200 } }
+              }
             ]
           }
         }
         """
     )
     fun searchByTarget(q: String, cvsTarget: String, pageable: Pageable): Page<ProductDocument>
-
-    @Query(
-        """
-        {
-          "bool": {
-            "must": [
-              { "match": { "title": { "query": "?0", "zero_terms_query": "all" } } }
-            ],
-            "filter": [
-              { "term": { "cvsTarget": "?1" } },
-              { "term": { "isDeleted": false } }
-            ]
-          }
-        }
-        """
-    )
-    fun searchByTargetExcludeDeletedProduct(q: String, cvsTarget: String, pageable: Pageable): Page<ProductDocument>
 }
