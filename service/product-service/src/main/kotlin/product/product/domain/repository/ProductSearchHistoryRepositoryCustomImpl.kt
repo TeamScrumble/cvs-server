@@ -10,44 +10,31 @@ class ProductSearchHistoryRepositoryCustomImpl(
     private val client: DatabaseClient
 ) : ProductSearchHistoryRepositoryCustom {
     override suspend fun findPopularSearches(
-        since: LocalDateTime,
-        limit: Int
-    ): List<ProductSearchHistoryRepositoryCustom.PopularSearchResult> {
-        return findPopularSearches(since, null, limit)
-    }
-
-    override suspend fun findPopularSearches(
-        since: LocalDateTime,
         until: LocalDateTime?,
         limit: Int
     ): List<ProductSearchHistoryRepositoryCustom.PopularSearchResult> {
         val sql = if (until != null) {
             """
-            SELECT keyword, COUNT(*) as search_count
-            FROM product_search_history
-            WHERE created_at >= :since AND created_at < :until
-            GROUP BY keyword
-            ORDER BY search_count DESC, keyword ASC
-            LIMIT :limit
-            """.trimIndent()
+        SELECT keyword, COUNT(*) as search_count
+        FROM product_search_history
+        WHERE created_at < :until
+        GROUP BY keyword
+        ORDER BY search_count DESC, keyword ASC
+        LIMIT :limit
+        """.trimIndent()
         } else {
             """
-            SELECT keyword, COUNT(*) as search_count
-            FROM product_search_history
-            WHERE created_at >= :since
-            GROUP BY keyword
-            ORDER BY search_count DESC, keyword ASC
-            LIMIT :limit
-            """.trimIndent()
+        SELECT keyword, COUNT(*) as search_count
+        FROM product_search_history
+        GROUP BY keyword
+        ORDER BY search_count DESC, keyword ASC
+        LIMIT :limit
+        """.trimIndent()
         }
 
-        var query = client.sql(sql)
-            .bind("since", since)
-            .bind("limit", limit)
-
-        if (until != null) {
-            query = query.bind("until", until)
-        }
+        val query = client.sql(sql).let {
+            if (until != null) it.bind("until", until) else it
+        }.bind("limit", limit)
 
         return query
             .map { row, _ ->
@@ -56,9 +43,7 @@ class ProductSearchHistoryRepositoryCustomImpl(
                     searchCount = (row.get("search_count") as Number).toLong()
                 )
             }
-            .all()
-            .collectList()
-            .awaitSingle()
+            .all().collectList().awaitSingle()
     }
 }
 
