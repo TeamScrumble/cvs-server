@@ -2,6 +2,7 @@ package auth.application
 
 import auth.domain.auth.Auth
 import auth.domain.auth.AuthRepository
+import auth.infra.cache.PassportCacheMemory
 import auth.infra.cache.RefreshTokenCacheMemory
 import auth.infra.cache.TokenTicketCacheMemory
 import db.extension.upsert
@@ -20,7 +21,8 @@ class AuthService(
     private val authRepository: AuthRepository,
     private val memberApi: MemberApi,
     private val refreshTokenCacheMemory: RefreshTokenCacheMemory,
-    private val tokenTicketCacheMemory: TokenTicketCacheMemory
+    private val tokenTicketCacheMemory: TokenTicketCacheMemory,
+    private val passportCacheMemory: PassportCacheMemory,
 ) {
 
     suspend fun findOrInsertByProvider(
@@ -68,6 +70,8 @@ class AuthService(
 
     suspend fun logout(passport: Passport) {
         refreshTokenCacheMemory.evict(passport.memberId)
+        passportCacheMemory.evictPassport(passport.memberId)
+        passportCacheMemory.evictSnapshot(passport.memberId)
     }
 
     suspend fun exchange(ticket: String): AuthTokens {
