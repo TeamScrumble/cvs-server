@@ -6,7 +6,7 @@ import auth.LogoutApi
 import auth.TokenExchangeApi
 import auth.TokenReissueApi
 import auth.application.AuthService
-import auth.application.TokenService
+import auth.application.TokenReissueFacadeService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -16,8 +16,8 @@ import security.passport.RequestPassport
 
 @RestController
 class AuthController(
-    private val tokenService: TokenService,
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val tokenReissueFacadeService: TokenReissueFacadeService
 ) : AuthApi {
 
     @PostMapping(TokenReissueApi.PATH)
@@ -25,7 +25,7 @@ class AuthController(
         @RequestHeader("X-Refresh-Token") refreshHeader: String
     ): ApiResponse<TokenReissueApi.Response> {
         val refreshToken = extractToken(refreshHeader)
-        val reissuedTokens = tokenService.reissue(refreshToken)
+        val reissuedTokens = tokenReissueFacadeService.reissue(refreshToken)
         val response = TokenReissueApi.Response(reissuedTokens.accessToken, reissuedTokens.refreshToken)
 
         return ApiResponse.Success(response)

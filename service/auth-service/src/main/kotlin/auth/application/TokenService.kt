@@ -1,6 +1,7 @@
 package auth.application
 
 import auth.config.AuthServiceTokenProperties
+import auth.domain.auth.AuthRepository
 import auth.infra.cache.RefreshTokenCacheMemory
 import auth.infra.cache.TokenTicketCacheMemory
 import error.errorcode.AuthErrorCode
@@ -18,17 +19,16 @@ class TokenService(
     private val tokenProvider: TokenProvider,
     private val refreshTokenCacheMemory: RefreshTokenCacheMemory,
     private val tokenTicketCacheMemory: TokenTicketCacheMemory,
-    private val memberApi: MemberApi,
-    private val tokenProperties: AuthServiceTokenProperties
+    private val tokenProperties: AuthServiceTokenProperties,
 ) {
-    suspend fun issueTicket(memberId: Long): String {
-        val tokens = issueTokens(memberId)
+    suspend fun issueTicket(memberId: Long, roles: Set<String>): String {
+        val tokens = issueTokens(memberId, roles)
         val ticket = UUID.randomUUID().toString()
         tokenTicketCacheMemory.set(ticket, tokens)
         return ticket
     }
 
-    suspend fun reissue(refreshToken: String): AuthTokens {
+    suspend fun decodeRefreshToken(refreshToken: String): AuthPrincipal {
         val principal = tokenProvider.decodeToken(refreshToken)
 
         if (principal.type != TokenType.REFRESH) {
@@ -41,14 +41,12 @@ class TokenService(
             throw BusinessException(AuthErrorCode.A_002)
         }
 
-        return issueTokens(principal.memberId)
+        return principal
     }
 
-    private suspend fun issueTokens(memberId: Long): AuthTokens {
-        val memberResponse = memberApi.get(memberId).getOrThrow()
-
+    suspend fun issueTokens(memberId: Long, roles: Set<String>): AuthTokens {
         val accessToken = tokenProvider.encodeToken(
-            AuthPrincipal.accessToken(memberId, memberResponse.roles),
+            AuthPrincipal.accessToken(memberId, roles),
             tokenProperties.accessTokenExpires
         )
         val refreshToken = tokenProvider.encodeToken(
@@ -57,7 +55,7 @@ class TokenService(
         )
 
         refreshTokenCacheMemory.set(
-            memberId = memberResponse.memberId,
+            memberId = memberId,
             refreshToken = refreshToken,
         )
 
